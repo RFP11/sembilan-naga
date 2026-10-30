@@ -1,0 +1,26 @@
+[
+  {
+    "id": "fire-bolt",
+    "name": "Fire Bolt",
+    "level": 0,
+    "school": "evocation",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": ["V", "S"],
+    "duration": "Instantaneous",
+    "classes": ["sorcerer", "wizard"],
+    "description": "Ranged spell attack; on a hit the target takes 1d10 Fire damage. Damage increases at levels 5, 11 and 17."
+  },
+  {
+    "id": "magic-missile",
+    "name": "Magic Missile",
+    "level": 1,
+    "school": "evocation",
+    "castingTime": "Action",
+    "range": "120 feet",
+    "components": ["V", "S"],
+    "duration": "Instantaneous",
+    "classes": ["sorcerer", "wizard"],
+    "description": "Three glowing darts each deal 1d4 + 1 Force damage to targets you can see. One more dart per slot level above 1."
+  }
+]
