@@ -289,7 +289,16 @@ Progres:
    Diuji end-to-end di Chromium headless (login → buat Elf Wizard → Finish).
    Belum: pilihan fitur kelas (Fighting Style, Expertise, spell awal), pilihan tool
    proficiency, roll HP saat memulai di level > 1, multiclass dari builder (lewat level-up).
-5. ⏳ Character sheet
+5. ✅ Character sheet: HP (damage lewat temp HP, heal, temp HP, massive damage), death save
+   diroll server, Short Rest (hit dice diroll server, Pact Magic pulih) dan Long Rest (aturan
+   2024: semua HP & hit dice pulih, Exhaustion −1), spell slot & pact slot, Exhaustion,
+   Heroic Inspiration, kondisi, koin; ability/save/skill/inisiatif/serangan/spell attack
+   bisa diroll ke dice log campaign; serangan senjata dari inventory (to-hit, damage,
+   versatile, proficiency kelas); AC dari armor/shield yang dipakai; inventory (tambah dari
+   SRD atau item bebas, jumlah, equip, attune maks 3, hapus); owner dan GM campaign bisa
+   mengubah; perubahan disiarkan lewat socket `character:updated` sehingga sheet yang
+   terbuka ikut berubah; `version` mencegah edit yang saling menimpa.
+   Belum: level-up, daftar spell kelas & persiapan spell, efek magic item (bonus AC/attack).
 6. ⏳ Homebrew item/spell/feat
 
 **Character builder** (wizard 5 langkah sesuai SRD):

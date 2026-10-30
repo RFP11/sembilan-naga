@@ -308,3 +308,110 @@ button.link {
     position: static;
   }
 }
+/* ── Character sheet ──────────────────────────────────────────────────── */
+.sheet-head h2 {
+  margin: 0;
+}
+.sheet-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.3fr) 280px;
+  gap: 1rem;
+  align-items: start;
+}
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem 0.75rem;
+}
+.panel h3 {
+  margin: 0.25rem 0 0.5rem;
+}
+.hp {
+  font-size: 1.4em;
+  margin: 0.25rem 0;
+}
+.hp-bar {
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+.hp-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+button.roll {
+  padding: 0.05rem 0.45rem;
+  min-width: 2.6rem;
+  font-variant-numeric: tabular-nums;
+}
+.skills {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.attacks td,
+.inventory td {
+  padding: 0.2rem 0.5rem 0.2rem 0;
+}
+.attacks button.roll + button.roll {
+  margin-left: 0.3rem;
+}
+.inventory {
+  width: 100%;
+  border-collapse: collapse;
+}
+.inventory tr + tr td {
+  border-top: 1px solid var(--line);
+}
+.qty {
+  white-space: nowrap;
+}
+.qty button {
+  padding: 0 0.4rem;
+  margin: 0 0.3rem;
+}
+.slots {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin: 0.2rem 0;
+}
+.slots span {
+  min-width: 7rem;
+}
+.add-item {
+  position: relative;
+  margin-top: 0.5rem;
+}
+.add-item input {
+  width: 100%;
+}
+.suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.suggestions button {
+  width: 100%;
+  text-align: left;
+}
+@media (max-width: 1200px) {
+  .sheet-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .sheet-grid > aside {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 800px) {
+  .sheet-grid {
+    grid-template-columns: 1fr;
+  }
+}

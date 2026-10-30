@@ -7,3 +7,4 @@ export * from "./multiclass";
 export * from "./play";
 export * from "./scores";
 export * from "./spellcasting";
+export * from "./damage";

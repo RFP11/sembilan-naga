@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import path from "node:path";
 import { registerAuth, type AuthConfig } from "./auth/plugin";
 import { campaignRoutes } from "./campaigns/routes";
+import { playRoutes } from "./characters/play";
 import { characterRoutes } from "./characters/routes";
 import type { Config } from "./config";
 import type { Db } from "./db";
@@ -19,11 +20,12 @@ export async function buildApp({ config, db }: AppDeps) {
   const app = Fastify({ logger: config.NODE_ENV !== "test" });
 
   await registerAuth(app, config, db);
+  const io = registerSocket(app, db);
   await app.register(healthRoutes, { prefix: "/api", db });
   await app.register(compendiumRoutes, { prefix: "/api" });
   await app.register(campaignRoutes, { prefix: "/api", db });
   await app.register(characterRoutes, { prefix: "/api", db });
-  registerSocket(app, db);
+  await app.register(playRoutes, { prefix: "/api", db, io });
 
   // Production: serve the React build from the same origin, with SPA fallback.
   if (config.WEB_DIST) {

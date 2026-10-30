@@ -121,15 +121,37 @@ describe("startingInventory", () => {
     expect(gp).toBe(4 + 14);
     expect(items).toEqual(
       expect.arrayContaining([
-        { kind: "armor", itemId: "chain-mail", name: null, variant: null, quantity: 1 },
-        { kind: "weapon", itemId: "javelin", name: null, variant: null, quantity: 8 },
-        { kind: "gear", itemId: "ammunition", name: null, variant: "Arrows", quantity: 20 },
+        {
+          kind: "armor",
+          itemId: "chain-mail",
+          name: null,
+          variant: null,
+          quantity: 1,
+          equipped: true,
+        },
+        {
+          kind: "weapon",
+          itemId: "javelin",
+          name: null,
+          variant: null,
+          quantity: 8,
+          equipped: true,
+        },
+        {
+          kind: "gear",
+          itemId: "ammunition",
+          name: null,
+          variant: "Arrows",
+          quantity: 20,
+          equipped: false,
+        },
         {
           kind: "custom",
           itemId: null,
           name: "Tool (your proficiency)",
           variant: null,
           quantity: 1,
+          equipped: false,
         },
       ]),
     );

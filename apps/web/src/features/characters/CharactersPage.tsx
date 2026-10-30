@@ -3,13 +3,14 @@ import { useState } from "react";
 import { api } from "../../lib/api";
 import { useCharacter, useCreateCharacter, useDeleteCharacter, useMyCharacters } from "./api";
 import { Builder } from "./builder/Builder";
-import { CharacterView } from "./CharacterView";
+import { Sheet } from "./sheet/Sheet";
 import { classSummary, speciesName } from "./labels";
 
 /** The Characters tab: your characters, the builder for drafts, a summary for ready ones. */
 export function CharactersPage({ campaignId }: { campaignId: string }) {
   const [openId, setOpenId] = useState<string | null>(null);
-  if (openId) return <OpenCharacter id={openId} onBack={() => setOpenId(null)} />;
+  if (openId)
+    return <OpenCharacter id={openId} campaignId={campaignId} onBack={() => setOpenId(null)} />;
   return <CharacterList campaignId={campaignId} onOpen={setOpenId} />;
 }
 
@@ -77,7 +78,15 @@ function CharacterList({
   );
 }
 
-function OpenCharacter({ id, onBack }: { id: string; onBack: () => void }) {
+function OpenCharacter({
+  id,
+  campaignId,
+  onBack,
+}: {
+  id: string;
+  campaignId: string;
+  onBack: () => void;
+}) {
   const character = useCharacter(id);
   return (
     <div className="stack">
@@ -90,7 +99,7 @@ function OpenCharacter({ id, onBack }: { id: string; onBack: () => void }) {
         (character.data.status === "draft" ? (
           <Builder character={character.data} onDone={() => void character.refetch()} />
         ) : (
-          <CharacterView character={character.data} />
+          <Sheet character={character.data} campaignId={campaignId} />
         ))}
     </div>
   );

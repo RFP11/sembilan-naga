@@ -9,10 +9,12 @@ export interface StartingItem {
   name: string | null;
   variant: string | null;
   quantity: number;
+  equipped: boolean;
 }
 
 /**
- * Items and GP from the chosen class (first class) and background packages. A
+ * Items and GP from the chosen class (first class) and background packages, with weapons
+ * and armor equipped. A
  * "proficient-tool" entry becomes the tool picked in `choices["tool-proficiency"]`, or a
  * placeholder the player can edit later.
  */
@@ -30,18 +32,33 @@ export function startingInventory(build: CharacterBuild): { items: StartingItem[
     gp += option.gp;
     for (const ref of option.items) {
       if (ref.kind === "custom") {
-        items.push({ kind: "custom", itemId: null, name: ref.name, variant: null, quantity: 1 });
+        items.push({
+          kind: "custom",
+          itemId: null,
+          name: ref.name,
+          variant: null,
+          quantity: 1,
+          equipped: false,
+        });
       } else if (ref.kind === "proficient-tool") {
         const toolId = build.choices["tool-proficiency"];
         items.push(
           typeof toolId === "string"
-            ? { kind: "tool", itemId: toolId, name: null, variant: null, quantity: 1 }
+            ? {
+                kind: "tool",
+                itemId: toolId,
+                name: null,
+                variant: null,
+                quantity: 1,
+                equipped: false,
+              }
             : {
                 kind: "custom",
                 itemId: null,
                 name: "Tool (your proficiency)",
                 variant: null,
                 quantity: 1,
+                equipped: false,
               },
         );
       } else {
@@ -51,6 +68,8 @@ export function startingInventory(build: CharacterBuild): { items: StartingItem[
           name: null,
           variant: ref.variant ?? ref.note ?? null,
           quantity: ref.quantity,
+          // Starting weapons and armor are ready to use; the sheet can unequip them.
+          equipped: ref.kind === "weapon" || ref.kind === "armor",
         });
       }
     }

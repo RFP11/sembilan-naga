@@ -41,9 +41,14 @@ export interface ClientToServerEvents {
   "dice:roll": (payload: DiceRollRequest, ack: (res: Ack) => void) => void;
 }
 
+/** A character's sheet changed (HP, items, rests...); clients refetch it. */
+export const characterUpdated = z.object({ campaignId: z.uuid(), characterId: z.uuid() });
+export type CharacterUpdated = z.infer<typeof characterUpdated>;
+
 export interface ServerToClientEvents {
   "token:moved": (payload: TokenMove) => void;
   "dice:rolled": (payload: DiceRollResult) => void;
+  "character:updated": (payload: CharacterUpdated) => void;
 }
 
 /** Socket.IO room name for a campaign. */

@@ -12,10 +12,9 @@ import { rollDice } from "@dnd/rules";
 import type { FastifyInstance } from "fastify";
 import { Server } from "socket.io";
 import { SESSION_COOKIE, validateSession } from "../auth/session";
-import { toRollResult } from "../campaigns/routes";
 import { memberRole } from "../campaigns/membership";
+import { recordRoll } from "../campaigns/rolls";
 import type { Db } from "../db";
-import { chatMessages } from "../db/schema";
 
 interface SocketData {
   user: User;
@@ -83,19 +82,14 @@ export function registerSocket(app: FastifyInstance, db: Db): IO {
       } catch (err) {
         return ack({ ok: false, error: (err as Error).message });
       }
-      const [row] = await db.orm
-        .insert(chatMessages)
-        .values({
-          campaignId,
-          userId: user.id,
-          kind: "roll",
-          expression,
-          label,
-          rolls: roll.rolls,
-          total: roll.total,
-        })
-        .returning();
-      io.to(campaignRoom(campaignId)).emit("dice:rolled", toRollResult(row!, user.displayName));
+      await recordRoll(db.orm, io, {
+        campaignId,
+        user,
+        expression,
+        label,
+        rolls: roll.rolls,
+        total: roll.total,
+      });
       ack({ ok: true });
     });
   });

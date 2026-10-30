@@ -163,3 +163,56 @@ export const buildIssue = z.object({
   message: z.string(),
 });
 export type BuildIssue = z.infer<typeof buildIssue>;
+
+// ── Play actions (sheet) ───────────────────────────────────────────────────────
+
+/** HP changes are applied on the server with the damage rules (temp HP, death saves). */
+export const hpChangeRequest = z.object({
+  type: z.enum(["damage", "heal", "temp"]),
+  amount: z.number().int().min(0).max(10_000),
+  /** Damage at 0 HP from a Critical Hit counts as two Death Save failures. */
+  critical: z.boolean().default(false),
+});
+export type HpChangeRequest = z.input<typeof hpChangeRequest>;
+
+/** Direct edits to play state. `version` must match, or the server answers 409. */
+export const statePatchRequest = z.object({
+  version: z.number().int(),
+  exhaustion: z.number().int().min(0).max(6).optional(),
+  heroicInspiration: z.boolean().optional(),
+  conditions: z.array(slug).optional(),
+  deathSaves: characterState.shape.deathSaves.optional(),
+  spellSlotsUsed: z.record(z.string(), z.number().int().min(0)).optional(),
+  pactSlotsUsed: z.number().int().min(0).optional(),
+  coins: coins.optional(),
+  concentratingOn: z.string().nullable().optional(),
+});
+export type StatePatchRequest = z.infer<typeof statePatchRequest>;
+
+/** Hit Point Dice to spend, by die size: { "10": 2 } spends two d10s. */
+export const shortRestRequest = z.object({
+  hitDice: z.record(z.string().regex(/^\d+$/), z.number().int().min(0).max(20)).default({}),
+});
+export type ShortRestRequest = z.input<typeof shortRestRequest>;
+
+export const addItemRequest = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.enum(["weapon", "armor", "gear", "tool", "magic-item"]),
+    itemId: slug,
+    variant: z.string().max(100).optional(),
+    quantity: z.number().int().min(1).max(10_000).default(1),
+  }),
+  z.object({
+    kind: z.literal("custom"),
+    name: z.string().trim().min(1).max(100),
+    quantity: z.number().int().min(1).max(10_000).default(1),
+  }),
+]);
+export type AddItemRequest = z.input<typeof addItemRequest>;
+
+export const updateItemRequest = z.object({
+  quantity: z.number().int().min(0).max(10_000).optional(),
+  equipped: z.boolean().optional(),
+  attuned: z.boolean().optional(),
+});
+export type UpdateItemRequest = z.infer<typeof updateItemRequest>;
