@@ -13,25 +13,95 @@ dnd-app/
 ├─ apps/
 │  ├─ server/      Fastify + Socket.IO + PostgreSQL, juga menyajikan build web di production
 │  └─ web/         React + PixiJS (Vite)
-├─ docker-compose.yml   Postgres untuk dev, + profile "app" untuk menjalankan versi production
+├─ docs/PLAN.md         Rencana fitur dan skema database
+├─ docker-compose.yml   Opsional: Postgres via Docker (:5433), + profile "app" untuk versi production
 └─ Dockerfile           Satu image: server + build web
 ```
 
 Paket di `packages/` diekspor sebagai source TypeScript (tanpa build step).
 Vite dan tsx langsung membacanya, dan `tsup` mem-bundle-nya ke build server.
 
+Rencana fitur, skema database, dan urutan pengerjaan ada di [docs/PLAN.md](docs/PLAN.md).
+Acuan aturan: **SRD 5.2.1** (aturan 2024).
+
 ## Mulai
 
-Butuh Node 24+ (`.nvmrc`), pnpm 10, dan Docker.
+Butuh Node 24+ (`.nvmrc`), pnpm 10, dan PostgreSQL 16+ yang terpasang di komputer sendiri.
+
+### 1. Siapkan Postgres
+
+Buat role Postgres untuk akun kamu (sekali saja), lalu buat database-nya:
+
+```bash
+sudo -u postgres createuser --createdb --pwprompt $USER   # isi password
+createdb -h localhost dnd
+```
+
+### 2. Isi `.env`
 
 ```bash
 pnpm install
 cp .env.example .env
-docker compose up -d      # Postgres di localhost:5433
+```
+
+Ubah `DATABASE_URL` di `.env` sesuai user dan password kamu:
+
+```
+DATABASE_URL="postgres://<user>:<password>@localhost:5432/dnd"
+```
+
+Karakter khusus di password harus di-URL-encode, karena `postgres://` adalah URL.
+Contoh: password `#Rahasia` ditulis `%23Rahasia`.
+
+| Karakter | Tulis sebagai |
+| -------- | ------------- |
+| `#`      | `%23`         |
+| `@`      | `%40`         |
+| `:`      | `%3A`         |
+| `/`      | `%2F`         |
+| `?`      | `%3F`         |
+| `%`      | `%25`         |
+
+Cek koneksi: `psql "$DATABASE_URL" -c 'select 1'` (jalankan setelah `source .env`),
+atau buka http://localhost:4000/api/health setelah `pnpm dev`: `"db": "up"` berarti tersambung.
+
+### 3. Jalankan
+
+```bash
 pnpm dev                  # server :4000 + web :5173
 ```
 
 Buka http://localhost:5173. Coba buka dua tab, lalu geser token di tab Table: tab lain ikut bergerak.
+
+## Database
+
+> **Belum tersedia.** Perintah di bawah dibuat di Fase 0 (lihat [docs/PLAN.md](docs/PLAN.md)).
+> Setelah itu, langkah 1 dan 3 di atas cukup diganti `pnpm db:setup` lalu `pnpm dev`.
+
+| Perintah           | Fungsi                                                                        |
+| ------------------ | ----------------------------------------------------------------------------- |
+| `pnpm db:setup`    | Buat database bila belum ada, jalankan migrasi, lalu isi data contoh          |
+| `pnpm db:create`   | Buat database dari `DATABASE_URL` + database `<nama>_test` untuk test         |
+| `pnpm db:migrate`  | Jalankan migrasi Drizzle                                                      |
+| `pnpm db:generate` | Buat file migrasi dari perubahan skema; commit bersama PR yang mengubah skema |
+| `pnpm db:seed`     | Isi data contoh (aman dijalankan berulang)                                    |
+| `pnpm db:reset`    | Hapus dan buat ulang database lalu `db:setup` (ditolak di production)         |
+| `pnpm db:studio`   | Buka Drizzle Studio untuk melihat isi tabel                                   |
+
+Data contoh dari seeder (hanya development/test):
+
+- User: `gm@dev.local` (GM), `player1@dev.local`, `player2@dev.local`
+- Campaign contoh dengan invite code `DEVCAMP`
+- Beberapa karakter jadi, satu karakter `draft`, dan satu tanpa campaign
+- Homebrew item, satu scene dengan token, dan satu encounter
+
+Login memakai Google. Di development, set `DEV_LOGIN=true` di `.env` untuk login cepat
+sebagai user seed tanpa kredensial Google.
+
+Aturan skema:
+
+- Ubah skema di kode Drizzle, lalu `pnpm db:generate`. Jangan mengedit tabel langsung lewat SQL.
+- Konten SRD (spell, monster, item) **tidak** disimpan di database; tetap JSON di `packages/data`.
 
 | Perintah                                  | Fungsi                                  |
 | ----------------------------------------- | --------------------------------------- |
