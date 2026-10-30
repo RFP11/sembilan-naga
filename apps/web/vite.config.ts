@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    // Listen on every interface so the app opens from other devices on the LAN / tailnet
+    // (e.g. http://192.168.0.113:5173). The API server stays on 127.0.0.1 behind this proxy.
+    host: true,
     // Allow opening the dev server through the tailnet (e.g. homeserver.tailabc13c.ts.net).
     allowedHosts: [".ts.net"],
     proxy: {
