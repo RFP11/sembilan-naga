@@ -28,14 +28,13 @@ Acuan aturan: **SRD 5.2.1** (aturan 2024).
 
 Butuh Node 24+ (`.nvmrc`), pnpm 10, dan PostgreSQL 16+ yang terpasang di komputer sendiri.
 
-### 1. Siapkan Postgres
-
-Buat role Postgres untuk akun kamu (sekali saja), lalu buat database-nya:
+### 1. Siapkan role Postgres (sekali saja)
 
 ```bash
 sudo -u postgres createuser --createdb --pwprompt $USER   # isi password
-createdb -h localhost dnd
 ```
+
+`--createdb` dibutuhkan karena `pnpm db:setup` membuat database `dnd` dan `dnd_test` sendiri.
 
 ### 2. Isi `.env`
 
@@ -62,46 +61,60 @@ Contoh: password `#Rahasia` ditulis `%23Rahasia`.
 | `?`      | `%3F`         |
 | `%`      | `%25`         |
 
-Cek koneksi: `psql "$DATABASE_URL" -c 'select 1'` (jalankan setelah `source .env`),
-atau buka http://localhost:4000/api/health setelah `pnpm dev`: `"db": "up"` berarti tersambung.
-
-### 3. Jalankan
+### 3. Siapkan database dan jalankan
 
 ```bash
+pnpm db:setup             # buat database → migrasi → data contoh
 pnpm dev                  # server :4000 + web :5173
 ```
 
-Buka http://localhost:5173. Coba buka dua tab, lalu geser token di tab Table: tab lain ikut bergerak.
+Buka http://localhost:5173, pilih salah satu user di **Dev login**, lalu buka "Dev Campaign".
+Coba login sebagai user lain di jendela private: geser token atau lempar dadu, dan jendela
+lain ikut berubah.
+
+Cek koneksi database kapan saja di http://localhost:5173/api/health (`"db": "up"`).
+
+## Login
+
+- **Dev login** (`DEV_LOGIN=true` di `.env`): login sebagai user seed tanpa kredensial apa pun.
+  Hanya aktif saat development; diabaikan bila `NODE_ENV=production`.
+- **Google**: buat OAuth client ID (tipe _Web application_) di Google Cloud Console, isi
+  _Authorized redirect URI_ dengan `<PUBLIC_URL>/api/auth/google/callback`
+  (development: `http://localhost:5173/api/auth/google/callback`), lalu isi
+  `GOOGLE_CLIENT_ID` dan `GOOGLE_CLIENT_SECRET` di `.env`. Tombol Google muncul otomatis.
+
+Session disimpan di cookie httpOnly; tabel `sessions` hanya menyimpan hash token-nya.
 
 ## Database
 
-> **Belum tersedia.** Perintah di bawah dibuat di Fase 0 (lihat [docs/PLAN.md](docs/PLAN.md)).
-> Setelah itu, langkah 1 dan 3 di atas cukup diganti `pnpm db:setup` lalu `pnpm dev`.
-
 | Perintah           | Fungsi                                                                        |
 | ------------------ | ----------------------------------------------------------------------------- |
-| `pnpm db:setup`    | Buat database bila belum ada, jalankan migrasi, lalu isi data contoh          |
+| `pnpm db:setup`    | `db:create` + `db:migrate` + `db:seed`                                        |
 | `pnpm db:create`   | Buat database dari `DATABASE_URL` + database `<nama>_test` untuk test         |
-| `pnpm db:migrate`  | Jalankan migrasi Drizzle                                                      |
+| `pnpm db:migrate`  | Jalankan migrasi Drizzle (database utama dan `_test`)                         |
 | `pnpm db:generate` | Buat file migrasi dari perubahan skema; commit bersama PR yang mengubah skema |
 | `pnpm db:seed`     | Isi data contoh (aman dijalankan berulang)                                    |
-| `pnpm db:reset`    | Hapus dan buat ulang database lalu `db:setup` (ditolak di production)         |
+| `pnpm db:reset`    | Hapus dan buat ulang kedua database lalu `db:setup` (ditolak di production)   |
 | `pnpm db:studio`   | Buka Drizzle Studio untuk melihat isi tabel                                   |
 
 Data contoh dari seeder (hanya development/test):
 
 - User: `gm@dev.local` (GM), `player1@dev.local`, `player2@dev.local`
-- Campaign contoh dengan invite code `DEVCAMP`
-- Beberapa karakter jadi, satu karakter `draft`, dan satu tanpa campaign
-- Homebrew item, satu scene dengan token, dan satu encounter
+- Campaign "Dev Campaign" dengan invite code `DEVCAMP`, ketiga user sebagai anggota
+- Beberapa riwayat lemparan dadu
 
-Login memakai Google. Di development, set `DEV_LOGIN=true` di `.env` untuk login cepat
-sebagai user seed tanpa kredensial Google.
+Seeder bertambah di tiap fase (karakter di Fase 2, scene & token di Fase 3, dst.).
 
 Aturan skema:
 
-- Ubah skema di kode Drizzle, lalu `pnpm db:generate`. Jangan mengedit tabel langsung lewat SQL.
+- Skema ada di `apps/server/src/db/schema.ts`. Ubah di sana, lalu `pnpm db:generate`.
+  Jangan mengedit tabel langsung lewat SQL.
+- Server menjalankan migrasi yang belum diterapkan saat start, jadi deploy cukup restart.
 - Konten SRD (spell, monster, item) **tidak** disimpan di database; tetap JSON di `packages/data`.
+- Test server memakai database `<nama>_test` (dibuat `db:create`); isinya dihapus dan di-seed
+  ulang setiap file test berjalan. `pnpm test` butuh Postgres yang menyala.
+
+## Perintah lain
 
 | Perintah                                  | Fungsi                                  |
 | ----------------------------------------- | --------------------------------------- |

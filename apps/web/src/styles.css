@@ -77,3 +77,54 @@ main {
   display: grid;
   gap: 0.35rem;
 }
+.centered {
+  max-width: 420px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+}
+.stack {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+.stack button {
+  width: 100%;
+  text-align: left;
+}
+.row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.row input {
+  flex: 1;
+}
+input {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+}
+.spacer {
+  flex: 1;
+}
+.error {
+  color: var(--accent);
+}
+a.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  text-decoration: none;
+}
+@media (max-width: 800px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}

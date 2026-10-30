@@ -138,14 +138,24 @@ Catatan:
 
 ## Fitur per Fase
 
-### Fase 0 – Fondasi (Backend)
+### Fase 0 – Fondasi (Backend) ✅
 
-- Drizzle + skema + migrasi awal, ganti `apps/server/src/db.ts`.
-- Login Google (OAuth 2.0 / OIDC), session cookie httpOnly. Env baru:
-  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`, `PUBLIC_URL`.
-- Campaign: buat, invite code, gabung, role GM/player/spectator.
-- Socket.IO memakai session yang sama (ganti `guest-xxxx`), cek role di setiap event.
-- Setup database & seeder (lihat bawah) supaya anggota tim bisa mulai dengan satu perintah.
+- ✅ Drizzle + migrasi `0000_foundation` (`apps/server/src/db/`). Tabel lain di skema di atas
+  dibuat lewat migrasi di fase yang memakainya, bukan di depan.
+- ✅ Login Google (arctic, OAuth 2.0 + PKCE), session cookie httpOnly; tabel `sessions`
+  menyimpan hash SHA-256 token, kedaluwarsa 30 hari dengan perpanjangan otomatis. Env baru:
+  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `PUBLIC_URL`, `DEV_LOGIN` (tidak perlu
+  `SESSION_SECRET` karena token disimpan sebagai hash).
+- ✅ Campaign: buat, invite code (8 karakter, tanpa 0/O/1/I), gabung, role GM/player/spectator;
+  invite code hanya dikirim ke GM.
+- ✅ Socket.IO memakai session yang sama (anonim ditolak), `campaign:join` cek keanggotaan,
+  spectator tidak bisa menggerakkan token / melempar dadu, lemparan dadu disimpan ke
+  `chat_messages` dan riwayatnya tersedia di `GET /api/campaigns/:id/rolls`.
+- ✅ Web: layar login (Google / dev login), pemilih campaign (buat / gabung / pilih),
+  Table & dice log memakai campaign yang dipilih.
+- ✅ Server menjalankan migrasi tertunda saat start; image Docker membawa folder migrasi.
+- ✅ CI menjalankan Postgres service untuk test server.
+- ✅ Setup database & seeder (lihat bawah) supaya anggota tim bisa mulai dengan satu perintah.
 
 #### Setup database & seeder
 
@@ -173,16 +183,16 @@ Aturan seeder (`apps/server/src/db/seed/`):
 - **Idempotent**: UUID tetap + upsert, aman dijalankan berulang kali.
 - **Hanya untuk development/test**; menolak jalan di production.
 - **Tidak menyalin kompendium SRD** ke DB (tetap JSON); seed hanya merujuk slug.
-- Data yang di-seed:
-  - 3 user dev: `gm@dev.local` (GM), `player1@dev.local`, `player2@dev.local`
-  - 1 campaign contoh dengan invite code tetap (`DEVCAMP`) dan ketiga user sebagai member
-  - Karakter: beberapa `ready` (mis. Fighter, Wizard, Cleric level 1 & 5, satu multiclass)
+- Data yang di-seed (✅ = sudah, sisanya ditambahkan di fase yang membuat tabelnya):
+  - ✅ 3 user dev: `gm@dev.local` (GM), `player1@dev.local`, `player2@dev.local`
+  - ✅ 1 campaign contoh dengan invite code tetap (`DEVCAMP`) dan ketiga user sebagai member
+  - ✅ Beberapa `chat_messages` roll
+  - Fase 2 — Karakter: beberapa `ready` (mis. Fighter, Wizard, Cleric level 1 & 5, satu multiclass)
     dan satu `draft` di tengah builder; satu karakter tanpa campaign (uji pindah campaign)
-  - Homebrew contoh per `kind`: item (`private` dan `campaign`, satu berbasis item SRD),
+  - Fase 2 (monster: Fase 4) — Homebrew contoh per `kind`: item (`private` dan `campaign`, satu berbasis item SRD),
     spell, feat, dan monster (salinan monster SRD yang diedit)
-  - 1 scene dengan peta placeholder (gambar grid buatan sendiri, bukan aset berlisensi),
+  - Fase 3 — 1 scene dengan peta placeholder (gambar grid buatan sendiri, bukan aset berlisensi),
     token PC + monster SRD (satu `hidden`), dan satu encounter `planning`
-  - Beberapa `chat_messages` roll
 - Karakter seed dibuat lewat fungsi builder yang sama dengan aplikasi, jadi seed sekaligus
   menguji validasi.
 

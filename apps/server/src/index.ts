@@ -1,13 +1,21 @@
 import { buildApp } from "./app";
 import { config } from "./config";
-import { createDb } from "./db";
+import { createDb, runMigrations } from "./db";
 
-const sql = createDb(config.DATABASE_URL);
-const app = await buildApp({ config, sql });
+if (!config.DATABASE_URL) {
+  console.error(
+    "DATABASE_URL is not set. Copy .env.example to .env and run `pnpm db:setup` (see README).",
+  );
+  process.exit(1);
+}
+
+const db = createDb(config.DATABASE_URL);
+await runMigrations(db, config.MIGRATIONS_DIR);
+const app = await buildApp({ config, db });
 
 const shutdown = async () => {
   await app.close();
-  await sql?.end();
+  await db.close();
   process.exit(0);
 };
 process.on("SIGINT", shutdown);

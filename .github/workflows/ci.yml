@@ -8,6 +8,22 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: dnd
+          POSTGRES_PASSWORD: dnd
+          POSTGRES_DB: dnd
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dnd"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgres://dnd:dnd@localhost:5432/dnd
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -19,5 +35,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
+      # Creates <db>_test for the server tests (they migrate and seed it themselves).
+      - run: pnpm db:create
       - run: pnpm test
       - run: pnpm build
