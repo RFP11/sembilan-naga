@@ -10,8 +10,8 @@
     "typecheck": "tsc -p .",
     "test": "vitest run --passWithNoTests"
   },
-  "dependencies": {},
   "devDependencies": {
+    "@dnd/data": "workspace:*",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   }

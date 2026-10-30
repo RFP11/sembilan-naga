@@ -242,7 +242,7 @@ Sisa pekerjaan data, berurutan:
 - Dipakai oleh: kompendium (filter CR/tipe), token monster di VTT, encounter builder
   (XP budget), tombol serang yang roll otomatis.
 
-**3. ⏳ Data terstruktur untuk builder** (ditulis manual, mulai bersama Fase 2)
+**3. ✅ Data terstruktur untuk builder** (ditulis manual, `packages/data/src/builder/`)
 
 Tabel multi-kolom di PDF tidak bisa di-parse andal, dan builder butuh data yang bisa
 dihitung, bukan teks. Ditulis tangan sebagai TypeScript bertipe di
@@ -258,11 +258,17 @@ di komentar untuk review.
   Fiendish Legacies (Abyssal / Chthonic / Infernal), Keen Senses, Skillful, Versatile,
   pilihan spellcasting ability, ukuran Small/Medium.
 - Peralatan awal: paket A/B/C tiap kelas dan A/B tiap background → daftar
-  `{ itemId, quantity }` + GP, merujuk ke id weapons/armor/gear/tools.
+  `{ kind, id, quantity, variant?, note? }` + GP, merujuk ke id weapons/armor/gear/tools.
+  Dua bentuk khusus: `proficient-tool` (Monk, Soldier: alat yang dipilih untuk proficiency)
+  dan `custom` (Spellbook Wizard, yang bukan item di daftar peralatan SRD).
 - Tabel builder lain yang kecil (Standard Array by Class, Point Cost) masuk ke
   `packages/rules` sebagai konstanta + fungsi.
 - Test: setiap id spell / skill / item / feat yang dirujuk benar-benar ada di data SRD,
-  sehingga salah ketik di data manual langsung ketahuan di CI.
+  level spell lineage cocok (cantrip, level 1 di level 3, level 2 di level 5), varian item
+  ada di tabel item-nya, dan opsi serta GP paket awal sama dengan teks SRD; salah ketik di
+  data manual langsung ketahuan di CI.
+- Belum: pilihan fitur kelas (Fighting Style, Expertise, dll.) memakai model `Choice` yang
+  sama; ditambahkan bersama UI builder.
 
 ### Fase 2 – Character Builder & Sheet (Rules engine + Frontend)
 
@@ -383,15 +389,17 @@ Pekerjaan yang dibutuhkan:
 Homebrew jenis lain bila dibutuhkan (species, background, subclass; cukup menambah `kind`
 dan skemanya), jurnal & handout, whisper di chat.
 
-## Tambahan `packages/rules`
+## Tambahan `packages/rules` ✅
 
-Semua murni, randomness di-inject, dan ber-test:
+Semua murni, randomness di-inject, dan ber-test. Tabel spell slot dan Pact Magic diuji silang
+terhadap tabel fitur 12 kelas hasil ekstraksi SRD (`srd-tables.test.ts`).
 
 - Modifier, proficiency bonus per level, XP → level
 - Validasi point buy dan ASI background
 - HP level 1 dan per level (tetap/roll), hit dice per kelas
 - AC: armor + Dex (cap medium), shield, Unarmored Defense, bonus item magic/homebrew
-- Validasi langkah builder (pilihan wajib per kelas/background/species)
+- Prasyarat multiclass (skor 13+ di primary ability kelas lama dan baru)
+- ⏳ Validasi langkah builder (pilihan wajib per kelas/background/species): bersama UI builder
 - Spell slot: full caster, half caster, Pact Magic, Multiclass Spellcaster table
 - Spell save DC & spell attack bonus
 - Passive Perception, efek Exhaustion

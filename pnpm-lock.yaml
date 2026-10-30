@@ -177,6 +177,9 @@ importers:
 
   packages/rules:
     devDependencies:
+      '@dnd/data':
+        specifier: workspace:*
+        version: link:../data
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

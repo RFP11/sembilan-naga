@@ -25,6 +25,7 @@ import weaponsJson from "./srd/weapons.json";
 // Validated at import time so bad data fails loudly in tests/CI.
 
 export * from "./schemas";
+export * from "./builder";
 
 const list = <T extends z.ZodType>(schema: T, data: unknown): z.infer<T>[] =>
   z.array(schema).parse(data);
