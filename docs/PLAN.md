@@ -272,6 +272,20 @@ di komentar untuk review.
 
 ### Fase 2 – Character Builder & Sheet (Rules engine + Frontend)
 
+Progres:
+
+1. ✅ Rules engine (`packages/rules`)
+2. ✅ Data builder terstruktur (`packages/data/src/builder/`)
+3. ✅ Tabel & API karakter: migrasi `0001_characters`; paket `@dnd/character`
+   (`deriveCharacter`, `validateBuild`, `startingInventory`) dipakai web & server;
+   `GET/POST /api/characters`, `GET/PATCH/DELETE /api/characters/:id`,
+   `POST /api/characters/:id/finalize` (422 + daftar masalah bila belum lengkap),
+   `GET /api/campaigns/:id/characters`; owner bisa edit, GM campaign bisa baca;
+   seeder karakter lewat kode builder yang sama.
+4. ⏳ UI character builder
+5. ⏳ Character sheet
+6. ⏳ Homebrew item/spell/feat
+
 **Character builder** (wizard 5 langkah sesuai SRD):
 
 1. **Kelas** – kartu 12 kelas (primary ability, hit die, kompleksitas), pilih level awal

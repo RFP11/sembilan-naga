@@ -1,9 +1,13 @@
 // Development data. Idempotent: fixed ids + upserts, so `pnpm db:seed` can run any time.
 // Grows with each phase (characters in Fase 2, scenes/tokens in Fase 3, ...).
 
-import { sql } from "drizzle-orm";
+import { choiceKey, validateBuild } from "@dnd/character";
+import { characterBuild, type CharacterBuildInput } from "@dnd/contracts";
+import { inArray, sql } from "drizzle-orm";
+import { buildColumns, loadCharacter, replaceLevels } from "../characters/repo";
+import { finalizeCharacter } from "../characters/service";
 import type { Orm } from "./index";
-import { campaignMembers, campaigns, chatMessages, users } from "./schema";
+import { campaignMembers, campaigns, characters, chatMessages, users } from "./schema";
 
 export const SEED = {
   gm: { id: "00000000-0000-4000-8000-000000000001", email: "gm@dev.local", displayName: "Dev GM" },
@@ -104,5 +108,159 @@ export async function seed(orm: Orm): Promise<void> {
         sql`, `,
       )})
     `);
+
+    await seedCharacters(tx);
   });
+}
+
+interface SeedCharacter {
+  id: string;
+  ownerId: string;
+  campaignId: string | null;
+  build: CharacterBuildInput;
+  /** Finalize (play state, items); false leaves a draft at `builderStep`. */
+  ready: boolean;
+  builderStep?: number;
+}
+
+const fixed = (n: number) => `00000000-0000-4000-8000-${String(n).padStart(12, "0")}`;
+const sub = (classId: string, subclassId: string, total: number) =>
+  Array.from({ length: total }, (_, i) => ({ classId, ...(i >= 2 && { subclassId }) }));
+
+/** Built and finalized through the same code as the app, so a bad seed fails loudly. */
+export const SEED_CHARACTERS: SeedCharacter[] = [
+  {
+    id: fixed(301),
+    ownerId: SEED.player1.id,
+    campaignId: SEED.campaign.id,
+    ready: true,
+    build: {
+      name: "Brunhild Stonefist",
+      speciesId: "dwarf",
+      backgroundId: "soldier",
+      alignment: "lg",
+      abilityMethod: "standard",
+      baseScores: { str: 15, dex: 14, con: 13, int: 8, wis: 10, cha: 12 },
+      backgroundBonus: { str: 2, con: 1 },
+      levels: [{ classId: "fighter" }],
+      choices: { [choiceKey.classSkills("fighter")]: ["perception", "survival"] },
+      equipment: { class: "a", background: "a" },
+      languages: ["dwarvish", "giant"],
+    },
+  },
+  {
+    id: fixed(302),
+    ownerId: SEED.player2.id,
+    campaignId: SEED.campaign.id,
+    ready: true,
+    build: {
+      name: "Elaria Moonwhisper",
+      speciesId: "elf",
+      backgroundId: "sage",
+      alignment: "ng",
+      abilityMethod: "standard",
+      baseScores: { str: 8, dex: 14, con: 13, int: 15, wis: 12, cha: 10 },
+      backgroundBonus: { int: 2, con: 1 },
+      levels: sub("wizard", "evoker", 5),
+      choices: {
+        [choiceKey.species("elven-lineage")]: "high-elf",
+        [choiceKey.species("spellcasting-ability")]: "int",
+        [choiceKey.species("keen-senses")]: "perception",
+        [choiceKey.classSkills("wizard")]: ["investigation", "medicine"],
+      },
+      equipment: { class: "a", background: "a" },
+      languages: ["elvish", "draconic"],
+    },
+  },
+  {
+    // Not in any campaign: for trying "move to campaign".
+    id: fixed(303),
+    ownerId: SEED.player1.id,
+    campaignId: null,
+    ready: true,
+    build: {
+      name: "Tobin Ashgrove",
+      speciesId: "human",
+      backgroundId: "acolyte",
+      alignment: "lg",
+      abilityMethod: "standard",
+      baseScores: { str: 14, dex: 8, con: 13, int: 10, wis: 15, cha: 12 },
+      backgroundBonus: { wis: 2, cha: 1 },
+      levels: sub("cleric", "life-domain", 5),
+      choices: {
+        [choiceKey.species("size")]: "medium",
+        [choiceKey.species("skills")]: "perception",
+        [choiceKey.species("feat")]: "alert",
+        [choiceKey.classSkills("cleric")]: ["history", "medicine"],
+      },
+      equipment: { class: "a", background: "b" },
+      languages: ["halfling", "dwarvish"],
+    },
+  },
+  {
+    // Multiclass: Fighter 2 / Warlock 1.
+    id: fixed(304),
+    ownerId: SEED.player2.id,
+    campaignId: SEED.campaign.id,
+    ready: true,
+    build: {
+      name: "Kara Emberveil",
+      speciesId: "tiefling",
+      backgroundId: "criminal",
+      alignment: "cn",
+      abilityMethod: "standard",
+      baseScores: { str: 8, dex: 15, con: 13, int: 10, wis: 12, cha: 14 },
+      backgroundBonus: { dex: 2, con: 1 },
+      levels: [
+        { classId: "fighter" },
+        { classId: "fighter", hpRoll: 7 },
+        { classId: "warlock", hpRoll: 5 },
+      ],
+      choices: {
+        [choiceKey.species("fiendish-legacy")]: "infernal",
+        [choiceKey.species("spellcasting-ability")]: "cha",
+        [choiceKey.species("size")]: "medium",
+        [choiceKey.classSkills("fighter")]: ["acrobatics", "perception"],
+      },
+      equipment: { class: "b", background: "a" },
+      languages: ["goblin", "orc"],
+    },
+  },
+  {
+    // A draft left in the middle of the builder.
+    id: fixed(305),
+    ownerId: SEED.player1.id,
+    campaignId: SEED.campaign.id,
+    ready: false,
+    builderStep: 2,
+    build: { name: "Pip", speciesId: "gnome", levels: [{ classId: "rogue" }] },
+  },
+];
+
+async function seedCharacters(tx: Orm) {
+  // Recreate from scratch so edits made while testing don't linger.
+  await tx.delete(characters).where(
+    inArray(
+      characters.id,
+      SEED_CHARACTERS.map((c) => c.id),
+    ),
+  );
+  for (const seed of SEED_CHARACTERS) {
+    const build = characterBuild.parse(seed.build);
+    if (seed.ready) {
+      const issues = validateBuild(build);
+      if (issues.length) {
+        throw new Error(`seed character ${build.name}: ${issues.map((i) => i.message).join("; ")}`);
+      }
+    }
+    await tx.insert(characters).values({
+      id: seed.id,
+      ownerId: seed.ownerId,
+      campaignId: seed.campaignId,
+      builderStep: seed.builderStep ?? 0,
+      ...buildColumns(build),
+    });
+    await replaceLevels(tx, seed.id, build);
+    if (seed.ready) await finalizeCharacter(tx, (await loadCharacter(tx, seed.id))!);
+  }
 }

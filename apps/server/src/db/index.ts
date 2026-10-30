@@ -1,4 +1,5 @@
-import { drizzle } from "drizzle-orm/postgres-js";
+import type { PgDatabase } from "drizzle-orm/pg-core";
+import { drizzle, type PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import path from "node:path";
 import postgres from "postgres";
@@ -14,7 +15,7 @@ export function createDb(url: string) {
 
 export type Db = ReturnType<typeof createDb>;
 /** The Drizzle instance, or a transaction on it. */
-export type Orm = Db["orm"];
+export type Orm = PgDatabase<PostgresJsQueryResultHKT, typeof schema>;
 
 /**
  * Where `pnpm db:generate` writes migrations. Server scripts (dev, start, test, db:*) all run

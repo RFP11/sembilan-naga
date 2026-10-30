@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import path from "node:path";
 import { registerAuth, type AuthConfig } from "./auth/plugin";
 import { campaignRoutes } from "./campaigns/routes";
+import { characterRoutes } from "./characters/routes";
 import type { Config } from "./config";
 import type { Db } from "./db";
 import { registerSocket } from "./plugins/socket";
@@ -21,6 +22,7 @@ export async function buildApp({ config, db }: AppDeps) {
   await app.register(healthRoutes, { prefix: "/api", db });
   await app.register(compendiumRoutes, { prefix: "/api" });
   await app.register(campaignRoutes, { prefix: "/api", db });
+  await app.register(characterRoutes, { prefix: "/api", db });
   registerSocket(app, db);
 
   // Production: serve the React build from the same origin, with SPA fallback.

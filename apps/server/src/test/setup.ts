@@ -23,7 +23,7 @@ export async function createTestDb(): Promise<Db> {
   const db = createDb(testDatabaseUrl(url));
   await runMigrations(db);
   await db.orm.execute(
-    sql`truncate users, sessions, campaigns, campaign_members, chat_messages cascade`,
+    sql`truncate users, sessions, campaigns, campaign_members, chat_messages, characters cascade`,
   );
   await seed(db.orm);
   return db;

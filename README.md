@@ -9,6 +9,7 @@ dnd-app/
 ├─ packages/
 │  ├─ contracts/   Skema Zod untuk REST API + event Socket.IO (dipakai web & server)
 │  ├─ rules/       Logika D&D murni (modifier, proficiency, dadu) + unit test
+│  ├─ character/   Build karakter → stat turunan + validasi builder (dipakai web & server)
 │  └─ data/        Data SRD (JSON) yang divalidasi dengan Zod
 ├─ apps/
 │  ├─ server/      Fastify + Socket.IO + PostgreSQL, juga menyajikan build web di production
@@ -102,6 +103,10 @@ Data contoh dari seeder (hanya development/test):
 - User: `gm@dev.local` (GM), `player1@dev.local`, `player2@dev.local`
 - Campaign "Dev Campaign" dengan invite code `DEVCAMP`, ketiga user sebagai anggota
 - Beberapa riwayat lemparan dadu
+- Karakter: Brunhild (Dwarf Fighter 1), Elaria (Elf Wizard 5), Kara (Tiefling Fighter 2 /
+  Warlock 1), Tobin (Human Cleric 5, belum masuk campaign), dan Pip (draft di tengah builder).
+  Semuanya dibuat lewat kode builder yang sama dengan aplikasi; seeder gagal bila datanya
+  tidak valid.
 
 Seeder bertambah di tiap fase (karakter di Fase 2, scene & token di Fase 3, dst.).
 
@@ -131,6 +136,7 @@ Aturan skema:
 | ------------ | ---------------------------------------------------- | ---------------------------------------- |
 | Rules engine | `packages/rules`                                     | Modifier, AC, spell slot, attack, damage |
 | Data SRD     | `packages/data`                                      | Kelas, spell, monster dari SRD 5.2       |
+| Karakter     | `packages/character`                                 | Stat turunan, validasi build             |
 | Backend      | `apps/server`                                        | Auth, database, campaign, Socket.IO      |
 | Frontend UI  | `apps/web/src/features/{character-sheet,compendium}` | Lembar karakter, kompendium, layout      |
 | VTT          | `apps/web/src/features/vtt`                          | Peta, grid, token, fog of war            |
