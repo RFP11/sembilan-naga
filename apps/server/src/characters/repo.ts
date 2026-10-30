@@ -22,6 +22,7 @@ interface BuildJson {
   equipment?: CharacterBuild["equipment"];
   languages?: CharacterBuild["languages"];
   notes?: CharacterBuild["notes"];
+  abilityRolls?: CharacterBuild["abilityRolls"];
 }
 
 export function toBuild(row: CharacterRow, levels: LevelRow[]): CharacterBuild {
@@ -48,6 +49,7 @@ export function toBuild(row: CharacterRow, levels: LevelRow[]): CharacterBuild {
     equipment: json.equipment,
     languages: json.languages,
     notes: json.notes,
+    abilityRolls: json.abilityRolls,
   });
 }
 
@@ -59,6 +61,7 @@ export function buildColumns(build: CharacterBuild) {
     equipment: build.equipment,
     languages: build.languages,
     notes: build.notes,
+    abilityRolls: build.abilityRolls,
   };
   const s = build.baseScores;
   return {

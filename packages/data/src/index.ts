@@ -11,7 +11,6 @@ import gearJson from "./srd/gear.json";
 import glossaryJson from "./srd/glossary.json";
 import languagesJson from "./srd/languages.json";
 import magicItemsJson from "./srd/magic-items.json";
-import monstersJson from "./srd/monsters.json";
 import skillsJson from "./srd/skills.json";
 import speciesJson from "./srd/species.json";
 import spellsJson from "./srd/spells.json";
@@ -50,7 +49,6 @@ export const species = list(s.species, speciesJson);
 export const backgrounds = list(s.background, backgroundsJson);
 export const feats = list(s.feat, featsJson);
 export const classes = list(s.dndClass, classesJson);
-export const monsters = list(s.monster, monstersJson);
 
 export const SRD_ATTRIBUTION =
   "This work includes material from the System Reference Document 5.2.1 (“SRD 5.2.1”) by Wizards of " +

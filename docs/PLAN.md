@@ -282,7 +282,13 @@ Progres:
    `POST /api/characters/:id/finalize` (422 + daftar masalah bila belum lengkap),
    `GET /api/campaigns/:id/characters`; owner bisa edit, GM campaign bisa baca;
    seeder karakter lewat kode builder yang sama.
-4. ⏳ UI character builder
+4. ✅ UI character builder: tab Characters (lazy-loaded; data monster dipisah ke
+   `@dnd/data/monsters` agar chunk-nya ±250 KB gzip), wizard 5 langkah + halaman Finish,
+   autosave draft, preview live dari `@dnd/character`, masalah per langkah, roll 4d6 di
+   server (`POST /api/characters/:id/roll-abilities`, hasilnya tidak bisa diubah klien).
+   Diuji end-to-end di Chromium headless (login → buat Elf Wizard → Finish).
+   Belum: pilihan fitur kelas (Fighting Style, Expertise, spell awal), pilihan tool
+   proficiency, roll HP saat memulai di level > 1, multiclass dari builder (lewat level-up).
 5. ⏳ Character sheet
 6. ⏳ Homebrew item/spell/feat
 

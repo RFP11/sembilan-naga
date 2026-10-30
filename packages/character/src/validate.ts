@@ -95,8 +95,13 @@ export function validateBuild(build: CharacterBuild): BuildIssue[] {
       add("abilities", "Assign the standard array: 15, 14, 13, 12, 10, 8.");
     } else if (build.abilityMethod === "point-buy") {
       for (const m of validatePointBuy(base)) add("abilities", m);
-    } else if (build.abilityMethod === "roll" && Object.values(base).some((s) => s < 3 || s > 18)) {
-      add("abilities", "Rolled scores are between 3 and 18.");
+    } else if (build.abilityMethod === "roll") {
+      const rolled = [...(build.abilityRolls ?? [])].sort((a, b) => a - b).join();
+      const assigned = Object.values(base)
+        .sort((a, b) => a - b)
+        .join();
+      if (!build.abilityRolls) add("abilities", "Roll your ability scores.");
+      else if (rolled !== assigned) add("abilities", "Assign each rolled score to one ability.");
     } else if (!build.abilityMethod) add("abilities", "Choose how to generate ability scores.");
   }
   if (background) {

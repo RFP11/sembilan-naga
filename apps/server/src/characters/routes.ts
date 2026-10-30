@@ -6,6 +6,7 @@ import {
   type Character,
   type User,
 } from "@dnd/contracts";
+import { roll4d6DropLowest } from "@dnd/rules";
 import { and, desc, eq } from "drizzle-orm";
 import type { FastifyPluginAsync, FastifyReply } from "fastify";
 import { z } from "zod";
@@ -133,6 +134,26 @@ export const characterRoutes: FastifyPluginAsync<{ db: Db }> = async (app, { db 
     });
     const updated = (await loadCharacter(db.orm, c.id))!;
     return { ...updated, issues: updated.status === "draft" ? validateBuild(updated.build) : [] };
+  });
+
+  /**
+   * Rolls six 4d6-drop-lowest scores on the server and stores them; the build then assigns
+   * them (validateBuild checks the assignment). Rolling again replaces the set.
+   */
+  app.post("/characters/:id/roll-abilities", async (req, reply) => {
+    const c = await owned(req.user!, req.params, reply);
+    if (!c) return;
+    if (c.status !== "draft") return reply.code(409).send({ error: "already ready" });
+    const abilityRolls = Array.from({ length: 6 }, () => roll4d6DropLowest(Math.random).total);
+    const next = characterBuild.parse({
+      ...c.build,
+      abilityMethod: "roll",
+      abilityRolls,
+      baseScores: undefined,
+    });
+    await db.orm.update(characters).set(buildColumns(next)).where(eq(characters.id, c.id));
+    const updated = (await loadCharacter(db.orm, c.id))!;
+    return { ...updated, issues: validateBuild(updated.build) };
   });
 
   /** Draft → ready (see finalizeCharacter); refused with the open issues while incomplete. */

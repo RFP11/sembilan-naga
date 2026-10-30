@@ -32,7 +32,11 @@ export async function finalizeCharacter(orm: Orm, c: Character): Promise<void> {
       coins: { cp: 0, sp: 0, ep: 0, gp, pp: 0 },
     });
     if (items.length) {
-      await tx.insert(characterItems).values(items.map((i) => ({ ...i, characterId: c.id })));
+      // Stagger created_at so the inventory lists items in package order.
+      const now = Date.now();
+      await tx
+        .insert(characterItems)
+        .values(items.map((i, n) => ({ ...i, characterId: c.id, createdAt: new Date(now + n) })));
     }
     if (spells.length) {
       await tx

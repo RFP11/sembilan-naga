@@ -66,6 +66,8 @@ export const characterBuild = z.object({
   equipment: buildFields.equipment.default({}),
   languages: buildFields.languages.default([]),
   notes: buildFields.notes.default(""),
+  /** Six 4d6-drop-lowest results rolled by the server; not editable through PATCH. */
+  abilityRolls: z.array(z.number().int().min(3).max(18)).length(6).optional(),
 });
 export type CharacterBuild = z.infer<typeof characterBuild>;
 export type CharacterBuildInput = z.input<typeof characterBuild>;

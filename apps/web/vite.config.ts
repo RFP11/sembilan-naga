@@ -4,6 +4,9 @@ import { defineConfig } from "vite";
 // In dev, Vite serves the UI and forwards API + websocket traffic to the Fastify server.
 export default defineConfig({
   plugins: [react()],
+  // Pre-bundle deps that only lazy-loaded code imports, so Vite doesn't reload the page the
+  // first time someone opens those screens in dev.
+  optimizeDeps: { include: ["zod"] },
   server: {
     port: 5173,
     // Listen on every interface so the app opens from other devices on the LAN / tailnet

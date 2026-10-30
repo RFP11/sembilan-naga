@@ -99,6 +99,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@dnd/character':
+        specifier: workspace:*
+        version: link:../../packages/character
       '@dnd/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

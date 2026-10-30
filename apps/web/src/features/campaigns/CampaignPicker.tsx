@@ -36,7 +36,7 @@ export function CampaignPicker({ onPick }: { onPick: (id: string) => void }) {
       <h1>Campaigns</h1>
       {campaigns.isPending && <p className="muted">Loading…</p>}
       {campaigns.error && <p className="error">{campaigns.error.message}</p>}
-      <ul className="stack">
+      <ul className="stack menu">
         {campaigns.data?.map((c) => (
           <li key={c.id}>
             <button onClick={() => onPick(c.id)}>

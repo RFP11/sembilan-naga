@@ -1,16 +1,20 @@
-import { useState, type ComponentType } from "react";
+import { lazy, Suspense, useState, type ComponentType } from "react";
 import { Login } from "./features/auth/Login";
 import { CampaignPicker, useCampaigns } from "./features/campaigns/CampaignPicker";
-import { CharacterSheet } from "./features/character-sheet/CharacterSheet";
 import { Compendium } from "./features/compendium/Compendium";
 import { Table } from "./features/vtt/Table";
 import { useLogout, useMe } from "./lib/auth";
 
-type Tab = "vtt" | "sheet" | "compendium";
+// The characters feature pulls in the whole SRD data set, so it loads on first use.
+const CharactersPage = lazy(() =>
+  import("./features/characters/CharactersPage").then((m) => ({ default: m.CharactersPage })),
+);
+
+type Tab = "vtt" | "characters" | "compendium";
 
 const TABS: Record<Tab, { label: string; Component: ComponentType<{ campaignId: string }> }> = {
   vtt: { label: "Table", Component: Table },
-  sheet: { label: "Character", Component: CharacterSheet },
+  characters: { label: "Characters", Component: CharactersPage },
   compendium: { label: "Compendium", Component: Compendium },
 };
 
@@ -78,7 +82,9 @@ function LoggedIn({ displayName }: { displayName: string }) {
         <button onClick={() => logout.mutate()}>Log out</button>
       </header>
       <main>
-        <Component campaignId={campaign.id} />
+        <Suspense fallback={<p className="muted">Loading…</p>}>
+          <Component campaignId={campaign.id} />
+        </Suspense>
       </main>
     </div>
   );

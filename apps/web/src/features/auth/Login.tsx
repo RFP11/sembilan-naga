@@ -27,7 +27,7 @@ export function Login() {
         </p>
       )}
       {providers.data?.devUsers && (
-        <section className="stack">
+        <section className="stack menu">
           <h2 className="muted">Dev login</h2>
           {providers.data.devUsers.map((u) => (
             <button key={u.id} onClick={() => devLogin.mutate(u.id)} disabled={devLogin.isPending}>

@@ -11,6 +11,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@dnd/character": "workspace:*",
     "@dnd/contracts": "workspace:*",
     "@dnd/data": "workspace:*",
     "@dnd/rules": "workspace:*",

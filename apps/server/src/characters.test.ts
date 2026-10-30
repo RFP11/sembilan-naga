@@ -136,6 +136,51 @@ describe("characters", () => {
     expect(refused.status).toBe(400);
   });
 
+  it("rolls ability scores on the server and only accepts assignments of those rolls", async () => {
+    const p2 = await loginAs(app, SEED.player2.id);
+    const { body: draft } = await call<Character>(p2, "POST", "/characters", {});
+    const rolled = await call<Character & { issues: BuildIssue[] }>(
+      p2,
+      "POST",
+      `/characters/${draft.id}/roll-abilities`,
+    );
+    const rolls = rolled.body.build.abilityRolls!;
+    expect(rolls).toHaveLength(6);
+    expect(rolls.every((r) => r >= 3 && r <= 18)).toBe(true);
+    expect(rolled.body.issues.map((i) => i.message)).not.toContain("Roll your ability scores.");
+
+    // Clients can't overwrite the rolls; they're not part of the editable build.
+    await call(p2, "PATCH", `/characters/${draft.id}`, {
+      build: { abilityRolls: [18, 18, 18, 18, 18, 18] },
+    });
+    const fake = { str: 18, dex: 18, con: 18, int: 18, wis: 18, cha: 18 };
+    const cheated = await call<Character & { issues: BuildIssue[] }>(
+      p2,
+      "PATCH",
+      `/characters/${draft.id}`,
+      {
+        build: { baseScores: fake },
+      },
+    );
+    expect(cheated.body.build.abilityRolls).toEqual(rolls);
+    if (rolls.some((r) => r !== 18)) {
+      expect(cheated.body.issues.map((i) => i.message)).toContain(
+        "Assign each rolled score to one ability.",
+      );
+    }
+
+    const [str, dex, con, int, wis, cha] = rolls;
+    const honest = await call<Character & { issues: BuildIssue[] }>(
+      p2,
+      "PATCH",
+      `/characters/${draft.id}`,
+      {
+        build: { baseScores: { str, dex, con, int, wis, cha } },
+      },
+    );
+    expect(honest.body.issues.filter((i) => i.step === "abilities")).toEqual([]);
+  });
+
   it("deletes only the owner's characters", async () => {
     const pip = SEED_CHARACTERS[4]!.id;
     expect(
