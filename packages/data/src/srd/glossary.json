@@ -2,17 +2,17 @@
   {
     "id": "ability-check",
     "name": "Ability Check",
-    "description": "An ability check is a D20 Test that represents using one of the six abilities—or a specific skill associated\n\n**with an ability—to overcome a challenge.** See also “Playing the Game” (“D20 Tests” and “Proficiency”)."
+    "description": "An ability check is a D20 Test that represents using one of the six abilities—or a specific skill associated with an ability—to overcome a challenge. See also “Playing the Game” (“D20 Tests” and “Proficiency”)."
   },
   {
     "id": "ability-score-and-modifier",
     "name": "Ability Score and Modifier",
-    "description": "A creature has six ability scores—Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma—each of which has a corresponding modifier. Add the modifier when you make a D20 Test with the corresponding ability or when a rule asks\n\n**you to do so.** See also “Playing the Game” (“The Six Abilities”)."
+    "description": "A creature has six ability scores—Strength, Dexterity, Constitution, Intelligence, Wisdom, and Charisma—each of which has a corresponding modifier. Add the modifier when you make a D20 Test with the corresponding ability or when a rule asks you to do so. See also “Playing the Game” (“The Six Abilities”)."
   },
   {
     "id": "action",
     "name": "Action",
-    "description": "On your turn, you can take one action. Choose which action to take from those below or from the special\n\n**actions provided by your features.** See also “Playing the Game” (“Actions”). These actions are defined elsewhere in this glossary:\n\nAttack Dash Disengage Dodge Help Hide Influence Magic Ready Search Study Utilize"
+    "description": "On your turn, you can take one action. Choose which action to take from those below or from the special actions provided by your features. See also “Playing the Game” (“Actions”). These actions are defined elsewhere in this glossary:\n\nAttack Dash Disengage Dodge Help Hide Influence Magic Ready Search Study Utilize"
   },
   {
     "id": "advantage",
@@ -22,12 +22,12 @@
   {
     "id": "adventure",
     "name": "Adventure",
-    "description": "An adventure is a series of encounters. A\n\n**story emerges through playing them.** See also “Encounter.”"
+    "description": "An adventure is a series of encounters. A story emerges through playing them. See also “Encounter.”"
   },
   {
     "id": "alignment",
     "name": "Alignment",
-    "description": "A creature’s alignment broadly describes its ethical attitudes and ideals. Alignment is a combination of two factors: one identifies morality (good, evil, or neutral), and the other describes attitudes toward order (lawful, chaotic, or neutral). These factors allow for nine possible combinations, such as Lawful\n\n**Good and Neutral Evil.** See also “Character Creation” (“Create Your Character”)."
+    "description": "A creature’s alignment broadly describes its ethical attitudes and ideals. Alignment is a combination of two factors: one identifies morality (good, evil, or neutral), and the other describes attitudes toward order (lawful, chaotic, or neutral). These factors allow for nine possible combinations, such as Lawful Good and Neutral Evil. See also “Character Creation” (“Create Your Character”)."
   },
   {
     "id": "ally",
@@ -37,12 +37,12 @@
   {
     "id": "area-of-effect",
     "name": "Area of Effect",
-    "description": "The descriptions of many spells and other features specify that they have an area of effect, which typically has one of six shapes. These shapes are defined elsewhere in this glossary:\n\nCone Cube Cylinder Emanation Line Sphere An area of effect has a point of origin, a location from which the effect’s energy erupts. The rules for each shape specify how to position its point of origin. If all straight lines extending from the point of origin to a location in the area of effect are blocked, that location isn’t included in the area of effect. To block a line, an obstruction must provide Total\n\n**Cover.** See also “Cover.”\n\nIf the creator of an area of effect places it at an unseen point and an obstruction—such as a wall— is between the creator and that point, the point of origin comes into being on the near side of the obstruction."
+    "description": "The descriptions of many spells and other features specify that they have an area of effect, which typically has one of six shapes. These shapes are defined elsewhere in this glossary:\n\nCone Cube Cylinder Emanation Line Sphere An area of effect has a point of origin, a location from which the effect’s energy erupts. The rules for each shape specify how to position its point of origin. If all straight lines extending from the point of origin to a location in the area of effect are blocked, that location isn’t included in the area of effect. To block a line, an obstruction must provide Total Cover. See also “Cover.”\n\nIf the creator of an area of effect places it at an unseen point and an obstruction—such as a wall— is between the creator and that point, the point of origin comes into being on the near side of the obstruction."
   },
   {
     "id": "armor-class",
     "name": "Armor Class",
-    "description": "An Armor Class (AC) is the target number for an attack roll. AC represents how difficult it is to hit a target.\n\nYour base AC calculation is 10 plus your Dexterity modifier. If a rule gives you another base AC calculation, you choose which calculation to use; you can’t\n\n**use more than one.** See also “Attack Roll.”"
+    "description": "An Armor Class (AC) is the target number for an attack roll. AC represents how difficult it is to hit a target.\n\nYour base AC calculation is 10 plus your Dexterity modifier. If a rule gives you another base AC calculation, you choose which calculation to use; you can’t use more than one. See also “Attack Roll.”"
   },
   {
     "id": "armor-training",
@@ -58,17 +58,17 @@
   {
     "id": "attack-roll",
     "name": "Attack Roll",
-    "description": "An attack roll is a D20 Test that represents making an attack with a weapon, an Unarmed Strike, or a\n\n**spell.** See also “Playing the Game” (“D20 Tests”)."
+    "description": "An attack roll is a D20 Test that represents making an attack with a weapon, an Unarmed Strike, or a spell. See also “Playing the Game” (“D20 Tests”)."
   },
   {
     "id": "attitude",
     "name": "Attitude",
-    "description": "A monster has a starting attitude toward a player\n\n**character: Friendly, Hostile, or Indifferent.** See also “Friendly,” “Hostile,” “Indifferent,” and “Influence.”"
+    "description": "A monster has a starting attitude toward a player character: Friendly, Hostile, or Indifferent. See also “Friendly,” “Hostile,” “Indifferent,” and “Influence.”"
   },
   {
     "id": "attunement",
     "name": "Attunement",
-    "description": "Some magic items require a creature to form a bond—called Attunement—with them before the creature can use an item’s magical properties. A creature can have Attunement with no more than\n\n**three magic items at a time.** See also “Equipment” (“Magic Items”)."
+    "description": "Some magic items require a creature to form a bond—called Attunement—with them before the creature can use an item’s magical properties. A creature can have Attunement with no more than three magic items at a time. See also “Equipment” (“Magic Items”)."
   },
   {
     "id": "blinded",
@@ -89,17 +89,17 @@
   {
     "id": "bonus-action",
     "name": "Bonus Action",
-    "description": "A Bonus Action is a special action that you can take on the same turn that you take an action. You can’t take more than one Bonus Action on a turn, and you have a Bonus Action to take only if a rule explicitly\n\n**says so.** See also “Playing the Game” (“Actions”)."
+    "description": "A Bonus Action is a special action that you can take on the same turn that you take an action. You can’t take more than one Bonus Action on a turn, and you have a Bonus Action to take only if a rule explicitly says so. See also “Playing the Game” (“Actions”)."
   },
   {
     "id": "breaking-objects",
     "name": "Breaking Objects",
-    "description": "Objects can be harmed by attacks and by some spells, using the rules below. If an object is exceedingly fragile, the GM may allow a creature to break it automatically with the Attack or Utilize action.\n\n**Armor Class.** The Object Armor Class table suggests ACs for various substances.\n\n**Object Armor Class**\n*AC Substance AC Substance*\n- 11 Cloth, paper, rope 19 Iron, steel\n- 13 Crystal, glass, ice 21 Mithral\n- 15 Wood 23 Adamantine\n- 17 Stone\n\n**Hit Points.** An object is destroyed when it has 0 Hit Points. The Object Hit Points table suggests Hit Points for fragile and resilient objects that are Large or smaller. To track Hit Points for a Huge or Gargantuan object, divide it into Large or smaller sections, and track each section’s Hit Points separately. The GM determines whether destroying part of an object causes the whole thing to collapse.\n\n**Object Hit Points**\n*Size Fragile Resilient*\n- Tiny (bottle, lock) 2 (1d4) 5 (2d4)\n- Small (chest, lute) 3 (1d6) 10 (3d6)\n- Medium (barrel, chandelier) 4 (1d8) 18 (4d8)\n- Large (cart, dining table) 5 (1d10) 27 (5d10)\n\n**Damage Types and Objects.** Objects have Immunity to Poison and Psychic damage. The GM might decide that some damage types are more or less effective against an object. For example, Bludgeoning damage works well for smashing things but not for cutting. Paper or cloth objects might have Vulnerability to Fire damage.\n\n**Damage Threshold.** Big objects, such as castle walls, often have extra resilience represented by a\n\n**damage threshold.** See also “Damage Threshold.”\n\n**No Ability Scores.** An object lacks ability scores unless a rule assigns scores to the object. Without ability scores, an object can’t make ability checks, and it fails all saving throws."
+    "description": "Objects can be harmed by attacks and by some spells, using the rules below. If an object is exceedingly fragile, the GM may allow a creature to break it automatically with the Attack or Utilize action.\n\n**Armor Class.** The Object Armor Class table suggests ACs for various substances.\n\n**Object Armor Class**\n*AC Substance AC Substance*\n- 11 Cloth, paper, rope 19 Iron, steel\n- 13 Crystal, glass, ice 21 Mithral\n- 15 Wood 23 Adamantine\n- 17 Stone\n\n**Hit Points.** An object is destroyed when it has 0 Hit Points. The Object Hit Points table suggests Hit Points for fragile and resilient objects that are Large or smaller. To track Hit Points for a Huge or Gargantuan object, divide it into Large or smaller sections, and track each section’s Hit Points separately. The GM determines whether destroying part of an object causes the whole thing to collapse.\n\n**Object Hit Points**\n*Size Fragile Resilient*\n- Tiny (bottle, lock) 2 (1d4) 5 (2d4)\n- Small (chest, lute) 3 (1d6) 10 (3d6)\n- Medium (barrel, chandelier) 4 (1d8) 18 (4d8)\n- Large (cart, dining table) 5 (1d10) 27 (5d10)\n\n**Damage Types and Objects.** Objects have Immunity to Poison and Psychic damage. The GM might decide that some damage types are more or less effective against an object. For example, Bludgeoning damage works well for smashing things but not for cutting. Paper or cloth objects might have Vulnerability to Fire damage.\n\n**Damage Threshold.** Big objects, such as castle walls, often have extra resilience represented by a damage threshold. See also “Damage Threshold.”\n\n**No Ability Scores.** An object lacks ability scores unless a rule assigns scores to the object. Without ability scores, an object can’t make ability checks, and it fails all saving throws."
   },
   {
     "id": "bright-light",
     "name": "Bright Light",
-    "description": "**Bright Light is normal illumination.** See also “Playing the Game” (“Exploration”)."
+    "description": "Bright Light is normal illumination. See also “Playing the Game” (“Exploration”)."
   },
   {
     "id": "burning",
@@ -120,7 +120,7 @@
   {
     "id": "cantrip",
     "name": "Cantrip",
-    "description": "A cantrip is a level 0 spell, which is cast without a\n\n**spell slot.** See also “Spells.”"
+    "description": "A cantrip is a level 0 spell, which is cast without a spell slot. See also “Spells.”"
   },
   {
     "id": "carrying-capacity",
@@ -130,7 +130,7 @@
   {
     "id": "challenge-rating",
     "name": "Challenge Rating",
-    "description": "Challenge Rating (CR) summarizes the threat a monster poses to a group of four player characters. Compare a monster’s CR to the characters’ level. If the CR is higher, the monster is likely a danger. If the CR is lower, the monster likely poses little threat. But circumstances and the number of player characters can significantly alter how threatening a monster is in actual play. “Gameplay Toolbox” (“Combat Encounters”) provides guidance to the GM on using\n\n**CR while planning potential combat encounters.** See also “Stat Block.”"
+    "description": "Challenge Rating (CR) summarizes the threat a monster poses to a group of four player characters. Compare a monster’s CR to the characters’ level. If the CR is higher, the monster is likely a danger. If the CR is lower, the monster likely poses little threat. But circumstances and the number of player characters can significantly alter how threatening a monster is in actual play. “Gameplay Toolbox” (“Combat Encounters”) provides guidance to the GM on using CR while planning potential combat encounters. See also “Stat Block.”"
   },
   {
     "id": "character-sheet",
@@ -151,7 +151,7 @@
   {
     "id": "climb-speed",
     "name": "Climb Speed",
-    "description": "A Climb Speed can be used in place of Speed to traverse a vertical surface without expending the extra\n\n**movement normally associated with climbing.** See also “Climbing” and “Speed.”"
+    "description": "A Climb Speed can be used in place of Speed to traverse a vertical surface without expending the extra movement normally associated with climbing. See also “Climbing” and “Speed.”"
   },
   {
     "id": "concentration",
@@ -172,7 +172,7 @@
   {
     "id": "cover",
     "name": "Cover",
-    "description": "Cover provides a degree of protection to a target behind it. There are three degrees of cover, each of which provides a different benefit to a target: Half Cover (+2 bonus to AC and Dexterity saving throws), Three-Quarters Cover (+5 bonus to AC and Dexterity saving throws), and Total Cover (can’t be targeted directly). If behind more than one degree of cover, a target benefits only from the most protec-\n\n**tive degree.** See also “Playing the Game” (“Combat”)."
+    "description": "Cover provides a degree of protection to a target behind it. There are three degrees of cover, each of which provides a different benefit to a target: Half Cover (+2 bonus to AC and Dexterity saving throws), Three-Quarters Cover (+5 bonus to AC and Dexterity saving throws), and Total Cover (can’t be targeted directly). If behind more than one degree of cover, a target benefits only from the most protective degree. See also “Playing the Game” (“Combat”)."
   },
   {
     "id": "crawling",
@@ -182,7 +182,7 @@
   {
     "id": "creature",
     "name": "Creature",
-    "description": "Any being in the game, including a player’s charac-\n\n**ter, is a creature.** See also “Creature Type.”"
+    "description": "Any being in the game, including a player’s character, is a creature. See also “Creature Type.”"
   },
   {
     "id": "creature-type",
@@ -192,7 +192,7 @@
   {
     "id": "critical-hit",
     "name": "Critical Hit",
-    "description": "If you roll a 20 on the d20 for an attack roll, you score a Critical Hit, and the attack hits regardless of any modifiers or the target’s AC. A Critical Hit lets you roll extra dice for the attack’s damage against the target. Roll all of the attack’s damage dice twice and add them together. Then add any relevant mod-\n\n**ifiers.** See also “Playing the Game” (“Damage and Healing”)."
+    "description": "If you roll a 20 on the d20 for an attack roll, you score a Critical Hit, and the attack hits regardless of any modifiers or the target’s AC. A Critical Hit lets you roll extra dice for the attack’s damage against the target. Roll all of the attack’s damage dice twice and add them together. Then add any relevant modifiers. See also “Playing the Game” (“Damage and Healing”)."
   },
   {
     "id": "cube",
@@ -214,7 +214,7 @@
   {
     "id": "d20-test",
     "name": "D20 Test",
-    "description": "D20 Tests encompass the three main d20 rolls of the game: ability checks, attack rolls, and saving throws. If something in the game affects D20 Tests, it affects all three of these rolls. The GM determines whether a D20 Test is warranted in a given circum-\n\n**stance.** See also “Playing the Game” (“D20 Tests”)."
+    "description": "D20 Tests encompass the three main d20 rolls of the game: ability checks, attack rolls, and saving throws. If something in the game affects D20 Tests, it affects all three of these rolls. The GM determines whether a D20 Test is warranted in a given circumstance. See also “Playing the Game” (“D20 Tests”)."
   },
   {
     "id": "damage",
@@ -244,7 +244,7 @@
   {
     "id": "darkvision",
     "name": "Darkvision",
-    "description": "If you have Darkvision, you can see in Dim Light within a specified range as if it were Bright Light and in Darkness within that range as if it were Dim Light. You discern colors in that Darkness\n\n**only as shades of gray.** See also “Playing the Game” (“Exploration”)."
+    "description": "If you have Darkvision, you can see in Dim Light within a specified range as if it were Bright Light and in Darkness within that range as if it were Dim Light. You discern colors in that Darkness only as shades of gray. See also “Playing the Game” (“Exploration”)."
   },
   {
     "id": "dash",
@@ -266,7 +266,7 @@
   {
     "id": "death-saving-throw",
     "name": "Death Saving Throw",
-    "description": "A player character must make a Death Saving Throw (also called a Death Save) if they start their\n\n**turn with 0 Hit Points.** See also “Playing the Game” (“Damage and Healing”)."
+    "description": "A player character must make a Death Saving Throw (also called a Death Save) if they start their turn with 0 Hit Points. See also “Playing the Game” (“Damage and Healing”)."
   },
   {
     "id": "dehydration",
@@ -282,7 +282,7 @@
   {
     "id": "difficulty-class",
     "name": "Difficulty Class",
-    "description": "A Difficulty Class (DC) is the target number for an\n\n**ability check or a saving throw.** See also “Playing the Game” (“D20 Tests”)."
+    "description": "A Difficulty Class (DC) is the target number for an ability check or a saving throw. See also “Playing the Game” (“D20 Tests”)."
   },
   {
     "id": "dim-light",
@@ -315,7 +315,7 @@
   {
     "id": "encounter",
     "name": "Encounter",
-    "description": "An encounter is a scene in an adventure that is part of at least one of the game’s three pillars: social in-\n\n**teraction, exploration, or combat.** See also “Playing the Game” (“Social Interaction,” “Exploration,” and “Combat”)."
+    "description": "An encounter is a scene in an adventure that is part of at least one of the game’s three pillars: social interaction, exploration, or combat. See also “Playing the Game” (“Social Interaction,” “Exploration,” and “Combat”)."
   },
   {
     "id": "enemy",
@@ -331,7 +331,7 @@
   {
     "id": "experience-points",
     "name": "Experience Points",
-    "description": "As they overcome challenges and complete adventures, characters earn Experience Points (XP), which are awarded by the Game Master. When a character’s XP total crosses certain thresholds,\n\n**the character’s level increases.** See also “Level Advancement.”"
+    "description": "As they overcome challenges and complete adventures, characters earn Experience Points (XP), which are awarded by the Game Master. When a character’s XP total crosses certain thresholds, the character’s level increases. See also “Level Advancement.”"
   },
   {
     "id": "expertise",
@@ -352,13 +352,13 @@
   {
     "id": "fly-speed",
     "name": "Fly Speed",
-    "description": "A Fly Speed can be used to travel through the air. While you have a Fly Speed, you can stay aloft until\n\n**you land, fall, or die.** See also “Flying” and “Speed.”"
+    "description": "A Fly Speed can be used to travel through the air. While you have a Fly Speed, you can stay aloft until you land, fall, or die. See also “Flying” and “Speed.”"
   },
   {
     "id": "friendly",
     "name": "Friendly",
     "tag": "attitude",
-    "description": "A Friendly creature views you favorably. You have Advantage on an ability check to influence a\n\n**Friendly creature.** See also “Influence.”"
+    "description": "A Friendly creature views you favorably. You have Advantage on an ability check to influence a Friendly creature. See also “Influence.”"
   },
   {
     "id": "frightened",
@@ -375,12 +375,12 @@
   {
     "id": "grappling",
     "name": "Grappling",
-    "description": "A creature can grapple another creature. Characters typically grapple by using an Unarmed Strike. Many monsters have special attacks that allow them to quickly grapple prey. However a grapple is\n\n**initiated, it follows these rules.** See also “Unarmed Strike” and “Grappled.”\n\n**Grappled Condition.** Successfully grappling a creature gives it the Grappled condition.\n\n**One Grapple per Hand.** A creature must have a hand free to grapple another creature. Some stat blocks and game effects allow a creature to grapple using a tentacle, a maw, or another body part. Whatever part a grappler uses, it can grapple only one creature at a time with that part, and the grappler can’t use that part to target another creature unless it ends the grapple.\n\n**Ending a Grapple.** A Grappled creature can use its action to make a Strength (Athletics) or Dexterity (Acrobatics) check against the grapple’s escape DC, ending the condition on itself on a success. The condition also ends if the grappler has the Incapacitated condition or if the distance between the Grappled target and the grappler exceeds the grapple’s range. In addition, the grappler can release the target at any time (no action required)."
+    "description": "A creature can grapple another creature. Characters typically grapple by using an Unarmed Strike. Many monsters have special attacks that allow them to quickly grapple prey. However a grapple is initiated, it follows these rules. See also “Unarmed Strike” and “Grappled.”\n\n**Grappled Condition.** Successfully grappling a creature gives it the Grappled condition.\n\n**One Grapple per Hand.** A creature must have a hand free to grapple another creature. Some stat blocks and game effects allow a creature to grapple using a tentacle, a maw, or another body part. Whatever part a grappler uses, it can grapple only one creature at a time with that part, and the grappler can’t use that part to target another creature unless it ends the grapple.\n\n**Ending a Grapple.** A Grappled creature can use its action to make a Strength (Athletics) or Dexterity (Acrobatics) check against the grapple’s escape DC, ending the condition on itself on a success. The condition also ends if the grappler has the Incapacitated condition or if the distance between the Grappled target and the grappler exceeds the grapple’s range. In addition, the grappler can release the target at any time (no action required)."
   },
   {
     "id": "hazard",
     "name": "Hazard",
-    "description": "**A hazard is an environmental danger.** See also “Burning,” “Dehydration,” “Falling,” “Malnutrition,” and “Suffocation.”"
+    "description": "A hazard is an environmental danger. See also “Burning,” “Dehydration,” “Falling,” “Malnutrition,” and “Suffocation.”"
   },
   {
     "id": "healing",
@@ -390,7 +390,7 @@
   {
     "id": "heavily-obscured",
     "name": "Heavily Obscured",
-    "description": "You have the Blinded condition while trying to see\n\n**something in a Heavily Obscured space.** See also “Blinded,” “Darkness,” and “Playing the Game” (“Exploration”)."
+    "description": "You have the Blinded condition while trying to see something in a Heavily Obscured space. See also “Blinded,” “Darkness,” and “Playing the Game” (“Exploration”)."
   },
   {
     "id": "help",
@@ -428,12 +428,12 @@
     "id": "hostile",
     "name": "Hostile",
     "tag": "attitude",
-    "description": "A Hostile creature views you unfavorably. You have Disadvantage on an ability check to influence a Hos-\n\n**tile creature.** See also “Influence.”"
+    "description": "A Hostile creature views you unfavorably. You have Disadvantage on an ability check to influence a Hostile creature. See also “Influence.”"
   },
   {
     "id": "hover",
     "name": "Hover",
-    "description": "Some creatures can hover, as noted in their stat blocks, and some spells and other effects grant the ability to hover. Hovering while flying prevents\n\n**you from falling in certain circumstances.** See also “Flying.”"
+    "description": "Some creatures can hover, as noted in their stat blocks, and some spells and other effects grant the ability to hover. Hovering while flying prevents you from falling in certain circumstances. See also “Flying.”"
   },
   {
     "id": "illusions",
@@ -460,7 +460,7 @@
     "id": "indifferent",
     "name": "Indifferent",
     "tag": "attitude",
-    "description": "An Indifferent creature has no desire to help or hinder you. Indifferent is the default attitude of a mon-\n\n**ster.** See also “Influence.”"
+    "description": "An Indifferent creature has no desire to help or hinder you. Indifferent is the default attitude of a monster. See also “Influence.”"
   },
   {
     "id": "influence",
@@ -482,7 +482,7 @@
   {
     "id": "jumping",
     "name": "Jumping",
-    "description": "When you jump, you make either a Long Jump (hor-\n\n**izontal) or a High Jump (vertical).** See also “Long Jump” and “High Jump.”"
+    "description": "When you jump, you make either a Long Jump (horizontal) or a High Jump (vertical). See also “Long Jump” and “High Jump.”"
   },
   {
     "id": "knocking-out-a-creature",
@@ -492,7 +492,7 @@
   {
     "id": "lightly-obscured",
     "name": "Lightly Obscured",
-    "description": "You have Disadvantage on Wisdom (Perception) checks to see something in a Lightly Obscured\n\n**space.** See also “Dim Light” and “Playing the Game” (“Exploration”)."
+    "description": "You have Disadvantage on Wisdom (Perception) checks to see something in a Lightly Obscured space. See also “Dim Light” and “Playing the Game” (“Exploration”)."
   },
   {
     "id": "line",
@@ -514,7 +514,7 @@
     "id": "magic",
     "name": "Magic",
     "tag": "action",
-    "description": "When you take the Magic action, you cast a spell that has a casting time of an action or use a feature or magic item that requires a Magic action to be activated.\n\nIf you cast a spell that has a casting time of 1 minute or longer, you must take the Magic action on each turn of that casting, and you must maintain Concentration while you do so. If your Concentration is broken, the spell fails, but you don’t expend a\n\n**spell slot.** See also “Concentration.”"
+    "description": "When you take the Magic action, you cast a spell that has a casting time of an action or use a feature or magic item that requires a Magic action to be activated.\n\nIf you cast a spell that has a casting time of 1 minute or longer, you must take the Magic action on each turn of that casting, and you must maintain Concentration while you do so. If your Concentration is broken, the spell fails, but you don’t expend a spell slot. See also “Concentration.”"
   },
   {
     "id": "magical-effect",
@@ -525,12 +525,12 @@
     "id": "malnutrition",
     "name": "Malnutrition",
     "tag": "hazard",
-    "description": "A creature needs an amount of food per day based on its size, as shown in the Food Needs per Day table. A creature that eats but consumes less than half the required food for a day must succeed on a DC 10 Constitution saving throw or gain 1 Exhaustion level at the day’s end. A creature that eats nothing for 5 days automatically gains 1 Exhaustion level at the end of the fifth day as well as an additional level at the end of each subsequent day without food. Exhaustion caused by malnutrition can’t be removed until the creature eats the full amount of\n\n**food required for a day.** See also “Exhaustion.”\n\n**Food Needs per Day**\n*Size Food Size Food*\n- Tiny 1/4 pound Large 4 pounds\n- Small 1 pound Huge 16 pounds\n- Medium 1 pound Gargantuan 64 pounds"
+    "description": "A creature needs an amount of food per day based on its size, as shown in the Food Needs per Day table. A creature that eats but consumes less than half the required food for a day must succeed on a DC 10 Constitution saving throw or gain 1 Exhaustion level at the day’s end. A creature that eats nothing for 5 days automatically gains 1 Exhaustion level at the end of the fifth day as well as an additional level at the end of each subsequent day without food. Exhaustion caused by malnutrition can’t be removed until the creature eats the full amount of food required for a day. See also “Exhaustion.”\n\n**Food Needs per Day**\n*Size Food Size Food*\n- Tiny 1/4 pound Large 4 pounds\n- Small 1 pound Huge 16 pounds\n- Medium 1 pound Gargantuan 64 pounds"
   },
   {
     "id": "monster",
     "name": "Monster",
-    "description": "A monster is a creature controlled by the GM, even\n\n**if the creature is benevolent.** See also “Creature” and “NPC.”"
+    "description": "A monster is a creature controlled by the GM, even if the creature is benevolent. See also “Creature” and “NPC.”"
   },
   {
     "id": "nonplayer-character",
@@ -540,7 +540,7 @@
   {
     "id": "object",
     "name": "Object",
-    "description": "An object is a nonliving, distinct thing. Composite things, like buildings, comprise more than one ob-\n\n**ject.** See also “Breaking Objects.”"
+    "description": "An object is a nonliving, distinct thing. Composite things, like buildings, comprise more than one object. See also “Breaking Objects.”"
   },
   {
     "id": "occupied-space",
@@ -550,7 +550,7 @@
   {
     "id": "opportunity-attacks",
     "name": "Opportunity Attacks",
-    "description": "You can make an Opportunity Attack when a creature that you can see leaves your reach using its action, its Bonus Action, its Reaction, or one of its speeds. To make the Opportunity Attack, take a Reaction to make one melee attack with a weapon or an Unarmed Strike against the provoking creature. The attack occurs right before the creature leaves\n\n**your reach.** See also “Playing the Game” (“Combat”)."
+    "description": "You can make an Opportunity Attack when a creature that you can see leaves your reach using its action, its Bonus Action, its Reaction, or one of its speeds. To make the Opportunity Attack, take a Reaction to make one melee attack with a weapon or an Unarmed Strike against the provoking creature. The attack occurs right before the creature leaves your reach. See also “Playing the Game” (“Combat”)."
   },
   {
     "id": "paralyzed",
@@ -577,7 +577,7 @@
   {
     "id": "player-character",
     "name": "Player Character",
-    "description": "A player character is a character controlled by a\n\n**player.** See also “Character Creation.”"
+    "description": "A player character is a character controlled by a player. See also “Character Creation.”"
   },
   {
     "id": "poisoned",
@@ -620,7 +620,7 @@
   {
     "id": "resistance",
     "name": "Resistance",
-    "description": "If you have Resistance to a damage type, damage of that type is halved against you (round down). Resistance is applied only once to an instance of\n\n**damage.** See also “Playing the Game” (“Damage and Healing”)."
+    "description": "If you have Resistance to a damage type, damage of that type is halved against you (round down). Resistance is applied only once to an instance of damage. See also “Playing the Game” (“Damage and Healing”)."
   },
   {
     "id": "restrained",
@@ -631,7 +631,7 @@
   {
     "id": "ritual",
     "name": "Ritual",
-    "description": "If you have a spell prepared that has the Ritual tag, you can cast that spell as a Ritual. The Ritual version of a spell takes 10 minutes longer to cast than normal. It also doesn’t expend a spell slot, which means the ritual version of a spell can’t be cast at a\n\n**higher level.** See also “Spells.”"
+    "description": "If you have a spell prepared that has the Ritual tag, you can cast that spell as a Ritual. The Ritual version of a spell takes 10 minutes longer to cast than normal. It also doesn’t expend a spell slot, which means the ritual version of a spell can’t be cast at a higher level. See also “Spells.”"
   },
   {
     "id": "round-down",
@@ -646,7 +646,7 @@
   {
     "id": "saving-throw",
     "name": "Saving Throw",
-    "description": "A saving throw—also called a save—represents an attempt to avoid or resist a threat. You normally make a saving throw only when a rule requires you to do so, but you can decide to fail the save without rolling. The result of a save is detailed in the effect that allowed it. If a target is forced to make a save and lacks the ability score used by it, the target au-\n\n**tomatically fails.** See also “Playing the Game” (“D20 Tests”)."
+    "description": "A saving throw—also called a save—represents an attempt to avoid or resist a threat. You normally make a saving throw only when a rule requires you to do so, but you can decide to fail the save without rolling. The result of a save is detailed in the effect that allowed it. If a target is forced to make a save and lacks the ability score used by it, the target automatically fails. See also “Playing the Game” (“D20 Tests”)."
   },
   {
     "id": "search",
@@ -672,7 +672,7 @@
   {
     "id": "size",
     "name": "Size",
-    "description": "A creature or an object belongs to a size category: Tiny, Small, Medium, Large, Huge, or Gargantuan. A creature’s size determines how much space the creature occupies in combat. An object’s size affects\n\n**its Hit Points.** See also “Breaking Objects” and “Playing the Game” (“Combat”)."
+    "description": "A creature or an object belongs to a size category: Tiny, Small, Medium, Large, Huge, or Gargantuan. A creature’s size determines how much space the creature occupies in combat. An object’s size affects its Hit Points. See also “Breaking Objects” and “Playing the Game” (“Combat”)."
   },
   {
     "id": "skill",
@@ -692,12 +692,12 @@
   {
     "id": "spell-attack",
     "name": "Spell Attack",
-    "description": "A spell attack is an attack roll made as part of a spell\n\n**or another magical effect.** See also “Spells” (“Casting Spells”)."
+    "description": "A spell attack is an attack roll made as part of a spell or another magical effect. See also “Spells” (“Casting Spells”)."
   },
   {
     "id": "spellcasting-focus",
     "name": "Spellcasting Focus",
-    "description": "A Spellcasting Focus is an object that certain creatures can use in place of a spell’s Material components if those materials aren’t consumed by the spell and don’t have a cost specified. Some classes allow its members to use certain types of Spellcast-\n\n**ing Focuses.** See also “Spells” (“Casting Spells”)."
+    "description": "A Spellcasting Focus is an object that certain creatures can use in place of a spell’s Material components if those materials aren’t consumed by the spell and don’t have a cost specified. Some classes allow its members to use certain types of Spellcasting Focuses. See also “Spells” (“Casting Spells”)."
   },
   {
     "id": "sphere",
@@ -708,12 +708,12 @@
   {
     "id": "stable",
     "name": "Stable",
-    "description": "A creature is Stable if it has 0 Hit Points but isn’t\n\n**required to make Death Saving Throws.** See also “Playing the Game” (“Damage and Healing”)."
+    "description": "A creature is Stable if it has 0 Hit Points but isn’t required to make Death Saving Throws. See also “Playing the Game” (“Damage and Healing”)."
   },
   {
     "id": "stat-block",
     "name": "Stat Block",
-    "description": "A stat block contains the game statistics of a monster. Each stat block includes the following information presented after the monster’s name.\n\n**Size.** A monster is Tiny, Small, Medium, Large,\n\n**Huge, or Gargantuan.** See also “Size.”\n\n**Creature Type.** This entry notes the family of beings a monster belongs to, along with any descrip-\n\n**tive tags.** See also “Creature Type.”\n\n**Alignment.** An alignment is suggested for the monster, with the GM determining its actual align-\n\n**ment.** See also “Alignment.”\n\n**AC, Initiative, and HP.** These entries give the monster’s Armor Class, Initiative, and Hit Points, which are detailed in “Playing the Game.” In parentheses after the Hit Points, the monster’s Hit Point Dice are provided, along with the contribution of its Constitution, if any, to its Hit Points. Following the Initiative modifier is an Initiative score. Some creatures that are created by magic lack Hit Dice and Initiative information.\n\n**Speed.** Here the monster’s Speed is provided,\n\n**along with any special speeds.** See also “Burrow Speed,” “Climb Speed,” “Fly Speed,” and “Swim Speed.”\n\n**Ability Scores.** A table provides the monster’s ability scores, modifiers, and saving throw modifiers, all of which are detailed in “Playing the Game.”\n\n**Skills.** This entry lists the monster’s skill pro-\n\n**ficiencies, if any.** See also “Playing the Game” (“Proficiency”).\n\n**Resistances and Vulnerabilities.** These entries list the monster’s Resistances and Vulnerabilities, if\n\n**any.** See also “Resistance” and “Vulnerability.”\n\n**Immunities.** This section lists the monster’s\n\n**damage and condition Immunities, if any.** See also “Immunity.”\n\n**Gear.** If the monster has any equipment that can be given away or retrieved, it’s listed in this entry.\n\n**Senses.** This entry lists the monster’s special senses, such as Darkvision, and its Passive Percep-\n\n**tion.** See also “Passive Perception.”\n\n**Languages.** This entry lists any languages the monster knows.\n\n**CR.** Challenge Rating summarizes the threat a monster poses and is detailed in “Monsters.” The Experience Points characters receive for defeating a monster and its Proficiency Bonus follow. Some creatures that are created by magic have no CR. See also “Challenge Rating” and “Experience Points.”\n\n**Traits.** The monster’s traits, if any, are features that are active at all times or in certain situations.\n\n**Actions.** The monster can take these actions in addition to those detailed in this glossary. See also “Playing the Game” (“Actions”).\n\n**Bonus Actions.** If the monster has Bonus Action options, they are listed in this section.\n\n**Reactions.** If the monster can take special Reactions, those are listed in this section.\n\n**Attack Notation.** The entry for a monster’s attack starts by identifying whether the attack is a melee or a ranged attack and then provides the attack roll’s bonus, its reach or range, and what happens on a hit. An attack is against one target unless its entry says otherwise.\n\n**Saving Throw Effect Notation.** If an effect forces a saving throw, the effect’s entry starts by identifying the kind of saving throw required and then provides the save’s DC, a description of which creatures must make the save, and what happens on a failed or a successful save.\n\n**Damage Notation.** A stat block usually provides both a static number and a die expression for each instance of damage. For example, an attack might deal 4 (1d4 + 2) damage on a hit. The GM determines whether you use the static number or the die expression in parentheses; you don’t use both."
+    "description": "A stat block contains the game statistics of a monster. Each stat block includes the following information presented after the monster’s name.\n\n**Size.** A monster is Tiny, Small, Medium, Large, Huge, or Gargantuan. See also “Size.”\n\n**Creature Type.** This entry notes the family of beings a monster belongs to, along with any descriptive tags. See also “Creature Type.”\n\n**Alignment.** An alignment is suggested for the monster, with the GM determining its actual alignment. See also “Alignment.”\n\n**AC, Initiative, and HP.** These entries give the monster’s Armor Class, Initiative, and Hit Points, which are detailed in “Playing the Game.” In parentheses after the Hit Points, the monster’s Hit Point Dice are provided, along with the contribution of its Constitution, if any, to its Hit Points. Following the Initiative modifier is an Initiative score. Some creatures that are created by magic lack Hit Dice and Initiative information.\n\n**Speed.** Here the monster’s Speed is provided, along with any special speeds. See also “Burrow Speed,” “Climb Speed,” “Fly Speed,” and “Swim Speed.”\n\n**Ability Scores.** A table provides the monster’s ability scores, modifiers, and saving throw modifiers, all of which are detailed in “Playing the Game.”\n\n**Skills.** This entry lists the monster’s skill proficiencies, if any. See also “Playing the Game” (“Proficiency”).\n\n**Resistances and Vulnerabilities.** These entries list the monster’s Resistances and Vulnerabilities, if any. See also “Resistance” and “Vulnerability.”\n\n**Immunities.** This section lists the monster’s damage and condition Immunities, if any. See also “Immunity.”\n\n**Gear.** If the monster has any equipment that can be given away or retrieved, it’s listed in this entry.\n\n**Senses.** This entry lists the monster’s special senses, such as Darkvision, and its Passive Perception. See also “Passive Perception.”\n\n**Languages.** This entry lists any languages the monster knows.\n\n**CR.** Challenge Rating summarizes the threat a monster poses and is detailed in “Monsters.” The Experience Points characters receive for defeating a monster and its Proficiency Bonus follow. Some creatures that are created by magic have no CR. See also “Challenge Rating” and “Experience Points.”\n\n**Traits.** The monster’s traits, if any, are features that are active at all times or in certain situations.\n\n**Actions.** The monster can take these actions in addition to those detailed in this glossary. See also “Playing the Game” (“Actions”).\n\n**Bonus Actions.** If the monster has Bonus Action options, they are listed in this section.\n\n**Reactions.** If the monster can take special Reactions, those are listed in this section.\n\n**Attack Notation.** The entry for a monster’s attack starts by identifying whether the attack is a melee or a ranged attack and then provides the attack roll’s bonus, its reach or range, and what happens on a hit. An attack is against one target unless its entry says otherwise.\n\n**Saving Throw Effect Notation.** If an effect forces a saving throw, the effect’s entry starts by identifying the kind of saving throw required and then provides the save’s DC, a description of which creatures must make the save, and what happens on a failed or a successful save.\n\n**Damage Notation.** A stat block usually provides both a static number and a die expression for each instance of damage. For example, an attack might deal 4 (1d4 + 2) damage on a hit. The GM determines whether you use the static number or the die expression in parentheses; you don’t use both."
   },
   {
     "id": "study",
@@ -746,7 +746,7 @@
   {
     "id": "swim-speed",
     "name": "Swim Speed",
-    "description": "A Swim Speed can be used to swim without expending the extra movement normally associated with\n\n**swimming.** See also “Swimming” and “Speed.”"
+    "description": "A Swim Speed can be used to swim without expending the extra movement normally associated with swimming. See also “Swimming” and “Speed.”"
   },
   {
     "id": "target",
@@ -781,7 +781,7 @@
   {
     "id": "unarmed-strike",
     "name": "Unarmed Strike",
-    "description": "Instead of using a weapon to make a melee attack, you can use a punch, kick, headbutt, or similar forceful blow. In game terms, this is an Unarmed Strike—a melee attack that involves you using your body to damage, grapple, or shove a target within 5 feet of you.\n\nWhenever you use your Unarmed Strike, choose one of the following options for its effect.\n\n**Damage.** You make an attack roll against the target. Your bonus to the roll equals your Strength modifier plus your Proficiency Bonus. On a hit, the target takes Bludgeoning damage equal to 1 plus your Strength modifier.\n\n**Grapple.** The target must succeed on a Strength or Dexterity saving throw (it chooses which), or it has the Grappled condition. The DC for the saving throw and any escape attempts equals 8 plus your Strength modifier and Proficiency Bonus. This grapple is possible only if the target is no more than one size larger than you and if you have a hand free to\n\n**grab it.** See also “Grappling.”\n\n**Shove.** The target must succeed on a Strength or Dexterity saving throw (it chooses which), or you either push it 5 feet away or cause it to have the Prone condition. The DC for the saving throw equals 8 plus your Strength modifier and Proficiency Bonus. This shove is possible only if the target is no more than one size larger than you."
+    "description": "Instead of using a weapon to make a melee attack, you can use a punch, kick, headbutt, or similar forceful blow. In game terms, this is an Unarmed Strike—a melee attack that involves you using your body to damage, grapple, or shove a target within 5 feet of you.\n\nWhenever you use your Unarmed Strike, choose one of the following options for its effect.\n\n**Damage.** You make an attack roll against the target. Your bonus to the roll equals your Strength modifier plus your Proficiency Bonus. On a hit, the target takes Bludgeoning damage equal to 1 plus your Strength modifier.\n\n**Grapple.** The target must succeed on a Strength or Dexterity saving throw (it chooses which), or it has the Grappled condition. The DC for the saving throw and any escape attempts equals 8 plus your Strength modifier and Proficiency Bonus. This grapple is possible only if the target is no more than one size larger than you and if you have a hand free to grab it. See also “Grappling.”\n\n**Shove.** The target must succeed on a Strength or Dexterity saving throw (it chooses which), or you either push it 5 feet away or cause it to have the Prone condition. The DC for the saving throw equals 8 plus your Strength modifier and Proficiency Bonus. This shove is possible only if the target is no more than one size larger than you."
   },
   {
     "id": "unconscious",
@@ -808,11 +808,11 @@
   {
     "id": "weapon",
     "name": "Weapon",
-    "description": "A weapon is an object that is in the Simple or\n\n**Martial weapon category.** See also “Equipment” (“Weapons”)."
+    "description": "A weapon is an object that is in the Simple or Martial weapon category. See also “Equipment” (“Weapons”)."
   },
   {
     "id": "weapon-attack",
     "name": "Weapon Attack",
-    "description": "A weapon attack is an attack roll made with a\n\n**weapon.** See also “Weapon.”"
+    "description": "A weapon attack is an attack roll made with a weapon. See also “Weapon.”"
   }
 ]

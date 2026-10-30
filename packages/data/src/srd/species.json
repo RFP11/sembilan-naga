@@ -103,15 +103,17 @@
       },
       {
         "name": "Gnomish Lineage",
-        "description": "You are part of a lineage that grants you supernatural abilities. Choose one of the following options; whichever one you choose, Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage):"
-      },
-      {
-        "name": "Forest Gnome",
-        "description": "You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell."
-      },
-      {
-        "name": "Rock Gnome",
-        "description": "You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell’s ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn’t do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action."
+        "description": "You are part of a lineage that grants you supernatural abilities. Choose one of the following options; whichever one you choose, Intelligence, Wisdom, or Charisma is your spellcasting ability for the spells you cast with this trait (choose the ability when you select the lineage):",
+        "options": [
+          {
+            "name": "Forest Gnome",
+            "description": "You know the Minor Illusion cantrip. You also always have the Speak with Animals spell prepared. You can cast it without a spell slot a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest. You can also use any spell slots you have to cast the spell."
+          },
+          {
+            "name": "Rock Gnome",
+            "description": "You know the Mending and Prestidigitation cantrips. In addition, you can spend 10 minutes casting Prestidigitation to create a Tiny clockwork device (AC 5, 1 HP), such as a toy, fire starter, or music box. When you create the device, you determine its function by choosing one effect from Prestidigitation; the device produces that effect whenever you or another creature takes a Bonus Action to activate it with a touch. If the chosen effect has options within it, you choose one of those options for the device when you create it. For example, if you choose the spell’s ignite-extinguish effect, you determine whether the device ignites or extinguishes fire; the device doesn’t do both. You can have three such devices in existence at a time, and each falls apart 8 hours after its creation or when you dismantle it with a touch as a Utilize action."
+          }
+        ]
       }
     ]
   },
@@ -125,31 +127,33 @@
     "traits": [
       {
         "name": "Giant Ancestry",
-        "description": "You are descended from Giants. Choose one of the following benefits—a supernatural boon from your ancestry; you can use the chosen benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest:"
-      },
-      {
-        "name": "Cloud’s Jaunt (Cloud Giant)",
-        "description": "As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see."
-      },
-      {
-        "name": "Fire’s Burn (Fire Giant)",
-        "description": "When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target."
-      },
-      {
-        "name": "Frost’s Chill (Frost Giant)",
-        "description": "When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn."
-      },
-      {
-        "name": "Hill’s Tumble (Hill Giant)",
-        "description": "When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition."
-      },
-      {
-        "name": "Stone’s Endurance (Stone Giant)",
-        "description": "When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total."
-      },
-      {
-        "name": "Storm’s Thunder (Storm Giant)",
-        "description": "When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature."
+        "description": "You are descended from Giants. Choose one of the following benefits—a supernatural boon from your ancestry; you can use the chosen benefit a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest:",
+        "options": [
+          {
+            "name": "Cloud’s Jaunt (Cloud Giant)",
+            "description": "As a Bonus Action, you magically teleport up to 30 feet to an unoccupied space you can see."
+          },
+          {
+            "name": "Fire’s Burn (Fire Giant)",
+            "description": "When you hit a target with an attack roll and deal damage to it, you can also deal 1d10 Fire damage to that target."
+          },
+          {
+            "name": "Frost’s Chill (Frost Giant)",
+            "description": "When you hit a target with an attack roll and deal damage to it, you can also deal 1d6 Cold damage to that target and reduce its Speed by 10 feet until the start of your next turn."
+          },
+          {
+            "name": "Hill’s Tumble (Hill Giant)",
+            "description": "When you hit a Large or smaller creature with an attack roll and deal damage to it, you can give that target the Prone condition."
+          },
+          {
+            "name": "Stone’s Endurance (Stone Giant)",
+            "description": "When you take damage, you can take a Reaction to roll 1d12. Add your Constitution modifier to the number rolled and reduce the damage by that total."
+          },
+          {
+            "name": "Storm’s Thunder (Storm Giant)",
+            "description": "When you take damage from a creature within 60 feet of you, you can take a Reaction to deal 1d8 Thunder damage to that creature."
+          }
+        ]
       },
       {
         "name": "Large Form",

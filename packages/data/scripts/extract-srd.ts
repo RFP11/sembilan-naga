@@ -16,6 +16,7 @@ interface Item {
   size: number;
   width: number;
   font: string;
+  bold: boolean;
   /** The PDF had a whitespace-only item right before this one. */
   spaceBefore: boolean;
 }
@@ -24,7 +25,10 @@ const doc = await getDocument({ data: new Uint8Array(fs.readFileSync(PDF)) }).pr
 const out: string[] = [];
 
 for (let p = 1; p <= doc.numPages; p++) {
-  const content = await (await doc.getPage(p)).getTextContent();
+  const page = await doc.getPage(p);
+  await page.getOperatorList(); // loads the fonts, so their real names are known
+  const content = await page.getTextContent();
+  const isBold = (fontName: string) => /Bold/.test(page.commonObjs.get(fontName)?.name ?? "");
   const items: Item[] = [];
   let spaceBefore = false;
   for (const it of content.items) {
@@ -40,6 +44,7 @@ for (let p = 1; p <= doc.numPages; p++) {
       size: Math.round(it.transform[0] * 10) / 10,
       width: it.width,
       font: it.fontName,
+      bold: isBold(it.fontName),
       spaceBefore,
     });
     spaceBefore = false;
@@ -65,7 +70,11 @@ function renderLine(page: number, line: Item[]): string {
   const fontMax = new Map<string, number>();
   for (const it of line) fontMax.set(it.font, Math.max(fontMax.get(it.font) ?? 0, it.size));
   let text = "";
-  let runIn = true; // still inside the line's leading run of one font
+  // A line opening with bold text followed by regular text starts with a run-in label
+  // ("Range:", "Benefit.", "Fire Breath (Recharge 5–6)."); mark it so the build scripts
+  // can split paragraphs and fields.
+  const labelEnd = line.findIndex((it) => !it.bold);
+  let runIn = labelEnd > 0;
   for (let i = 0; i < line.length; i++) {
     const it = line[i]!;
     const prev = line[i - 1];
@@ -74,13 +83,11 @@ function renderLine(page: number, line: Item[]): string {
     const str = smallCaps ? it.str.toLowerCase() : it.str;
     if (prev) {
       const fontChange = prev.font !== it.font;
-      // A bold run-in label ("Range:", "Benefit.") opens a paragraph; mark it so the
-      // build scripts can split paragraphs and fields. The PDF often omits its space.
-      if (runIn && fontChange) {
+      // The PDF often omits the space after a label.
+      if (runIn && i === labelEnd) {
         runIn = false;
-        if (/[.:]$/.test(text.trim()) && text.trim().split(" ").length <= 6) {
-          text = `**${text.trim()}** `;
-          text += str;
+        if (/[.:]$/.test(text.trim())) {
+          text = `**${text.trim()}** ` + str;
           continue;
         }
       }

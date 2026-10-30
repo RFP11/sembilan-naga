@@ -245,6 +245,8 @@ export type Spell = z.infer<typeof spell>;
 export const trait = z.object({
   name: z.string(),
   description: z.string(),
+  /** Mutually exclusive choices, e.g. Gnomish Lineage → Forest Gnome / Rock Gnome. */
+  options: z.array(z.object({ name: z.string(), description: z.string() })).optional(),
 });
 export type Trait = z.infer<typeof trait>;
 
@@ -336,3 +338,81 @@ export const dndClass = z.object({
   }),
 });
 export type DndClass = z.infer<typeof dndClass>;
+
+// ── Monsters ───────────────────────────────────────────────────────────────────
+
+export const monsterEntry = z.object({
+  name: z.string(),
+  /** "Recharge 5–6", "3/Day, or 4/Day in Lair", "Bear or Hybrid Form Only". */
+  usage: z.string().optional(),
+  description: z.string(),
+  attack: z
+    .object({
+      kind: z.enum(["melee", "ranged", "melee-or-ranged"]),
+      toHit: z.number().int(),
+      reach: z.number().int().optional(),
+      range: z.object({ normal: z.number().int(), long: z.number().int().optional() }).optional(),
+    })
+    .optional(),
+  save: z.object({ ability: abilityId, dc: z.number().int() }).optional(),
+  /** Damage on a hit / failed save, e.g. 13 (1d10 + 8) Slashing plus 5 (2d4) Fire. */
+  damage: z.array(
+    z.object({ average: z.number().int(), dice: z.string().optional(), type: damageTypeId }),
+  ),
+});
+export type MonsterEntry = z.infer<typeof monsterEntry>;
+
+const abilityBlock = z.object({
+  score: z.number().int(),
+  mod: z.number().int(),
+  save: z.number().int(),
+});
+
+export const monster = z.object({
+  id,
+  name: z.string(),
+  /** Heading the stat block sits under, e.g. "Dragons" or "Azer". */
+  group: z.string().optional(),
+  animal: z.boolean(),
+  size: z.array(z.enum(["tiny", "small", "medium", "large", "huge", "gargantuan"])),
+  type: z.string(), // "Dragon (Chromatic)", "Swarm of Tiny Beasts"
+  alignment: z.string(),
+  ac: z.number().int(),
+  initiative: z.object({ bonus: z.number().int(), score: z.number().int() }),
+  hp: z.object({ average: z.number().int(), formula: z.string() }),
+  speed: z.string(),
+  speeds: z.partialRecord(z.enum(["walk", "burrow", "climb", "fly", "swim"]), z.number().int()),
+  hover: z.boolean(),
+  abilities: z.object({
+    str: abilityBlock,
+    dex: abilityBlock,
+    con: abilityBlock,
+    int: abilityBlock,
+    wis: abilityBlock,
+    cha: abilityBlock,
+  }),
+  skills: z.record(z.string(), z.number().int()),
+  resistances: z.string().optional(),
+  vulnerabilities: z.string().optional(),
+  immunities: z.string().optional(),
+  damageResistances: z.array(damageTypeId),
+  damageVulnerabilities: z.array(damageTypeId),
+  damageImmunities: z.array(damageTypeId),
+  conditionImmunities: z.array(z.string()),
+  gear: z.string().optional(),
+  senses: z.string(),
+  passivePerception: z.number().int(),
+  languages: z.string(),
+  cr: z.string(), // "1/8", "17"
+  crValue: z.number(),
+  xp: z.number().int(),
+  xpInLair: z.number().int().optional(),
+  proficiencyBonus: z.number().int(),
+  legendaryActionUses: z.string().optional(),
+  traits: z.array(monsterEntry),
+  actions: z.array(monsterEntry),
+  bonusActions: z.array(monsterEntry),
+  reactions: z.array(monsterEntry),
+  legendaryActions: z.array(monsterEntry),
+});
+export type Monster = z.infer<typeof monster>;

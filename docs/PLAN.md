@@ -191,11 +191,59 @@ dan dibersihkan per test (transaksi yang di-rollback atau truncate).
   38 senjata + 10 property + 8 mastery, 13 armor, 25 tools, 80 gear, 258 magic item,
   339 spell, 9 species, 4 background, 17 feat, 12 kelas (tabel fitur, fitur, subclass,
   Metamagic & Eldritch Invocations).
-- ⏳ Belum: monster & hewan (stat block).
-- ⏳ Data terstruktur untuk builder, ditulis manual: tabel multi-kolom yang di PDF
-  tidak bisa di-parse rapi (Elven Lineages, Fiendish Legacies, Giant Ancestry, paket
-  peralatan awal A/B/C, pilihan Draconic Ancestry).
 - Halaman kompendium: cari & filter (level, school, kelas, CR, tipe).
+
+Sisa pekerjaan data, berurutan:
+
+**1. ✅ Opsi bertingkat pada trait** (kecil, di parser)
+
+- Skema `trait` mendapat `options?: trait[]`.
+- `build-origins.ts` memakai daftar eksplisit induk → opsi, karena PDF tidak menandai
+  hubungannya: Gnomish Lineage → Forest Gnome, Rock Gnome; Giant Ancestry → Cloud’s Jaunt,
+  Fire’s Burn, Frost’s Chill, Hill’s Tumble, Stone’s Endurance, Storm’s Thunder.
+- Test: tidak ada trait opsi yang muncul juga sebagai trait biasa.
+
+**2. ✅ Monster & hewan** (`build-monsters.ts` → `monsters.json`, 330 stat block: 235 monster + 95 hewan)
+
+- Kelompok (heading 18, mis. "Azer") + stat block (heading 14.6, mis. "Azer Sentinel").
+- Field terstruktur: size, type, tag, alignment; AC; Initiative; HP (rata-rata + rumus);
+  Speed (walk/fly/swim/climb/burrow, hover); 6 ability (skor, mod, save); Skills;
+  Resistances / Vulnerabilities / Immunities (damage dan kondisi dipisah); Gear; Senses
+  (+ Passive Perception); Languages; CR, XP, PB; Legendary Action Uses; `isAnimal`.
+- Entri Traits / Actions / Bonus Actions / Reactions / Legendary Actions: nama, teks
+  Markdown, plus data yang bisa dihitung VTT:
+  - serangan: melee/ranged, bonus to-hit, reach/range, damage `[{ avg, dice, type }]`
+  - saving throw: ability, DC, area
+  - pemakaian: `Recharge 5–6`, `3/Day`, `1/Day Each`
+- Test: 330 entri; XP sesuai CR; PB sesuai CR; modifier = ⌊(skor−10)/2⌋;
+  semua damage type & kondisi merujuk ke data yang ada.
+- Inkonsistensi yang memang tercetak di SRD dibiarkan apa adanya dan dicatat sebagai
+  pengecualian di test: XP Archmage (8.000, tabel CR 12 = 8.400), skor Initiative
+  Gray Ooze dan Invisible Stalker.
+- Dipakai oleh: kompendium (filter CR/tipe), token monster di VTT, encounter builder
+  (XP budget), tombol serang yang roll otomatis.
+
+**3. ⏳ Data terstruktur untuk builder** (ditulis manual, mulai bersama Fase 2)
+
+Tabel multi-kolom di PDF tidak bisa di-parse andal, dan builder butuh data yang bisa
+dihitung, bukan teks. Ditulis tangan sebagai TypeScript bertipe di
+`packages/data/src/builder/`, terpisah dari JSON hasil generate, dengan nomor halaman SRD
+di komentar untuk review.
+
+- Model pilihan yang dipakai ulang di semua tempat:
+  `Choice { id, name, options: { id, name, grants: Grant[] }[] }`, dengan `Grant` berupa
+  union: resistance, spell (dengan level karakter minimum), cantrip, speed, darkvision,
+  skill/tool proficiency, feat, ability score, dll.
+- Species: Draconic Ancestry (10 naga → damage type), Elven Lineages (Drow / High Elf /
+  Wood Elf: manfaat level 1, spell level 3 & 5), Gnomish Lineage, Giant Ancestry,
+  Fiendish Legacies (Abyssal / Chthonic / Infernal), Keen Senses, Skillful, Versatile,
+  pilihan spellcasting ability, ukuran Small/Medium.
+- Peralatan awal: paket A/B/C tiap kelas dan A/B tiap background → daftar
+  `{ itemId, quantity }` + GP, merujuk ke id weapons/armor/gear/tools.
+- Tabel builder lain yang kecil (Standard Array by Class, Point Cost) masuk ke
+  `packages/rules` sebagai konstanta + fungsi.
+- Test: setiap id spell / skill / item / feat yang dirujuk benar-benar ada di data SRD,
+  sehingga salah ketik di data manual langsung ketahuan di CI.
 
 ### Fase 2 – Character Builder & Sheet (Rules engine + Frontend)
 

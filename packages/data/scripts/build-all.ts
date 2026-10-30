@@ -7,3 +7,4 @@ import "./build-spells";
 import "./build-origins";
 import "./build-classes";
 import "./build-items";
+import "./build-monsters";

@@ -59,10 +59,33 @@ const species = entries(speciesLines).map(({ name, body }) => {
     size: [...size.matchAll(/(Small|Medium)/g)].map((m) => m[1]!.toLowerCase()),
     sizeNote: size,
     speed: Number(/^(\d+) feet$/.exec(f.Speed!)![1]),
-    traits: withTables(traits(body.slice(speedLine + 1)), speciesTables),
+    traits: nestOptions(withTables(traits(body.slice(speedLine + 1)), speciesTables)),
   };
 });
 writeJson("species.json", species);
+
+/**
+ * The PDF prints a trait's options as sibling run-in paragraphs, so the parent → options
+ * relationship is listed here: the trait named by the key absorbs the traits that follow
+ * it whose names match.
+ */
+function nestOptions(list: { name: string; description: string }[]) {
+  const OPTIONS: Record<string, RegExp> = {
+    "Gnomish Lineage": /^(Forest|Rock) Gnome$/,
+    "Giant Ancestry": /\((Cloud|Fire|Frost|Hill|Stone|Storm) Giant\)$/,
+  };
+  const out: {
+    name: string;
+    description: string;
+    options?: { name: string; description: string }[];
+  }[] = [];
+  for (const t of list) {
+    const parent = out.findLast((p) => OPTIONS[p.name]);
+    if (parent && OPTIONS[parent.name]!.test(t.name)) (parent.options ??= []).push(t);
+    else out.push(t);
+  }
+  return out;
+}
 
 // ── Feats ────────────────────────────────────────────────────────────────────────
 const featChapter = chapter(all, "Feats");

@@ -20,6 +20,7 @@ const collections = {
   backgrounds: srd.backgrounds,
   feats: srd.feats,
   classes: srd.classes,
+  monsters: srd.monsters,
 };
 
 const ids = <T extends { id: string }>(list: T[]) => new Set(list.map((x) => x.id));
@@ -44,6 +45,8 @@ describe("SRD data", () => {
     expect(srd.backgrounds).toHaveLength(4);
     expect(srd.classes).toHaveLength(12);
     expect(srd.spells).toHaveLength(339);
+    expect(srd.monsters).toHaveLength(330);
+    expect(srd.monsters.filter((m) => m.animal)).toHaveLength(95);
   });
 
   it("backgrounds reference existing feats and skills", () => {
@@ -121,5 +124,107 @@ describe("SRD data", () => {
       "Prepared Spells": "4",
       "1": "2",
     });
+  });
+
+  it("nests species trait options under their parent trait", () => {
+    const traitsOf = (id: string) => srd.species.find((s) => s.id === id)!.traits;
+    const gnome = traitsOf("gnome");
+    expect(gnome.find((t) => t.name === "Gnomish Lineage")!.options!.map((o) => o.name)).toEqual([
+      "Forest Gnome",
+      "Rock Gnome",
+    ]);
+    expect(gnome.map((t) => t.name)).not.toContain("Forest Gnome");
+    expect(traitsOf("goliath").find((t) => t.name === "Giant Ancestry")!.options).toHaveLength(6);
+  });
+});
+
+describe("SRD monsters", () => {
+  // CR → XP from the SRD's "Experience Points by Challenge Rating" table.
+  const XP: Record<string, number> = {
+    "0": 10,
+    "1/8": 25,
+    "1/4": 50,
+    "1/2": 100,
+    "1": 200,
+    "2": 450,
+    "3": 700,
+    "4": 1100,
+    "5": 1800,
+    "6": 2300,
+    "7": 2900,
+    "8": 3900,
+    "9": 5000,
+    "10": 5900,
+    "11": 7200,
+    "12": 8400,
+    "13": 10000,
+    "14": 11500,
+    "15": 13000,
+    "16": 15000,
+    "17": 18000,
+    "18": 20000,
+    "19": 22000,
+    "20": 25000,
+    "21": 33000,
+    "22": 41000,
+    "23": 50000,
+    "24": 62000,
+    "25": 75000,
+    "26": 90000,
+    "27": 105000,
+    "28": 120000,
+    "29": 135000,
+    "30": 155000,
+  };
+  // Inconsistencies printed in the SRD itself, kept as published.
+  const SRD_ERRATA = new Set([
+    "archmage:xp",
+    "gray-ooze:initiative",
+    "invisible-stalker:initiative",
+  ]);
+  const ok = (id: string, check: string, pass: boolean) => pass || SRD_ERRATA.has(`${id}:${check}`);
+
+  it.each(srd.monsters.map((m) => [m.id, m] as const))("%s has consistent numbers", (id, m) => {
+    expect(ok(id, "xp", m.xp === XP[m.cr] || (m.cr === "0" && m.xp === 0)), "XP for CR").toBe(true);
+    expect(m.proficiencyBonus, "PB for CR").toBe(Math.max(2, Math.ceil(m.crValue / 4) + 1));
+    expect(ok(id, "initiative", m.initiative.score === 10 + m.initiative.bonus), "initiative").toBe(
+      true,
+    );
+    for (const [ability, a] of Object.entries(m.abilities)) {
+      expect(a.mod, ability).toBe(Math.floor((a.score - 10) / 2));
+      expect([a.mod, a.mod + m.proficiencyBonus], `${ability} save`).toContain(a.save);
+    }
+  });
+
+  it("parses attacks into structured data", () => {
+    const entries = srd.monsters.flatMap((m) => [
+      ...m.actions,
+      ...m.bonusActions,
+      ...m.legendaryActions,
+    ]);
+    for (const e of entries) {
+      if (/^(Melee|Ranged|Melee or Ranged) Attack Roll:/.test(e.description))
+        expect(e.attack, e.name).toBeDefined();
+    }
+    const rend = srd.monsters
+      .find((m) => m.id === "adult-red-dragon")!
+      .actions.find((a) => a.name === "Rend")!;
+    expect(rend).toMatchObject({
+      attack: { kind: "melee", toHit: 14, reach: 10 },
+      damage: [
+        { average: 13, dice: "1d10+8", type: "slashing" },
+        { average: 5, dice: "2d4", type: "fire" },
+      ],
+    });
+    const breath = srd.monsters
+      .find((m) => m.id === "adult-red-dragon")!
+      .actions.find((a) => a.name === "Fire Breath")!;
+    expect(breath).toMatchObject({ usage: "Recharge 5–6", save: { ability: "dex", dc: 21 } });
+  });
+
+  it("condition immunities reference real conditions", () => {
+    const conditionIds = ids(srd.conditions);
+    for (const m of srd.monsters)
+      for (const c of m.conditionImmunities) expect(conditionIds, m.id).toContain(c);
   });
 });
