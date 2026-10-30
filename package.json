@@ -13,7 +13,14 @@
     "test": "turbo run test",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:create": "pnpm --filter @dnd/server db:create",
+    "db:migrate": "pnpm --filter @dnd/server db:migrate",
+    "db:seed": "pnpm --filter @dnd/server db:seed",
+    "db:setup": "pnpm --filter @dnd/server db:setup",
+    "db:reset": "pnpm --filter @dnd/server db:reset",
+    "db:generate": "pnpm --filter @dnd/server db:generate",
+    "db:studio": "pnpm --filter @dnd/server db:studio"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

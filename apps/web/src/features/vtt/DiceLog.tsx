@@ -1,19 +1,30 @@
 import type { DiceRollResult } from "@dnd/contracts";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
+import { api } from "../../lib/api";
 import { socket } from "../../lib/socket";
 
 export function DiceLog({ campaignId }: { campaignId: string }) {
-  const [log, setLog] = useState<DiceRollResult[]>([]);
+  const qc = useQueryClient();
+  const log = useQuery({
+    queryKey: ["rolls", campaignId],
+    queryFn: () => api<DiceRollResult[]>(`/campaigns/${campaignId}/rolls`),
+  });
   const [expression, setExpression] = useState("1d20");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const onRolled = (r: DiceRollResult) => setLog((prev) => [r, ...prev].slice(0, 50));
+    const onRolled = (r: DiceRollResult) => {
+      if (r.campaignId !== campaignId) return;
+      qc.setQueryData<DiceRollResult[]>(["rolls", campaignId], (prev = []) =>
+        [r, ...prev].slice(0, 50),
+      );
+    };
     socket.on("dice:rolled", onRolled);
     return () => {
       socket.off("dice:rolled", onRolled);
     };
-  }, []);
+  }, [campaignId, qc]);
 
   const roll = async (e: FormEvent) => {
     e.preventDefault();
@@ -27,13 +38,14 @@ export function DiceLog({ campaignId }: { campaignId: string }) {
         <input value={expression} onChange={(e) => setExpression(e.target.value)} size={10} />
         <button type="submit">Roll</button>
       </form>
-      {error && <p style={{ color: "var(--accent)" }}>{error}</p>}
+      {error && <p className="error">{error}</p>}
       <ul className="log">
-        {log.map((r, i) => (
-          <li key={log.length - i}>
+        {log.data?.map((r) => (
+          <li key={r.id}>
             <strong>{r.total}</strong>{" "}
             <span className="muted">
-              {r.by}: {r.expression} [{r.rolls.join(", ")}]
+              {r.by}: {r.label ? `${r.label} · ` : ""}
+              {r.expression} [{r.rolls.join(", ")}]
             </span>
           </li>
         ))}

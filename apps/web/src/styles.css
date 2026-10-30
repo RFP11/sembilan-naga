@@ -77,3 +77,341 @@ main {
   display: grid;
   gap: 0.35rem;
 }
+.centered {
+  max-width: 420px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+}
+.stack {
+  display: grid;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+/* Full-width choice lists (dev login, campaign picker). */
+.menu button {
+  width: 100%;
+  text-align: left;
+}
+.row {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+.row input {
+  flex: 1;
+}
+input {
+  font: inherit;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+}
+.spacer {
+  flex: 1;
+}
+.error {
+  color: var(--accent);
+}
+a.button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 6px;
+  color: var(--accent);
+  text-decoration: none;
+}
+@media (max-width: 800px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+/* ── Characters & builder ─────────────────────────────────────────────── */
+.builder {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+  align-items: start;
+}
+.builder > aside {
+  position: sticky;
+  top: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+.steps {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  align-items: center;
+}
+.save-state {
+  margin-left: auto;
+  font-size: 0.9em;
+}
+.builder-main {
+  min-width: 0;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 0.5rem;
+}
+.cards.alignment {
+  grid-template-columns: repeat(3, 1fr);
+}
+.card {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+}
+.card[aria-pressed="true"] {
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+}
+.chip,
+.option {
+  display: flex;
+  gap: 0.4rem;
+  align-items: baseline;
+}
+.option {
+  margin: 0.35rem 0;
+}
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem 0.75rem;
+}
+.field {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.field.column {
+  flex-direction: column;
+  align-items: stretch;
+}
+select,
+textarea {
+  font: inherit;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+  color: inherit;
+}
+.features {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.25rem;
+}
+.prose p {
+  margin: 0.4rem 0;
+  line-height: 1.45;
+}
+p.prose {
+  white-space: pre-line;
+}
+.issues {
+  color: var(--accent);
+  padding-left: 1.2rem;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+}
+.stats div {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 0.3rem;
+  text-align: center;
+}
+.stats dt {
+  font-size: 0.75em;
+  color: var(--muted);
+}
+.stats dd {
+  margin: 0;
+  font-weight: 600;
+}
+.scores {
+  border-collapse: collapse;
+}
+.scores th,
+.scores td {
+  padding: 0.2rem 0.6rem 0.2rem 0;
+  text-align: left;
+}
+.stepper {
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.stepper button {
+  padding: 0 0.5rem;
+}
+button.primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--bg);
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+button.link {
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  text-decoration: underline;
+}
+.badge {
+  font-size: 0.8em;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0 0.5rem;
+  color: var(--muted);
+}
+.list-row {
+  display: flex;
+  gap: 0.5rem;
+}
+.list-row .grow {
+  text-align: left;
+}
+.grow {
+  flex: 1;
+}
+.narrow {
+  max-width: 760px;
+}
+@media (max-width: 900px) {
+  .builder {
+    grid-template-columns: 1fr;
+  }
+  .builder > aside {
+    position: static;
+  }
+}
+/* ── Character sheet ──────────────────────────────────────────────────── */
+.sheet-head h2 {
+  margin: 0;
+}
+.sheet-grid {
+  display: grid;
+  grid-template-columns: minmax(300px, 1fr) minmax(320px, 1.3fr) 280px;
+  gap: 1rem;
+  align-items: start;
+}
+.panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem 0.9rem 0.75rem;
+}
+.panel h3 {
+  margin: 0.25rem 0 0.5rem;
+}
+.hp {
+  font-size: 1.4em;
+  margin: 0.25rem 0;
+}
+.hp-bar {
+  height: 6px;
+  background: var(--line);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+.hp-bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+button.roll {
+  padding: 0.05rem 0.45rem;
+  min-width: 2.6rem;
+  font-variant-numeric: tabular-nums;
+}
+.skills {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.attacks td,
+.inventory td {
+  padding: 0.2rem 0.5rem 0.2rem 0;
+}
+.attacks button.roll + button.roll {
+  margin-left: 0.3rem;
+}
+.inventory {
+  width: 100%;
+  border-collapse: collapse;
+}
+.inventory tr + tr td {
+  border-top: 1px solid var(--line);
+}
+.qty {
+  white-space: nowrap;
+}
+.qty button {
+  padding: 0 0.4rem;
+  margin: 0 0.3rem;
+}
+.slots {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin: 0.2rem 0;
+}
+.slots span {
+  min-width: 7rem;
+}
+.add-item {
+  position: relative;
+  margin-top: 0.5rem;
+}
+.add-item input {
+  width: 100%;
+}
+.suggestions {
+  list-style: none;
+  padding: 0;
+  margin: 0.25rem 0 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.suggestions button {
+  width: 100%;
+  text-align: left;
+}
+@media (max-width: 1200px) {
+  .sheet-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .sheet-grid > aside {
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 800px) {
+  .sheet-grid {
+    grid-template-columns: 1fr;
+  }
+}

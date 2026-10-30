@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import * as srd from "./index";
+import * as data from "./index";
+import { monsters } from "./monsters";
+
+const srd = { ...data, monsters };
 
 const collections = {
   abilities: srd.abilities,

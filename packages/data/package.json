@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./monsters": "./src/monsters.ts"
   },
   "scripts": {
     "srd:extract": "tsx scripts/extract-srd.ts",

@@ -1,23 +1,31 @@
 import fastifyStatic from "@fastify/static";
 import Fastify from "fastify";
 import path from "node:path";
+import { registerAuth, type AuthConfig } from "./auth/plugin";
+import { campaignRoutes } from "./campaigns/routes";
+import { playRoutes } from "./characters/play";
+import { characterRoutes } from "./characters/routes";
 import type { Config } from "./config";
-import type { Sql } from "./db";
+import type { Db } from "./db";
 import { registerSocket } from "./plugins/socket";
 import { compendiumRoutes } from "./routes/compendium";
 import { healthRoutes } from "./routes/health";
 
 export interface AppDeps {
-  config: Pick<Config, "NODE_ENV" | "WEB_DIST">;
-  sql?: Sql;
+  config: AuthConfig & Pick<Config, "WEB_DIST">;
+  db: Db;
 }
 
-export async function buildApp({ config, sql }: AppDeps) {
+export async function buildApp({ config, db }: AppDeps) {
   const app = Fastify({ logger: config.NODE_ENV !== "test" });
 
-  await app.register(healthRoutes, { prefix: "/api", sql });
+  await registerAuth(app, config, db);
+  const io = registerSocket(app, db);
+  await app.register(healthRoutes, { prefix: "/api", db });
   await app.register(compendiumRoutes, { prefix: "/api" });
-  registerSocket(app);
+  await app.register(campaignRoutes, { prefix: "/api", db });
+  await app.register(characterRoutes, { prefix: "/api", db });
+  await app.register(playRoutes, { prefix: "/api", db, io });
 
   // Production: serve the React build from the same origin, with SPA fallback.
   if (config.WEB_DIST) {

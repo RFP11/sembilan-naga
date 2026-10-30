@@ -1,2 +1,3 @@
 pnpm-lock.yaml
 **/dist
+apps/server/drizzle

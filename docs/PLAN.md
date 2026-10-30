@@ -66,13 +66,15 @@ character_state   character_id pk → characters (1:1),
                   conditions text[], concentrating_on (spell_id, nullable),
                   coins jsonb {cp,sp,ep,gp,pp}, version int
 character_items   id uuid pk, character_id → characters,
-                  item_id (slug SRD, nullable) | homebrew_item_id → homebrew_items (nullable),
+                  item_id (slug SRD, nullable) | homebrew_id → homebrew (nullable, kind=item),
                   name_override, quantity int, equipped bool, attuned bool,
                   charges_used smallint, notes
-                  CHECK: tepat satu dari item_id / homebrew_item_id terisi
-character_spells  character_id → characters, spell_id, class_id (sumber spell),
-                  prepared bool, always_prepared bool
-                  pk(character_id, spell_id, class_id)
+                  CHECK: tepat satu dari item_id / homebrew_id terisi
+character_spells  id uuid pk, character_id → characters,
+                  spell_id (slug SRD, nullable) | homebrew_id → homebrew (nullable, kind=spell),
+                  class_id (sumber spell), prepared bool, always_prepared bool
+                  CHECK: tepat satu dari spell_id / homebrew_id terisi
+                  unique(character_id, coalesce(spell_id, homebrew_id), class_id)
 
 ── VTT ─────────────────────────────────────────────────────────────────────────
 assets            id uuid pk, campaign_id → campaigns (nullable), uploader_id → users,
@@ -82,7 +84,9 @@ scenes            id uuid pk, campaign_id → campaigns, name, map_asset_id → 
                   cols, rows, grid_px, grid_offset_x, grid_offset_y,
                   fog_enabled bool, fog_revealed jsonb (poligon/rect), sort
 tokens            id uuid pk, scene_id → scenes,
-                  character_id → characters (nullable) | monster_id (slug, nullable),
+                  character_id → characters (nullable) | monster_id (slug SRD, nullable)
+                  | homebrew_id → homebrew (nullable, kind=monster); paling banyak satu terisi,
+                  semuanya kosong = token bebas (mis. objek/penanda),
                   name, x, y int (sel grid),
                   size enum(tiny | small | medium | large | huge | gargantuan),
                   image_asset_id → assets, hp_current, hp_max (khusus monster),
@@ -97,24 +101,28 @@ chat_messages     id uuid pk, campaign_id, user_id, character_id (nullable),
                   kind enum(text | roll | system), body, expression,
                   rolls int[], total int, label, whisper_to uuid[], created_at
 
-── Homebrew item ───────────────────────────────────────────────────────────────
-homebrew_items    id uuid pk, owner_id → users, campaign_id → campaigns (nullable),
+── Homebrew ────────────────────────────────────────────────────────────────────
+homebrew          id uuid pk, kind enum(item | spell | monster | feat),
+                  owner_id → users, campaign_id → campaigns (nullable),
                   visibility enum(private | campaign),
-                  base_item_id (slug SRD, nullable)  -- mis. "longsword" untuk "+1 Flame Longsword"
-                  name, category enum(weapon | armor | shield | gear | tool |
-                                      potion | scroll | ring | rod | staff | wand | wondrous),
-                  rarity enum(common | uncommon | rare | very-rare | legendary | artifact),
-                  requires_attunement bool, attunement_note,
-                  data jsonb  -- divalidasi skema Zod item yang SAMA dengan item SRD:
-                              -- damage, properties, mastery, AC/bonus, charges, recharge,
-                              -- efek (bonus attack/damage/AC/save, resistance), deskripsi
-                  image_asset_id → assets, created_at, updated_at
-
-── Nanti ───────────────────────────────────────────────────────────────────────
-custom_content    id uuid pk, campaign_id (nullable), owner_id,
-                  kind enum(spell | monster | feat | ...), slug,
-                  data jsonb (divalidasi skema Zod yang SAMA dengan SRD)
+                  base_id (slug SRD, nullable)  -- asal "Salin dari SRD", mis. "longsword", "goblin"
+                  name,
+                  data jsonb    -- divalidasi skema Zod SRD sesuai kind (lihat bawah)
+                  image_asset_id → assets, version int, created_at, updated_at
+                  index(campaign_id, kind)
 ```
+
+Skema `homebrew.data` per `kind`, dari `packages/data/src/schemas.ts`:
+
+| kind      | Skema                         | Tambahan khusus homebrew                                                                 |
+| --------- | ----------------------------- | ---------------------------------------------------------------------------------------- |
+| `item`    | `magicItem` / `weapon` / dll. | `effects` terstruktur (bonus attack/damage/AC/save, extra damage, resistance), `charges` |
+| `spell`   | `spell`                       | opsional: damage / save terstruktur untuk roll otomatis                                  |
+| `monster` | `monster`                     | —                                                                                        |
+| `feat`    | `feat`                        | opsional: `grants` (model pilihan builder)                                               |
+
+Karena bentuknya sama dengan SRD, kompendium, sheet, dan VTT memperlakukan homebrew dan
+SRD dengan kode yang sama; bedanya hanya sumber (`srd` atau `homebrew`) dan label di UI.
 
 Catatan:
 
@@ -130,14 +138,24 @@ Catatan:
 
 ## Fitur per Fase
 
-### Fase 0 – Fondasi (Backend)
+### Fase 0 – Fondasi (Backend) ✅
 
-- Drizzle + skema + migrasi awal, ganti `apps/server/src/db.ts`.
-- Login Google (OAuth 2.0 / OIDC), session cookie httpOnly. Env baru:
-  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`, `PUBLIC_URL`.
-- Campaign: buat, invite code, gabung, role GM/player/spectator.
-- Socket.IO memakai session yang sama (ganti `guest-xxxx`), cek role di setiap event.
-- Setup database & seeder (lihat bawah) supaya anggota tim bisa mulai dengan satu perintah.
+- ✅ Drizzle + migrasi `0000_foundation` (`apps/server/src/db/`). Tabel lain di skema di atas
+  dibuat lewat migrasi di fase yang memakainya, bukan di depan.
+- ✅ Login Google (arctic, OAuth 2.0 + PKCE), session cookie httpOnly; tabel `sessions`
+  menyimpan hash SHA-256 token, kedaluwarsa 30 hari dengan perpanjangan otomatis. Env baru:
+  `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `PUBLIC_URL`, `DEV_LOGIN` (tidak perlu
+  `SESSION_SECRET` karena token disimpan sebagai hash).
+- ✅ Campaign: buat, invite code (8 karakter, tanpa 0/O/1/I), gabung, role GM/player/spectator;
+  invite code hanya dikirim ke GM.
+- ✅ Socket.IO memakai session yang sama (anonim ditolak), `campaign:join` cek keanggotaan,
+  spectator tidak bisa menggerakkan token / melempar dadu, lemparan dadu disimpan ke
+  `chat_messages` dan riwayatnya tersedia di `GET /api/campaigns/:id/rolls`.
+- ✅ Web: layar login (Google / dev login), pemilih campaign (buat / gabung / pilih),
+  Table & dice log memakai campaign yang dipilih.
+- ✅ Server menjalankan migrasi tertunda saat start; image Docker membawa folder migrasi.
+- ✅ CI menjalankan Postgres service untuk test server.
+- ✅ Setup database & seeder (lihat bawah) supaya anggota tim bisa mulai dengan satu perintah.
 
 #### Setup database & seeder
 
@@ -165,15 +183,16 @@ Aturan seeder (`apps/server/src/db/seed/`):
 - **Idempotent**: UUID tetap + upsert, aman dijalankan berulang kali.
 - **Hanya untuk development/test**; menolak jalan di production.
 - **Tidak menyalin kompendium SRD** ke DB (tetap JSON); seed hanya merujuk slug.
-- Data yang di-seed:
-  - 3 user dev: `gm@dev.local` (GM), `player1@dev.local`, `player2@dev.local`
-  - 1 campaign contoh dengan invite code tetap (`DEVCAMP`) dan ketiga user sebagai member
-  - Karakter: beberapa `ready` (mis. Fighter, Wizard, Cleric level 1 & 5, satu multiclass)
+- Data yang di-seed (✅ = sudah, sisanya ditambahkan di fase yang membuat tabelnya):
+  - ✅ 3 user dev: `gm@dev.local` (GM), `player1@dev.local`, `player2@dev.local`
+  - ✅ 1 campaign contoh dengan invite code tetap (`DEVCAMP`) dan ketiga user sebagai member
+  - ✅ Beberapa `chat_messages` roll
+  - Fase 2 — Karakter: beberapa `ready` (mis. Fighter, Wizard, Cleric level 1 & 5, satu multiclass)
     dan satu `draft` di tengah builder; satu karakter tanpa campaign (uji pindah campaign)
-  - Homebrew item contoh: `private` dan `campaign`, termasuk yang berbasis item SRD
-  - 1 scene dengan peta placeholder (gambar grid buatan sendiri, bukan aset berlisensi),
+  - Fase 2 (monster: Fase 4) — Homebrew contoh per `kind`: item (`private` dan `campaign`, satu berbasis item SRD),
+    spell, feat, dan monster (salinan monster SRD yang diedit)
+  - Fase 3 — 1 scene dengan peta placeholder (gambar grid buatan sendiri, bukan aset berlisensi),
     token PC + monster SRD (satu `hidden`), dan satu encounter `planning`
-  - Beberapa `chat_messages` roll
 - Karakter seed dibuat lewat fungsi builder yang sama dengan aplikasi, jadi seed sekaligus
   menguji validasi.
 
@@ -223,7 +242,7 @@ Sisa pekerjaan data, berurutan:
 - Dipakai oleh: kompendium (filter CR/tipe), token monster di VTT, encounter builder
   (XP budget), tombol serang yang roll otomatis.
 
-**3. ⏳ Data terstruktur untuk builder** (ditulis manual, mulai bersama Fase 2)
+**3. ✅ Data terstruktur untuk builder** (ditulis manual, `packages/data/src/builder/`)
 
 Tabel multi-kolom di PDF tidak bisa di-parse andal, dan builder butuh data yang bisa
 dihitung, bukan teks. Ditulis tangan sebagai TypeScript bertipe di
@@ -239,13 +258,48 @@ di komentar untuk review.
   Fiendish Legacies (Abyssal / Chthonic / Infernal), Keen Senses, Skillful, Versatile,
   pilihan spellcasting ability, ukuran Small/Medium.
 - Peralatan awal: paket A/B/C tiap kelas dan A/B tiap background → daftar
-  `{ itemId, quantity }` + GP, merujuk ke id weapons/armor/gear/tools.
+  `{ kind, id, quantity, variant?, note? }` + GP, merujuk ke id weapons/armor/gear/tools.
+  Dua bentuk khusus: `proficient-tool` (Monk, Soldier: alat yang dipilih untuk proficiency)
+  dan `custom` (Spellbook Wizard, yang bukan item di daftar peralatan SRD).
 - Tabel builder lain yang kecil (Standard Array by Class, Point Cost) masuk ke
   `packages/rules` sebagai konstanta + fungsi.
 - Test: setiap id spell / skill / item / feat yang dirujuk benar-benar ada di data SRD,
-  sehingga salah ketik di data manual langsung ketahuan di CI.
+  level spell lineage cocok (cantrip, level 1 di level 3, level 2 di level 5), varian item
+  ada di tabel item-nya, dan opsi serta GP paket awal sama dengan teks SRD; salah ketik di
+  data manual langsung ketahuan di CI.
+- Belum: pilihan fitur kelas (Fighting Style, Expertise, dll.) memakai model `Choice` yang
+  sama; ditambahkan bersama UI builder.
 
 ### Fase 2 – Character Builder & Sheet (Rules engine + Frontend)
+
+Progres:
+
+1. ✅ Rules engine (`packages/rules`)
+2. ✅ Data builder terstruktur (`packages/data/src/builder/`)
+3. ✅ Tabel & API karakter: migrasi `0001_characters`; paket `@dnd/character`
+   (`deriveCharacter`, `validateBuild`, `startingInventory`) dipakai web & server;
+   `GET/POST /api/characters`, `GET/PATCH/DELETE /api/characters/:id`,
+   `POST /api/characters/:id/finalize` (422 + daftar masalah bila belum lengkap),
+   `GET /api/campaigns/:id/characters`; owner bisa edit, GM campaign bisa baca;
+   seeder karakter lewat kode builder yang sama.
+4. ✅ UI character builder: tab Characters (lazy-loaded; data monster dipisah ke
+   `@dnd/data/monsters` agar chunk-nya ±250 KB gzip), wizard 5 langkah + halaman Finish,
+   autosave draft, preview live dari `@dnd/character`, masalah per langkah, roll 4d6 di
+   server (`POST /api/characters/:id/roll-abilities`, hasilnya tidak bisa diubah klien).
+   Diuji end-to-end di Chromium headless (login → buat Elf Wizard → Finish).
+   Belum: pilihan fitur kelas (Fighting Style, Expertise, spell awal), pilihan tool
+   proficiency, roll HP saat memulai di level > 1, multiclass dari builder (lewat level-up).
+5. ✅ Character sheet: HP (damage lewat temp HP, heal, temp HP, massive damage), death save
+   diroll server, Short Rest (hit dice diroll server, Pact Magic pulih) dan Long Rest (aturan
+   2024: semua HP & hit dice pulih, Exhaustion −1), spell slot & pact slot, Exhaustion,
+   Heroic Inspiration, kondisi, koin; ability/save/skill/inisiatif/serangan/spell attack
+   bisa diroll ke dice log campaign; serangan senjata dari inventory (to-hit, damage,
+   versatile, proficiency kelas); AC dari armor/shield yang dipakai; inventory (tambah dari
+   SRD atau item bebas, jumlah, equip, attune maks 3, hapus); owner dan GM campaign bisa
+   mengubah; perubahan disiarkan lewat socket `character:updated` sehingga sheet yang
+   terbuka ikut berubah; `version` mencegah edit yang saling menimpa.
+   Belum: level-up, daftar spell kelas & persiapan spell, efek magic item (bonus AC/attack).
+6. ⏳ Homebrew item/spell/feat
 
 **Character builder** (wizard 5 langkah sesuai SRD):
 
@@ -277,17 +331,31 @@ Perilaku builder:
 - Inventory (SRD + homebrew), attunement (maks 3), spell prepared.
 - Tombol serang/spell → roll di server → dice log.
 
-**Homebrew item:**
+**Homebrew (dasar bersama + item, spell, feat):**
 
-- Editor item: mulai dari nol atau dari item SRD (`base_item_id`, mis. Longsword → +1 Longsword),
-  isi kategori, rarity, attunement, damage/properties/mastery, bonus AC/attack/damage/save,
-  charges + recharge ("The Next Dawn"), resistance, deskripsi, gambar.
+Dasar yang dibangun sekali untuk semua `kind`:
+
+- API: `GET/POST/PATCH/DELETE /api/campaigns/:id/homebrew?kind=…`; server cek role,
+  validasi `data` dengan skema sesuai `kind`, simpan, lalu broadcast `homebrew:updated`.
+- "Salin dari SRD": membuat homebrew dari entri SRD (`base_id`), lalu diedit. SRD tidak
+  pernah diubah; GM yang ingin versi berbeda memakai salinan ini.
 - Visibilitas: `private` (hanya pembuat) atau `campaign` (semua anggota campaign).
-- GM bisa memberi item homebrew ke karakter; player hanya bisa menambah item `campaign`
-  bila diizinkan di `campaigns.settings`.
-- Muncul di kompendium dengan label "Homebrew" dan bisa difilter.
-- Efek item ikut dihitung `packages/rules` (AC, attack, damage) seperti item SRD.
-- Ekspor/impor JSON agar bisa dibagi antar-campaign.
+  Player boleh membuat homebrew `campaign` hanya bila diizinkan di `campaigns.settings`.
+- Kompendium menggabungkan SRD + homebrew yang boleh dilihat user, dengan label "Homebrew"
+  dan filter sumber.
+- Ekspor/impor JSON (skema yang sama) agar bisa dibagi antar-campaign.
+
+Per jenis:
+
+- **Item**: editor kategori, rarity, attunement, damage/properties/mastery, `effects`
+  (bonus attack/damage/AC/save, extra damage, resistance), charges + recharge, gambar.
+  Item berbasis SRD (`base_id`, mis. Longsword → +1 Flame Longsword) mewarisi data dasarnya.
+  GM bisa memberi item ke karakter; efeknya dihitung `packages/rules` seperti item SRD.
+- **Spell**: editor level, school, kelas, casting time, range, komponen, durasi,
+  concentration/ritual, deskripsi, higher levels. Muncul di pilihan spell builder bila
+  kelasnya cocok dan diizinkan GM.
+- **Feat**: kategori, prasyarat, repeatable, benefit; `grants` opsional agar builder bisa
+  menerapkan efeknya otomatis.
 
 ### Fase 3 – VTT
 
@@ -302,6 +370,17 @@ Perilaku builder:
 - Encounter builder dengan XP Budget per Character (Low / Moderate / High).
 - Initiative tracker (monster memakai nilai Initiative di stat block), giliran, ronde.
 - HP & kondisi di token, pengingat concentration, efek Exhaustion otomatis.
+
+#### Homebrew monster
+
+- Editor stat block, biasanya lewat "Salin dari SRD" (mis. Goblin → Goblin Shaman).
+- Angka turunan dihitung `packages/rules` saat mengedit: modifier dari skor, PB dan XP
+  dari CR, save = mod (+ PB bila proficient), Initiative, Passive Perception.
+- Action/trait sebagai entri terstruktur (to-hit, reach/range, damage, save DC, usage),
+  sama dengan monster SRD, sehingga tombol serang di VTT langsung berfungsi.
+- Default `private`: stat monster tidak terlihat player. Di VTT player hanya melihat nama
+  token dan kondisinya.
+- Bisa dipakai di encounter builder (XP masuk XP budget) dan dijadikan token.
 
 #### Dadu 3D
 
@@ -336,18 +415,20 @@ Pekerjaan yang dibutuhkan:
 
 ### Fase 5 – Lanjutan
 
-Homebrew selain item (`custom_content`: spell, monster, feat), jurnal & handout,
-whisper di chat.
+Homebrew jenis lain bila dibutuhkan (species, background, subclass; cukup menambah `kind`
+dan skemanya), jurnal & handout, whisper di chat.
 
-## Tambahan `packages/rules`
+## Tambahan `packages/rules` ✅
 
-Semua murni, randomness di-inject, dan ber-test:
+Semua murni, randomness di-inject, dan ber-test. Tabel spell slot dan Pact Magic diuji silang
+terhadap tabel fitur 12 kelas hasil ekstraksi SRD (`srd-tables.test.ts`).
 
 - Modifier, proficiency bonus per level, XP → level
 - Validasi point buy dan ASI background
 - HP level 1 dan per level (tetap/roll), hit dice per kelas
 - AC: armor + Dex (cap medium), shield, Unarmored Defense, bonus item magic/homebrew
-- Validasi langkah builder (pilihan wajib per kelas/background/species)
+- Prasyarat multiclass (skor 13+ di primary ability kelas lama dan baru)
+- ⏳ Validasi langkah builder (pilihan wajib per kelas/background/species): bersama UI builder
 - Spell slot: full caster, half caster, Pact Magic, Multiclass Spellcaster table
 - Spell save DC & spell attack bonus
 - Passive Perception, efek Exhaustion
