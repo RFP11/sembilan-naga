@@ -1,0 +1,107 @@
+[
+  {
+    "id": "common",
+    "name": "Common",
+    "rarity": "standard"
+  },
+  {
+    "id": "common-sign-language",
+    "name": "Common Sign Language",
+    "rarity": "standard",
+    "roll": [1, 1]
+  },
+  {
+    "id": "draconic",
+    "name": "Draconic",
+    "rarity": "standard",
+    "roll": [2, 2]
+  },
+  {
+    "id": "dwarvish",
+    "name": "Dwarvish",
+    "rarity": "standard",
+    "roll": [3, 4]
+  },
+  {
+    "id": "elvish",
+    "name": "Elvish",
+    "rarity": "standard",
+    "roll": [5, 6]
+  },
+  {
+    "id": "giant",
+    "name": "Giant",
+    "rarity": "standard",
+    "roll": [7, 7]
+  },
+  {
+    "id": "gnomish",
+    "name": "Gnomish",
+    "rarity": "standard",
+    "roll": [8, 8]
+  },
+  {
+    "id": "goblin",
+    "name": "Goblin",
+    "rarity": "standard",
+    "roll": [9, 9]
+  },
+  {
+    "id": "halfling",
+    "name": "Halfling",
+    "rarity": "standard",
+    "roll": [10, 11]
+  },
+  {
+    "id": "orc",
+    "name": "Orc",
+    "rarity": "standard",
+    "roll": [12, 12]
+  },
+  {
+    "id": "abyssal",
+    "name": "Abyssal",
+    "rarity": "rare"
+  },
+  {
+    "id": "primordial",
+    "name": "Primordial",
+    "rarity": "rare",
+    "note": "Includes the Aquan, Auran, Ignan, and Terran dialects."
+  },
+  {
+    "id": "celestial",
+    "name": "Celestial",
+    "rarity": "rare"
+  },
+  {
+    "id": "sylvan",
+    "name": "Sylvan",
+    "rarity": "rare"
+  },
+  {
+    "id": "deep-speech",
+    "name": "Deep Speech",
+    "rarity": "rare"
+  },
+  {
+    "id": "thieves-cant",
+    "name": "Thieves’ Cant",
+    "rarity": "rare"
+  },
+  {
+    "id": "druidic",
+    "name": "Druidic",
+    "rarity": "rare"
+  },
+  {
+    "id": "undercommon",
+    "name": "Undercommon",
+    "rarity": "rare"
+  },
+  {
+    "id": "infernal",
+    "name": "Infernal",
+    "rarity": "rare"
+  }
+]

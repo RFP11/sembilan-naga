@@ -138,6 +138,20 @@ Aturan skema:
 3. Pakai di web lewat `socket` dari `apps/web/src/lib/socket.ts`
 4. Tambah test di `apps/server/src/app.test.ts`
 
+## Data SRD
+
+Konten di `packages/data/src/srd/*.json` dibuat otomatis dari `rule-book/SRD_CC_v5.2.1.pdf`
+dan divalidasi skema Zod di `packages/data/src/schemas.ts`.
+
+```bash
+pnpm --filter @dnd/data srd:extract   # PDF → packages/data/.cache/srd.lines.txt
+pnpm --filter @dnd/data srd:build     # teks → src/srd/*.json (+ Prettier)
+pnpm --filter @dnd/data test          # validasi skema + cek referensi antar-data
+```
+
+Ada data yang salah? Perbaiki parser di `packages/data/scripts/`, jangan edit JSON-nya
+langsung, lalu jalankan ulang `srd:build`.
+
 ## Lisensi konten
 
 Konten SRD berasal dari System Reference Document 5.2 oleh Wizards of the Coast LLC,

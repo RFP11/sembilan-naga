@@ -186,10 +186,15 @@ dan dibersihkan per test (transaksi yang di-rollback atau truncate).
 
 ### Fase 1 – Kompendium SRD (Data SRD)
 
-- Skrip impor PDF → JSON di `packages/data/scripts`, lalu dirapikan manual.
-- Isi: 9 species, 4 background, 12 kelas + 1 subclass masing-masing, feat, senjata
-  (dengan mastery), armor, tools, gear, ±340 spell, monster & hewan, magic item,
-  kondisi, glossary.
+- Skrip impor PDF → JSON di `packages/data/scripts` (`srd:extract`, `srd:build`).
+- ✅ Sudah: 6 ability, 18 skill, 13 damage type, 15 kondisi, 19 bahasa, 155 entri glossary,
+  38 senjata + 10 property + 8 mastery, 13 armor, 25 tools, 80 gear, 258 magic item,
+  339 spell, 9 species, 4 background, 17 feat, 12 kelas (tabel fitur, fitur, subclass,
+  Metamagic & Eldritch Invocations).
+- ⏳ Belum: monster & hewan (stat block).
+- ⏳ Data terstruktur untuk builder, ditulis manual: tabel multi-kolom yang di PDF
+  tidak bisa di-parse rapi (Elven Lineages, Fiendish Legacies, Giant Ancestry, paket
+  peralatan awal A/B/C, pilihan Draconic Ancestry).
 - Halaman kompendium: cari & filter (level, school, kelas, CR, tipe).
 
 ### Fase 2 – Character Builder & Sheet (Rules engine + Frontend)

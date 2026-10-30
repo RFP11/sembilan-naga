@@ -7,6 +7,8 @@
     ".": "./src/index.ts"
   },
   "scripts": {
+    "srd:extract": "tsx scripts/extract-srd.ts",
+    "srd:build": "tsx scripts/build-all.ts && prettier --write src/srd --log-level warn",
     "typecheck": "tsc -p .",
     "test": "vitest run --passWithNoTests"
   },
@@ -14,6 +16,8 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "pdfjs-dist": "4.10.38",
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   }

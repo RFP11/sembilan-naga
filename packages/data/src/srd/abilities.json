@@ -1,0 +1,32 @@
+[
+  {
+    "id": "str",
+    "name": "Strength",
+    "description": "Physical might"
+  },
+  {
+    "id": "dex",
+    "name": "Dexterity",
+    "description": "Agility, reflexes, and balance"
+  },
+  {
+    "id": "con",
+    "name": "Constitution",
+    "description": "Health and stamina"
+  },
+  {
+    "id": "int",
+    "name": "Intelligence",
+    "description": "Reasoning and memory"
+  },
+  {
+    "id": "wis",
+    "name": "Wisdom",
+    "description": "Perceptiveness and mental fortitude"
+  },
+  {
+    "id": "cha",
+    "name": "Charisma",
+    "description": "Confidence, poise, and charm"
+  }
+]

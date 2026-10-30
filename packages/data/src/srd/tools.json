@@ -1,0 +1,331 @@
+[
+  {
+    "id": "alchemists-supplies",
+    "name": "Alchemist’s Supplies",
+    "category": "artisan",
+    "costCp": 5000,
+    "weightLb": 8,
+    "ability": "int",
+    "utilize": "Identify a substance (DC 15), or start a fire (DC 15)",
+    "craft": ["Acid", "Alchemist’s Fire", "Component Pouch", "Oil", "Paper", "Perfume"]
+  },
+  {
+    "id": "brewers-supplies",
+    "name": "Brewer’s Supplies",
+    "category": "artisan",
+    "costCp": 2000,
+    "weightLb": 9,
+    "ability": "int",
+    "utilize": "Detect poisoned drink (DC 15), or identify alcohol (DC 10)",
+    "craft": ["Antitoxin"]
+  },
+  {
+    "id": "calligraphers-supplies",
+    "name": "Calligrapher’s Supplies",
+    "category": "artisan",
+    "costCp": 1000,
+    "weightLb": 5,
+    "ability": "dex",
+    "utilize": "Write text with impressive flourishes that guard against forgery (DC 15)",
+    "craft": ["Ink", "Spell Scroll"]
+  },
+  {
+    "id": "carpenters-tools",
+    "name": "Carpenter’s Tools",
+    "category": "artisan",
+    "costCp": 800,
+    "weightLb": 6,
+    "ability": "str",
+    "utilize": "Seal or pry open a door or container (DC 20)",
+    "craft": [
+      "Club",
+      "Greatclub",
+      "Quarterstaff",
+      "Barrel",
+      "Chest",
+      "Ladder",
+      "Pole",
+      "Portable Ram",
+      "Torch"
+    ]
+  },
+  {
+    "id": "cartographers-tools",
+    "name": "Cartographer’s Tools",
+    "category": "artisan",
+    "costCp": 1500,
+    "weightLb": 6,
+    "ability": "wis",
+    "utilize": "Draft a map of a small area (DC 15)",
+    "craft": ["Map"]
+  },
+  {
+    "id": "cobblers-tools",
+    "name": "Cobbler’s Tools",
+    "category": "artisan",
+    "costCp": 500,
+    "weightLb": 5,
+    "ability": "dex",
+    "utilize": "Modify footwear to give Advantage on the wearer’s next Dexterity (Acrobatics) check (DC 10)",
+    "craft": ["Climber’s Kit"]
+  },
+  {
+    "id": "cooks-utensils",
+    "name": "Cook’s Utensils",
+    "category": "artisan",
+    "costCp": 100,
+    "weightLb": 8,
+    "ability": "wis",
+    "utilize": "Improve food’s flavor (DC 10), or detect spoiled or poisoned food (DC 15)",
+    "craft": ["Rations"]
+  },
+  {
+    "id": "glassblowers-tools",
+    "name": "Glassblower’s Tools",
+    "category": "artisan",
+    "costCp": 3000,
+    "weightLb": 5,
+    "ability": "int",
+    "utilize": "Discern what a glass object held in the past 24 hours (DC 15)",
+    "craft": ["Glass Bottle", "Magnifying Glass", "Spyglass", "Vial"]
+  },
+  {
+    "id": "jewelers-tools",
+    "name": "Jeweler’s Tools",
+    "category": "artisan",
+    "costCp": 2500,
+    "weightLb": 2,
+    "ability": "int",
+    "utilize": "Discern a gem’s value (DC 15)",
+    "craft": ["Arcane Focus", "Holy Symbol"]
+  },
+  {
+    "id": "leatherworkers-tools",
+    "name": "Leatherworker’s Tools",
+    "category": "artisan",
+    "costCp": 500,
+    "weightLb": 5,
+    "ability": "dex",
+    "utilize": "Add a design to a leather item (DC 10)",
+    "craft": [
+      "Sling",
+      "Whip",
+      "Hide Armor",
+      "Leather Armor",
+      "Studded Leather Armor",
+      "Backpack",
+      "Crossbow Bolt Case",
+      "Map or Scroll Case",
+      "Parchment",
+      "Pouch",
+      "Quiver",
+      "Waterskin"
+    ]
+  },
+  {
+    "id": "masons-tools",
+    "name": "Mason’s Tools",
+    "category": "artisan",
+    "costCp": 1000,
+    "weightLb": 8,
+    "ability": "str",
+    "utilize": "Chisel a symbol or hole in stone (DC 10)",
+    "craft": ["Block and Tackle"]
+  },
+  {
+    "id": "painters-supplies",
+    "name": "Painter’s Supplies",
+    "category": "artisan",
+    "costCp": 1000,
+    "weightLb": 5,
+    "ability": "wis",
+    "utilize": "Paint a recognizable image of something you’ve seen (DC 10)",
+    "craft": ["Druidic Focus", "Holy Symbol"]
+  },
+  {
+    "id": "potters-tools",
+    "name": "Potter’s Tools",
+    "category": "artisan",
+    "costCp": 1000,
+    "weightLb": 3,
+    "ability": "int",
+    "utilize": "Discern what a ceramic object held in the past 24 hours (DC 15)",
+    "craft": ["Jug", "Lamp"]
+  },
+  {
+    "id": "smiths-tools",
+    "name": "Smith’s Tools",
+    "category": "artisan",
+    "costCp": 2000,
+    "weightLb": 8,
+    "ability": "str",
+    "utilize": "Pry open a door or container (DC 20)",
+    "craft": [
+      "Any Melee weapon (except Club",
+      "Greatclub",
+      "Quarterstaff",
+      "and Whip)",
+      "Medium armor (except Hide)",
+      "Heavy armor",
+      "Ball Bearings",
+      "Bucket",
+      "Caltrops",
+      "Chain",
+      "Crowbar",
+      "Firearm Bullets",
+      "Grappling Hook",
+      "Iron Pot",
+      "Iron Spikes",
+      "Sling Bullets"
+    ]
+  },
+  {
+    "id": "tinkers-tools",
+    "name": "Tinker’s Tools",
+    "category": "artisan",
+    "costCp": 5000,
+    "weightLb": 10,
+    "ability": "dex",
+    "utilize": "Assemble a Tiny item composed of scrap, which falls apart in 1 minute (DC 20)",
+    "craft": [
+      "Musket",
+      "Pistol",
+      "Bell",
+      "Bullseye Lantern",
+      "Flask",
+      "Hooded Lantern",
+      "Hunting Trap",
+      "Lock",
+      "Manacles",
+      "Mirror",
+      "Shovel",
+      "Signal Whistle",
+      "Tinderbox"
+    ]
+  },
+  {
+    "id": "weavers-tools",
+    "name": "Weaver’s Tools",
+    "category": "artisan",
+    "costCp": 100,
+    "weightLb": 5,
+    "ability": "dex",
+    "utilize": "Mend a tear in clothing (DC 10), or sew a Tiny design (DC 10)",
+    "craft": [
+      "Padded Armor",
+      "Basket",
+      "Bedroll",
+      "Blanket",
+      "Fine Clothes",
+      "Net",
+      "Robe",
+      "Rope",
+      "Sack",
+      "String",
+      "Tent",
+      "Traveler’s Clothes"
+    ]
+  },
+  {
+    "id": "woodcarvers-tools",
+    "name": "Woodcarver’s Tools",
+    "category": "artisan",
+    "costCp": 100,
+    "weightLb": 5,
+    "ability": "dex",
+    "utilize": "Carve a pattern in wood (DC 10)",
+    "craft": [
+      "Club",
+      "Greatclub",
+      "Quarterstaff",
+      "Ranged weapons (except Pistol",
+      "Musket",
+      "and Sling)",
+      "Arcane Focus",
+      "Arrows",
+      "Bolts",
+      "Druidic Focus",
+      "Ink Pen",
+      "Needles"
+    ]
+  },
+  {
+    "id": "disguise-kit",
+    "name": "Disguise Kit",
+    "category": "other",
+    "costCp": 2500,
+    "weightLb": 3,
+    "ability": "cha",
+    "utilize": "Apply makeup (DC 10)",
+    "craft": ["Costume"]
+  },
+  {
+    "id": "forgery-kit",
+    "name": "Forgery Kit",
+    "category": "other",
+    "costCp": 1500,
+    "weightLb": 5,
+    "ability": "dex",
+    "utilize": "Mimic 10 or fewer words of someone else’s handwriting (DC 15), or duplicate a wax seal (DC 20)",
+    "craft": []
+  },
+  {
+    "id": "gaming-set",
+    "name": "Gaming Set",
+    "category": "other",
+    "weightLb": 0,
+    "ability": "wis",
+    "utilize": "Discern whether someone is cheating (DC 10), or win the game (DC 20)",
+    "craft": [],
+    "variants": "Dice (1 SP), dragonchess (1 GP), playing cards (5 SP), three-dragon ante (1 GP)"
+  },
+  {
+    "id": "herbalism-kit",
+    "name": "Herbalism Kit",
+    "category": "other",
+    "costCp": 500,
+    "weightLb": 3,
+    "ability": "int",
+    "utilize": "Identify a plant (DC 10)",
+    "craft": ["Antitoxin", "Candle", "Healer’s Kit", "Potion of Healing"]
+  },
+  {
+    "id": "musical-instrument",
+    "name": "Musical Instrument",
+    "category": "other",
+    "ability": "cha",
+    "utilize": "Play a known tune (DC 10), or improvise a song (DC 15)",
+    "craft": [],
+    "variants": "Bagpipes (30 GP, 6 lb.), drum (6 GP, 3 lb.), dulcimer (25 GP, 10 lb.), flute (2 GP, 1 lb.), horn (3 GP, 2 lb.), lute (35 GP, 2 lb.), lyre (30 GP, 2 lb.), pan flute (12 GP, 2 lb.), shawm (2 GP, 1 lb.), viol (30 GP, 1 lb.)"
+  },
+  {
+    "id": "navigators-tools",
+    "name": "Navigator’s Tools",
+    "category": "other",
+    "costCp": 2500,
+    "weightLb": 2,
+    "ability": "wis",
+    "utilize": "Plot a course (DC 10), or determine position by stargazing (DC 15)",
+    "craft": []
+  },
+  {
+    "id": "poisoners-kit",
+    "name": "Poisoner’s Kit",
+    "category": "other",
+    "costCp": 5000,
+    "weightLb": 2,
+    "ability": "int",
+    "utilize": "Detect a poisoned object (DC 10)",
+    "craft": ["Basic Poison"]
+  },
+  {
+    "id": "thieves-tools",
+    "name": "Thieves’ Tools",
+    "category": "other",
+    "costCp": 2500,
+    "weightLb": 1,
+    "ability": "dex",
+    "utilize": "Pick a lock (DC 15), or disarm a trap (DC 15)",
+    "craft": []
+  }
+]

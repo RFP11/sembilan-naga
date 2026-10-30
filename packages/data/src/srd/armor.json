@@ -1,0 +1,140 @@
+[
+  {
+    "id": "padded-armor",
+    "name": "Padded Armor",
+    "category": "light",
+    "ac": 11,
+    "addDex": true,
+    "stealthDisadvantage": true,
+    "weightLb": 8,
+    "costCp": 500
+  },
+  {
+    "id": "leather-armor",
+    "name": "Leather Armor",
+    "category": "light",
+    "ac": 11,
+    "addDex": true,
+    "stealthDisadvantage": false,
+    "weightLb": 10,
+    "costCp": 1000
+  },
+  {
+    "id": "studded-leather-armor",
+    "name": "Studded Leather Armor",
+    "category": "light",
+    "ac": 12,
+    "addDex": true,
+    "stealthDisadvantage": false,
+    "weightLb": 13,
+    "costCp": 4500
+  },
+  {
+    "id": "hide-armor",
+    "name": "Hide Armor",
+    "category": "medium",
+    "ac": 12,
+    "addDex": true,
+    "maxDex": 2,
+    "stealthDisadvantage": false,
+    "weightLb": 12,
+    "costCp": 1000
+  },
+  {
+    "id": "chain-shirt",
+    "name": "Chain Shirt",
+    "category": "medium",
+    "ac": 13,
+    "addDex": true,
+    "maxDex": 2,
+    "stealthDisadvantage": false,
+    "weightLb": 20,
+    "costCp": 5000
+  },
+  {
+    "id": "scale-mail",
+    "name": "Scale Mail",
+    "category": "medium",
+    "ac": 14,
+    "addDex": true,
+    "maxDex": 2,
+    "stealthDisadvantage": true,
+    "weightLb": 45,
+    "costCp": 5000
+  },
+  {
+    "id": "breastplate",
+    "name": "Breastplate",
+    "category": "medium",
+    "ac": 14,
+    "addDex": true,
+    "maxDex": 2,
+    "stealthDisadvantage": false,
+    "weightLb": 20,
+    "costCp": 40000
+  },
+  {
+    "id": "half-plate-armor",
+    "name": "Half Plate Armor",
+    "category": "medium",
+    "ac": 15,
+    "addDex": true,
+    "maxDex": 2,
+    "stealthDisadvantage": true,
+    "weightLb": 40,
+    "costCp": 75000
+  },
+  {
+    "id": "ring-mail",
+    "name": "Ring Mail",
+    "category": "heavy",
+    "ac": 14,
+    "addDex": false,
+    "stealthDisadvantage": true,
+    "weightLb": 40,
+    "costCp": 3000
+  },
+  {
+    "id": "chain-mail",
+    "name": "Chain Mail",
+    "category": "heavy",
+    "ac": 16,
+    "addDex": false,
+    "strength": 13,
+    "stealthDisadvantage": true,
+    "weightLb": 55,
+    "costCp": 7500
+  },
+  {
+    "id": "splint-armor",
+    "name": "Splint Armor",
+    "category": "heavy",
+    "ac": 17,
+    "addDex": false,
+    "strength": 15,
+    "stealthDisadvantage": true,
+    "weightLb": 60,
+    "costCp": 20000
+  },
+  {
+    "id": "plate-armor",
+    "name": "Plate Armor",
+    "category": "heavy",
+    "ac": 18,
+    "addDex": false,
+    "strength": 15,
+    "stealthDisadvantage": true,
+    "weightLb": 65,
+    "costCp": 150000
+  },
+  {
+    "id": "shield",
+    "name": "Shield",
+    "category": "shield",
+    "ac": 2,
+    "addDex": false,
+    "stealthDisadvantage": false,
+    "weightLb": 6,
+    "costCp": 1000
+  }
+]
