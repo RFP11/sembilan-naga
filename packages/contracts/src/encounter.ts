@@ -37,7 +37,7 @@ export type ReactionPrompt = z.infer<typeof reactionPrompt>;
 
 /** What's easy to forget on this turn; only for whoever controls the acting token. */
 export const turnReminder = z.object({
-  type: z.enum(["recharge", "trait", "feature", "concentration", "deathSave"]),
+  type: z.enum(["recharge", "trait", "feature", "concentration", "deathSave", "status"]),
   title: z.string(),
   detail: z.string(),
 });

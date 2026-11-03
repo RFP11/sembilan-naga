@@ -156,7 +156,15 @@ export function useUpdateToken(campaignId: string, sceneId: string) {
       await qc.cancelQueries({ queryKey: key });
       const before = qc.getQueryData<Token[]>(key);
       qc.setQueryData<Token[]>(key, (all) =>
-        all?.map((t) => (t.id === id ? { ...t, ...changes } : t)),
+        all?.map((t) => {
+          if (t.id !== id) return t;
+          const next = { ...t, ...changes } as Token;
+          // The server caps it at the maximum; show the same right away.
+          if (next.hpCurrent !== null && next.hpMax !== null) {
+            next.hpCurrent = Math.min(next.hpCurrent, next.hpMax);
+          }
+          return next;
+        }),
       );
       return { before };
     },
@@ -191,7 +199,12 @@ export function useEncounter(campaignId: string) {
       }
     };
     // Names, HP and who's hidden come from the tokens; whether it shows depends on the map.
-    const events = ["encounter:changed", "tokens:changed", "scene:changed"] as const;
+    const events = [
+      "encounter:changed",
+      "tokens:changed",
+      "scene:changed",
+      "character:updated",
+    ] as const;
     for (const event of events) socket.on(event, onChanged);
     return () => {
       for (const event of events) socket.off(event, onChanged);

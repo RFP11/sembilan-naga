@@ -1,24 +1,35 @@
 // Character sheet actions during play: HP, death saves, rests, state edits, inventory.
 // The owner and the campaign's GM may use them; dice are rolled here and logged.
 
-import { deriveCharacter, equippedDefense } from "@dnd/character";
+import {
+  classSpellLimits,
+  deriveCharacter,
+  equippedDefense,
+  slotForCasting,
+  spellChoiceProblem,
+} from "@dnd/character";
 import {
   addItemRequest,
   campaignRoom,
+  castSpellRequest,
   hpChangeRequest,
+  setClassSpellsRequest,
   shortRestRequest,
   statePatchRequest,
   updateItemRequest,
+  type CastResult,
   type Character,
   type User,
 } from "@dnd/contracts";
-import { armor, classes, gear, magicItems, tools, weapons } from "@dnd/data";
+import { armor, classes, gear, magicItems, spells, tools, weapons } from "@dnd/data";
 import {
   applyDamage,
   applyHealing,
   deathSave,
   grantTempHp,
   hitDicePool,
+  isStable,
+  setHitPoints,
   type HitPointState,
 } from "@dnd/rules";
 import { and, eq, sql } from "drizzle-orm";
@@ -29,7 +40,7 @@ import { requireUser } from "../auth/plugin";
 import { memberRole } from "../campaigns/membership";
 import { recordRoll } from "../campaigns/rolls";
 import type { Db } from "../db";
-import { characterItems, characterState } from "../db/schema";
+import { characterItems, characterSpells, characterState } from "../db/schema";
 import type { IO } from "../plugins/socket";
 import { loadCharacter } from "./repo";
 
@@ -110,6 +121,7 @@ export const playRoutes: FastifyPluginAsync<{ db: Db; io: IO }> = async (app, { 
       const character = await saveHp(c, result);
       return { ...character, dead: result.dead };
     }
+    if (type === "set") return saveHp(c, setHitPoints(hp, amount));
     return saveHp(c, type === "heal" ? applyHealing(hp, amount) : grantTempHp(hp, amount));
   });
 
@@ -118,6 +130,8 @@ export const playRoutes: FastifyPluginAsync<{ db: Db; io: IO }> = async (app, { 
     const c = await playable(req.user!, req.params, reply);
     if (!c) return;
     if (c.state.hpCurrent > 0) return reply.code(409).send({ error: "only at 0 Hit Points" });
+    if (isStable(hpState(c))) return reply.code(409).send({ error: "sudah stabil" });
+    if (c.state.deathSaves.fail >= 3) return reply.code(409).send({ error: "karakter sudah mati" });
     const d20 = die(20);
     const result = deathSave(hpState(c), d20);
     if (c.campaignId) {
@@ -132,6 +146,90 @@ export const playRoutes: FastifyPluginAsync<{ db: Db; io: IO }> = async (app, { 
     }
     const character = await saveHp(c, result);
     return { ...character, roll: d20, stable: result.stable, dead: result.dead };
+  });
+
+  /** Chooses a class's cantrips and prepared spells, within what the class table allows. */
+  app.put("/characters/:id/spells/:classId", async (req, reply) => {
+    const c = await playable(req.user!, req.params, reply);
+    if (!c) return;
+    const parsed = setClassSpellsRequest.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid payload" });
+    const { classId } = req.params as { classId: string };
+    const derived = deriveCharacter(c.build, equippedDefense(c.items));
+    const limits = classSpellLimits(derived.classes).find((l) => l.classId === classId);
+    if (!limits) return reply.code(400).send({ error: "class itu tidak punya spell" });
+    const problem = spellChoiceProblem(limits, parsed.data.spellIds);
+    if (problem) return reply.code(400).send({ error: problem });
+
+    const spellIds = [...new Set(parsed.data.spellIds)];
+    await db.orm.transaction(async (tx) => {
+      await tx
+        .delete(characterSpells)
+        .where(and(eq(characterSpells.characterId, c.id), eq(characterSpells.source, classId)));
+      if (spellIds.length) {
+        await tx.insert(characterSpells).values(
+          spellIds.map((spellId) => ({
+            characterId: c.id,
+            spellId,
+            source: classId,
+            prepared: true,
+          })),
+        );
+      }
+    });
+    await changed(c);
+    return { ok: true };
+  });
+
+  /** Casts a spell the character has: spends the slot and starts any concentration. */
+  app.post("/characters/:id/cast", async (req, reply) => {
+    const c = await playable(req.user!, req.params, reply);
+    if (!c) return;
+    const parsed = castSpellRequest.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid payload" });
+    const { spellId, slotLevel: wanted } = parsed.data;
+
+    const spell = spells.find((s) => s.id === spellId);
+    const [known] = await db.orm
+      .select({ spellId: characterSpells.spellId })
+      .from(characterSpells)
+      .where(and(eq(characterSpells.characterId, c.id), eq(characterSpells.spellId, spellId)));
+    if (!spell || !known) return reply.code(400).send({ error: "spell itu belum disiapkan" });
+
+    const slotsUsed = c.state.spellSlotsUsed as Record<string, number>;
+    let slot: { level: number; pact: boolean } | null = null;
+    if (spell.level > 0) {
+      const derived = deriveCharacter(c.build, equippedDefense(c.items));
+      slot = slotForCasting(
+        derived,
+        { slots: slotsUsed, pact: c.state.pactSlotsUsed },
+        spell.level,
+        wanted,
+      );
+      if (!slot) return reply.code(409).send({ error: "tidak ada slot yang cocok tersisa" });
+    }
+
+    const previous = c.state.concentratingOn;
+    await db.orm
+      .update(characterState)
+      .set({
+        ...(slot &&
+          !slot.pact && {
+            spellSlotsUsed: { ...slotsUsed, [slot.level]: (slotsUsed[slot.level] ?? 0) + 1 },
+          }),
+        ...(slot?.pact && { pactSlotsUsed: c.state.pactSlotsUsed + 1 }),
+        ...(spell.concentration && { concentratingOn: spell.name }),
+        version: sql`${characterState.version} + 1`,
+      })
+      .where(eq(characterState.characterId, c.id));
+    await changed(c);
+    return {
+      slotLevel: slot?.level ?? null,
+      pact: slot?.pact ?? false,
+      concentrating: spell.concentration ? spell.name : null,
+      endedConcentration:
+        spell.concentration && previous && previous !== spell.name ? previous : null,
+    } satisfies CastResult;
   });
 
   app.patch("/characters/:id/state", async (req, reply) => {

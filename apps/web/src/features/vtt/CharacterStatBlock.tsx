@@ -1,16 +1,17 @@
 import { checkBonuses, deriveCharacter, equippedDefense, weaponAttacks } from "@dnd/character";
-import { backgrounds, classes, feats, languages, species, spells as allSpells } from "@dnd/data";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { backgrounds, classes, feats, languages, species } from "@dnd/data";
+import type { Character } from "@dnd/contracts";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useMemo, useState } from "react";
 import { api } from "../../lib/api";
 import { Prose } from "../../lib/Prose";
 import { socket } from "../../lib/socket";
 import { useCharacter } from "../characters/api";
 import { ABILITY_SHORT, ALIGNMENTS, classSummary, signed, speciesName } from "../characters/labels";
+import { CharacterSpells } from "../characters/sheet/CharacterSpells";
 import { itemName } from "../characters/sheet/Inventory";
 import { useAttackFlow } from "./attackFlow";
 import { d20, RollButton, RollResult, useRoller } from "./rolls";
-import { SpellList } from "./SpellList";
 
 const COINS = ["pp", "gp", "ep", "sp", "cp"] as const;
 
@@ -35,6 +36,101 @@ function FeatureItems({ features }: { features: Feature[] }) {
           <Prose text={f.description} />
         </details>
       ))}
+    </>
+  );
+}
+
+/** Fixing HP by hand, and death saves at 0 HP, right on the sheet at the table. */
+function HpControls({ character }: { character: Character }) {
+  const qc = useQueryClient();
+  const [value, setValue] = useState("");
+  const refresh = () => void qc.invalidateQueries({ queryKey: ["character", character.id] });
+  const setHp = useMutation({
+    mutationFn: (amount: number) =>
+      api(`/characters/${character.id}/hp`, { body: { type: "set", amount } }),
+    onSuccess: () => setValue(""),
+    onSettled: refresh,
+  });
+  const deathSave = useMutation({
+    mutationFn: () => api(`/characters/${character.id}/death-save`, { method: "POST" }),
+    onSettled: refresh,
+  });
+  const stabilize = useMutation({
+    mutationFn: () =>
+      api(`/characters/${character.id}/state`, {
+        method: "PATCH",
+        body: { version: character.state!.version, deathSaves: { success: 3, fail: 0 } },
+      }),
+    onSettled: refresh,
+  });
+  const state = character.state;
+  if (!state) return null;
+  const { success, fail } = state.deathSaves;
+  const error = setHp.error ?? deathSave.error ?? stabilize.error;
+
+  return (
+    <>
+      {state.hpCurrent === 0 && (
+        <div className="death-saves">
+          <p>
+            <b>Death save:</b> sukses {success}/3 · gagal {fail}/3
+          </p>
+          {fail >= 3 ? (
+            <p className="death-dead">
+              <b>Mati.</b>
+            </p>
+          ) : success >= 3 ? (
+            <p className="death-stable">
+              <b>Stabil.</b> Tidak perlu death save lagi. HP tetap 0 sampai pulih 1 HP setelah 1d4
+              jam, atau disembuhkan.
+            </p>
+          ) : (
+            <span className="death-actions">
+              <button
+                type="button"
+                className="btn btn-red btn-small"
+                disabled={deathSave.isPending}
+                onClick={() => deathSave.mutate()}
+              >
+                Lempar death save
+              </button>
+              <button
+                type="button"
+                className="btn btn-plain btn-small"
+                title="Berhasil distabilkan dengan Help dan Medicine DC 10"
+                disabled={stabilize.isPending}
+                onClick={() => stabilize.mutate()}
+              >
+                Stabilkan
+              </button>
+            </span>
+          )}
+        </div>
+      )}
+      <form
+        className="hp-controls"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (value !== "") setHp.mutate(Number(value));
+        }}
+      >
+        <input
+          type="number"
+          min={0}
+          aria-label="HP baru"
+          placeholder="HP"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        <button type="submit" className="roll-btn" disabled={value === "" || setHp.isPending}>
+          Set HP
+        </button>
+      </form>
+      {error && (
+        <p className="form-error" role="alert">
+          {error.message}
+        </p>
+      )}
     </>
   );
 }
@@ -64,10 +160,6 @@ export function CharacterStatBlock({
   const flow = useAttackFlow();
   const qc = useQueryClient();
   const character = query.data;
-  const granted = useQuery({
-    queryKey: ["character-spells", characterId],
-    queryFn: () => api<{ spellId: string | null }[]>(`/characters/${characterId}/spells`),
-  });
 
   useEffect(() => {
     const onUpdated = (e: { characterId: string }) => {
@@ -147,24 +239,6 @@ export function CharacterStatBlock({
     return list;
   }, [character, derived]);
 
-  /** Spells the character's classes can reach at its level, plus any it was granted. */
-  const spells = useMemo(() => {
-    if (!derived) return { own: [], fromClass: [] };
-    const ids = new Set((granted.data ?? []).map((g) => g.spellId));
-    const highest = Math.max(
-      derived.spellSlots.reduce((top, n, i) => (n > 0 ? i + 1 : top), 0),
-      derived.pactMagic?.slotLevel ?? 0,
-    );
-    const casterClasses = derived.spellcasting.map((c) => c.classId);
-    return {
-      own: allSpells.filter((x) => ids.has(x.id)),
-      fromClass: allSpells.filter(
-        (x) =>
-          !ids.has(x.id) && x.level <= highest && x.classes.some((c) => casterClasses.includes(c)),
-      ),
-    };
-  }, [derived, granted.data]);
-
   if (query.isPending) return <p className="ink-soft">Memuat karakter…</p>;
   if (query.error || !character || !derived || !bonuses) {
     return (
@@ -242,6 +316,8 @@ export function CharacterStatBlock({
           <dd>{signed(derived.proficiencyBonus)}</dd>
         </div>
       </dl>
+
+      <HpControls character={character} />
 
       <table className="stat-abilities">
         <thead>
@@ -407,39 +483,13 @@ export function CharacterStatBlock({
               </RollButton>
             </p>
           ))}
-          {derived.spellSlots.some((n) => n > 0) && (
-            <p>
-              <b>Slot:</b>{" "}
-              {derived.spellSlots
-                .map((total, i) => (total > 0 ? `L${i + 1} × ${total}` : ""))
-                .filter(Boolean)
-                .join(", ")}
-            </p>
-          )}
-          {derived.pactMagic && (
-            <p>
-              <b>Pact:</b> {derived.pactMagic.slots} slot level {derived.pactMagic.slotLevel}
-            </p>
-          )}
         </details>
       )}
 
-      {spells.own.length > 0 && (
-        <details className="stat-section" open>
-          <summary>Spell dimiliki ({spells.own.length})</summary>
-          <SpellList spells={spells.own} />
-        </details>
-      )}
-      {spells.fromClass.length > 0 && (
-        <details className="stat-section">
-          <summary>Spell class ({spells.fromClass.length})</summary>
-          <p className="ink-soft stat-hint">
-            Semua spell yang bisa dicapai class dan level ini. Pilih yang disiapkan sesuai aturan
-            class-mu.
-          </p>
-          <SpellList spells={spells.fromClass} search />
-        </details>
-      )}
+      <details className="stat-section" open>
+        <summary>Spell</summary>
+        <CharacterSpells character={character} derived={derived} />
+      </details>
 
       <details className="stat-section" open>
         <summary>Inventaris ({character.items.length})</summary>

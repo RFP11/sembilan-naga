@@ -25,6 +25,7 @@ export function TokenDetails({
   const update = useUpdateToken(campaignId, token.sceneId);
   const remove = useDeleteToken(campaignId, token.sceneId);
   const [name, setName] = useState(token.name);
+  const [hpValue, setHpValue] = useState("");
   const error = update.error ?? remove.error;
 
   const changeHp = (by: number) => {
@@ -64,6 +65,27 @@ export function TokenDetails({
                     +5
                   </button>
                 </span>
+                <form
+                  className="token-hp-set"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (hpValue === "") return;
+                    update.mutate({ id: token.id, hpCurrent: Math.max(0, Number(hpValue)) });
+                    setHpValue("");
+                  }}
+                >
+                  <input
+                    type="number"
+                    min={0}
+                    aria-label="HP baru"
+                    placeholder="HP"
+                    value={hpValue}
+                    onChange={(e) => setHpValue(e.target.value)}
+                  />
+                  <button type="submit" className="roll-btn" disabled={hpValue === ""}>
+                    Set HP
+                  </button>
+                </form>
               </div>
             )}
             <label className="calib-check">

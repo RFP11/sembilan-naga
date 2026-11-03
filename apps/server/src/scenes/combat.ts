@@ -214,7 +214,7 @@ const firstSentence = (text: string) => /^.*?[.!?](\s|$)/s.exec(text)?.[0]?.trim
 /** What's easy to forget at the start of this token's turn. */
 export function turnReminders(token: TokenRow, character: ReadyCharacter | null) {
   const reminders: {
-    type: "recharge" | "trait" | "feature" | "concentration" | "deathSave";
+    type: "recharge" | "trait" | "feature" | "concentration" | "deathSave" | "status";
     title: string;
     detail: string;
   }[] = [];
@@ -234,11 +234,23 @@ export function turnReminders(token: TokenRow, character: ReadyCharacter | null)
 
   if (character) {
     if (character.state.hpCurrent === 0) {
-      reminders.push({
-        type: "deathSave",
-        title: "Death Saving Throw",
-        detail: `HP 0: lempar di awal giliran. Sukses ${character.state.deathSaves.success}, gagal ${character.state.deathSaves.fail}.`,
-      });
+      const { success, fail } = character.state.deathSaves;
+      if (fail >= 3) {
+        reminders.push({ type: "status", title: "Mati", detail: "3 kali gagal death save." });
+      } else if (success >= 3) {
+        reminders.push({
+          type: "status",
+          title: "Stabil",
+          detail:
+            "HP 0, tidak perlu death save. Pulih 1 HP setelah 1d4 jam, atau saat disembuhkan.",
+        });
+      } else {
+        reminders.push({
+          type: "deathSave",
+          title: "Death Saving Throw",
+          detail: `HP 0: lempar di awal giliran. Sukses ${success}, gagal ${fail}.`,
+        });
+      }
     }
     if (character.state.concentratingOn) {
       reminders.push({

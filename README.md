@@ -226,6 +226,10 @@ bisa dilempar setelah kena (`pending_attacks`, sekali pakai). Damage langsung me
 memperhitungkan kritis, resistance, immunity, dan concentration. Opportunity attack muncul saat
 token keluar dari jangkauan musuh pada gilirannya sendiri (`reaction_prompts`).
 
+Spell karakter ada di `character_spells`: pilihan per class (dibatasi tabel class SRD lewat
+`packages/character/src/spells.ts`) dan pemberian species. `POST /characters/:id/cast` memakai slot
+terendah yang cocok, atau Pact Magic lebih dulu, dan mengisi concentration.
+
 ## Menambah event real-time
 
 1. Tambah skema + tipe di `packages/contracts/src/socket.ts`

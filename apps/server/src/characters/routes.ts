@@ -68,7 +68,12 @@ export const characterRoutes: FastifyPluginAsync<{ db: Db }> = async (app, { db 
     const c = await visible(req.user!, req.params, reply);
     if (!c) return;
     return db.orm
-      .select({ spellId: characterSpells.spellId, source: characterSpells.source })
+      .select({
+        spellId: characterSpells.spellId,
+        source: characterSpells.source,
+        prepared: characterSpells.prepared,
+        alwaysPrepared: characterSpells.alwaysPrepared,
+      })
       .from(characterSpells)
       .where(eq(characterSpells.characterId, c.id));
   });
