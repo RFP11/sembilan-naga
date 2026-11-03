@@ -18,6 +18,13 @@ const env = z
     GOOGLE_CLIENT_SECRET: z.string().optional(),
     /** Quick login as a seed user. Ignored when NODE_ENV=production. */
     DEV_LOGIN: flag.default(false),
+    /** The campaign the public page promotes; registrations stay closed while unset. */
+    PROMO_CAMPAIGN_ID: z.uuid().or(z.literal("")).optional(),
+    /** MinIO, for character sheets and map images. Registrations stay closed while unset. */
+    S3_ENDPOINT: z.url().or(z.literal("")).optional(),
+    S3_BUCKET: z.string().default("dnd-serpih"),
+    S3_ACCESS_KEY: z.string().optional(),
+    S3_SECRET_KEY: z.string().optional(),
   })
   .parse(process.env);
 

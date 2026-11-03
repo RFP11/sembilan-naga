@@ -2,6 +2,9 @@ import type { Campaign } from "@dnd/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { api } from "../../lib/api";
+import { Ribbon } from "../promo/parts";
+
+const ROLE_LABEL = { gm: "DM", player: "Pemain", spectator: "Penonton" } as const;
 
 export function useCampaigns() {
   return useQuery({ queryKey: ["campaigns"], queryFn: () => api<Campaign[]>("/campaigns") });
@@ -32,46 +35,71 @@ export function CampaignPicker({ onPick }: { onPick: (id: string) => void }) {
   };
 
   return (
-    <div className="centered">
-      <h1>Campaigns</h1>
-      {campaigns.isPending && <p className="muted">Loading…</p>}
-      {campaigns.error && <p className="error">{campaigns.error.message}</p>}
-      <ul className="stack menu">
+    <section className="wrap block camp-picker">
+      <Ribbon color="teal">Meja permainan</Ribbon>
+      <h1 className="on-wood-title">Pilih campaign</h1>
+      {campaigns.isPending && <p className="on-wood">Memuat…</p>}
+      {campaigns.error && (
+        <p className="on-wood" role="alert">
+          {campaigns.error.message}
+        </p>
+      )}
+
+      {campaigns.data?.length === 0 && (
+        <p className="on-wood section-lead">Kamu belum ikut campaign apa pun.</p>
+      )}
+      <ul className="camp-list">
         {campaigns.data?.map((c) => (
           <li key={c.id}>
-            <button onClick={() => onPick(c.id)}>
-              {c.name} <span className="muted">{c.role === "gm" ? "GM" : c.role}</span>
+            <button type="button" className="camp-card" onClick={() => onPick(c.id)}>
+              <span className="camp-name">{c.name}</span>
+              <span
+                className={`status-tag ${c.role === "gm" ? "status-pending" : "status-accepted"}`}
+              >
+                {ROLE_LABEL[c.role]}
+              </span>
             </button>
           </li>
         ))}
-        {campaigns.data?.length === 0 && <li className="muted">You're not in any campaign yet.</li>}
       </ul>
 
-      <form className="row" onSubmit={submit(create)}>
-        <input
-          placeholder="New campaign name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={create.isPending}>
-          Create
-        </button>
-      </form>
-      {create.error && <p className="error">{create.error.message}</p>}
+      <div className="camp-forms">
+        <form className="parchment" onSubmit={submit(create)}>
+          <div className="parchment-body">
+            <h2>Buat campaign</h2>
+            <label>
+              Nama campaign
+              <input value={name} onChange={(e) => setName(e.target.value)} required />
+            </label>
+            {create.error && (
+              <p className="form-error" role="alert">
+                {create.error.message}
+              </p>
+            )}
+            <button type="submit" className="btn btn-teal" disabled={create.isPending}>
+              Buat
+            </button>
+          </div>
+        </form>
 
-      <form className="row" onSubmit={submit(join)}>
-        <input
-          placeholder="Invite code"
-          value={code}
-          onChange={(e) => setCode(e.target.value)}
-          required
-        />
-        <button type="submit" disabled={join.isPending}>
-          Join
-        </button>
-      </form>
-      {join.error && <p className="error">{join.error.message}</p>}
-    </div>
+        <form className="parchment" onSubmit={submit(join)}>
+          <div className="parchment-body">
+            <h2>Gabung dengan kode</h2>
+            <label>
+              Kode undangan
+              <input value={code} onChange={(e) => setCode(e.target.value)} required />
+            </label>
+            {join.error && (
+              <p className="form-error" role="alert">
+                {join.error.message}
+              </p>
+            )}
+            <button type="submit" className="btn btn-plain" disabled={join.isPending}>
+              Gabung
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
   );
 }

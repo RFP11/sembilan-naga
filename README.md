@@ -86,6 +86,57 @@ Cek koneksi database kapan saja di http://localhost:5173/api/health (`"db": "up"
 
 Session disimpan di cookie httpOnly; tabel `sessions` hanya menyimpan hash token-nya.
 
+## Halaman promosi campaign
+
+| URL       | Isi                                              | Login       |
+| --------- | ------------------------------------------------ | ----------- |
+| `/`       | Promosi Serpih Langit: peta, pulau awal, faksi   | Tidak       |
+| `/daftar` | Form registrasi dengan upload character sheet    | Ya          |
+| `/dm`     | Pilih era peta, tinjau dan terima para pendaftar | Ya, GM saja |
+| `/app`    | VTT, karakter, dan kompendium                    | Ya          |
+
+- `PROMO_CAMPAIGN_ID` menentukan campaign yang dipromosikan. Di development pakai campaign seed
+  (lihat `.env.example`). Di production, buat campaign di `/app` sebagai DM, lalu isi id-nya.
+- Teks tiap era ada di `apps/server/src/promo/world.ts` dan hanya dikirim untuk era yang sedang
+  aktif. Jangan menaruh rahasia DM di sana, atau konten era di `apps/web`.
+- Character sheet (`sheets/`) dan gambar peta (`map/`) disimpan di bucket MinIO privat. Browser
+  tidak pernah mengakses MinIO langsung: server memeriksa login, role, dan era dulu, baru
+  mengalirkan isi filenya. Gambar peta tidak ada di git.
+
+Co-DM adalah anggota campaign dengan role `gm`, jadi haknya sama dengan DM di `/dm` dan di meja.
+Hanya pemilik campaign (`campaigns.owner_id`) yang bisa mengundang dan mencabut. Undangan dibuat
+di `/dm`: link sekali pakai yang terikat ke satu email Google dan berlaku 7 hari. Database hanya
+menyimpan hash tokennya, jadi link tidak bisa ditampilkan ulang.
+
+Catatan campaign ada di `/dm/catatan`: catatan bersama DM dan co-DM, per pulau dan per nomor sesi.
+Pemain tidak bisa membukanya. Dua DM yang mengubah catatan yang sama tidak saling menimpa: yang
+menyimpan belakangan mendapat peringatan dan tulisannya tetap ada di form.
+
+Menyiapkan MinIO (sekali saja; pakai kredensial admin MinIO, aplikasi mendapat user sendiri
+yang hanya bisa mengakses bucket ini, dan kredensialnya ditulis ke `.env`):
+
+```bash
+scripts/minio-setup.sh ~/minio-setup/minio.env
+pnpm promo:upload-map          # dari apps/server/promo-assets, atau: pnpm promo:upload-map <folder>
+```
+
+Selama `S3_*` kosong, pendaftaran tertutup dan peta tanpa gambar. Test memakai penyimpanan di
+memori, jadi `pnpm test` tidak butuh MinIO.
+
+### Production di `dnd.rfp11.com`
+
+Aplikasi dibuka lewat Cloudflare Tunnel. Arahkan _published application_ ke build production,
+bukan ke `pnpm dev`: Dev login hanya mati saat `NODE_ENV=production`, dan selama aktif siapa pun
+bisa masuk sebagai user seed, termasuk GM.
+
+1. Di Google Cloud Console, tambahkan _Authorized redirect URI_
+   `https://dnd.rfp11.com/api/auth/google/callback`.
+2. Jalankan dengan `PUBLIC_URL=https://dnd.rfp11.com`, `S3_ENDPOINT=https://s3.rfp11.com`, dan
+   `S3_ACCESS_KEY`/`S3_SECRET_KEY` dari `.env`. `PUBLIC_URL` https juga membuat cookie session
+   `Secure`.
+3. Login dengan Google di `https://dnd.rfp11.com/app`, buat campaign Serpih Langit, lalu isi
+   `PROMO_CAMPAIGN_ID` dengan id-nya dan restart.
+
 ## Database
 
 | Perintah           | Fungsi                                                                        |
@@ -149,6 +200,31 @@ Aturan skema:
 - Mengubah `packages/contracts`? Update web dan server di PR yang sama.
 - Kode di `packages/rules` harus murni (tanpa I/O, randomness di-inject) dan selalu disertai test.
 - Satu issue per fitur. Nama branch: `feat/vtt-fog-of-war`, `fix/dice-parser`, dst.
+
+## Peta
+
+DM mengunggah peta di tab Meja (PNG, JPG, atau WebP, maksimal 25 MB dan 8192 piksel per sisi).
+Gambarnya disimpan di bucket MinIO (`scenes/`) dan dikirim lewat server, jadi peta yang belum
+ditayangkan tidak bisa dilihat pemain.
+
+Skala disimpan sebagai jumlah piksel gambar per kotak grid (`scenes.grid_px`) dan posisi garis
+pertamanya (`offset_x`, `offset_y`). Di papan, satu kotak selalu seukuran token Medium, jadi peta
+yang diperbesar atau diperkecil mengikuti token, bukan sebaliknya.
+
+Token tersimpan per peta (`tokens`). Hanya DM yang bisa menambah, mengubah, dan menghapus; DM bisa
+menggeser semua token, pemain hanya token karakternya sendiri. Server tidak pernah mengirim token
+tersembunyi atau HP ke pemain, jadi `tokens:changed` hanya menyuruh client mengambil ulang dan
+geseran token tersembunyi hanya dikirim ke room DM (`campaignGmRoom`).
+
+Encounter (`encounters`, `combatants`) satu per campaign dan dihapus saat selesai. Inisiatif
+dilempar server dari bonus monster atau karakter. Urutan selalu dihitung dari inisiatif tertinggi;
+yang dikirim ke client sudah diputar mulai dari yang sedang giliran, jadi kartu yang selesai
+pindah ke bawah. Peserta tersembunyi tidak dikirim ke pemain.
+
+Serangan (`scenes/attacks.ts`) dilempar di server: pilih target, lempar lawan AC, dan damage hanya
+bisa dilempar setelah kena (`pending_attacks`, sekali pakai). Damage langsung mengurangi HP target,
+memperhitungkan kritis, resistance, immunity, dan concentration. Opportunity attack muncul saat
+token keluar dari jangkauan musuh pada gilirannya sendiri (`reaction_prompts`).
 
 ## Menambah event real-time
 
