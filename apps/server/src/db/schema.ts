@@ -5,12 +5,14 @@ import { sql } from "drizzle-orm";
 import {
   boolean,
   check,
+  doublePrecision,
   index,
   integer,
   jsonb,
   pgEnum,
   pgTable,
   primaryKey,
+  type AnyPgColumn,
   smallint,
   text,
   timestamp,
@@ -63,6 +65,10 @@ export const campaigns = pgTable("campaigns", {
   inviteCode: text("invite_code").notNull().unique(),
   /** Validated by `campaignSettings` in @dnd/contracts. */
   settings: jsonb().notNull().default({}),
+  /** The map on the table for everyone; other scenes stay hidden from players. */
+  activeSceneId: uuid("active_scene_id").references((): AnyPgColumn => scenes.id, {
+    onDelete: "set null",
+  }),
   createdAt: createdAt(),
 });
 
@@ -86,6 +92,230 @@ export const campaignMembers = pgTable(
   ],
 );
 
+export const registrationStatus = pgEnum("registration_status", [
+  "pending",
+  "accepted",
+  "rejected",
+]);
+
+/** Sign-ups from the public campaign page; the DM reviews them. One per account. */
+export const campaignRegistrations = pgTable(
+  "campaign_registrations",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    playerName: text("player_name").notNull(),
+    characterName: text("character_name").notNull(),
+    /** Island id from the server's world data; it also decides the faction. */
+    startIsland: text("start_island").notNull(),
+    /** Object name under `sheets/` in the storage bucket. */
+    sheetKey: text("sheet_key").notNull(),
+    /** The name the player's file had; display only. */
+    sheetName: text("sheet_name").notNull(),
+    sheetMime: text("sheet_mime").notNull(),
+    sheetBytes: integer("sheet_bytes").notNull(),
+    status: registrationStatus().notNull().default("pending"),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex("registrations_campaign_user_idx").on(t.campaignId, t.userId)],
+);
+
+/**
+ * Invitations to become a co-DM. Each is tied to one email address and works once. Like
+ * sessions, only the SHA-256 of the token is stored, so a leaked table can't be replayed.
+ */
+export const coDmInvites = pgTable(
+  "co_dm_invites",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    /** Stored lowercased; must match the account that accepts. */
+    email: text().notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    invitedBy: uuid("invited_by")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [index("co_dm_invites_campaign_idx").on(t.campaignId)],
+);
+
+/** Shared DM notes. Each island runs its own sessions, so notes belong to an island and session. */
+export const campaignNotes = pgTable(
+  "campaign_notes",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    /** Island id, validated by the server; includes the hidden island. */
+    islandId: text("island_id").notNull(),
+    sessionNumber: smallint("session_number").notNull(),
+    title: text().notNull(),
+    body: text().notNull(),
+    /** Kept when an account goes away, so the note survives it. */
+    authorId: uuid("author_id").references(() => users.id, { onDelete: "set null" }),
+    updatedById: uuid("updated_by_id").references(() => users.id, { onDelete: "set null" }),
+    /** Bumped on every edit; clients send it back to detect concurrent edits. */
+    version: integer().notNull().default(0),
+    createdAt: createdAt(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index("campaign_notes_island_idx").on(t.campaignId, t.islandId, t.sessionNumber),
+    check("campaign_notes_session_range", sql`${t.sessionNumber} between 1 and 9999`),
+  ],
+);
+
+/**
+ * Battle maps. The image lives in object storage; the grid says how many image pixels one square
+ * spans, which is the space of a Medium token, and where the first line falls.
+ */
+export const scenes = pgTable(
+  "scenes",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => campaigns.id, { onDelete: "cascade" }),
+    name: text().notNull(),
+    /** Object name under `scenes/` in the storage bucket. */
+    mapKey: text("map_key").notNull(),
+    mapMime: text("map_mime").notNull(),
+    widthPx: integer("width_px").notNull(),
+    heightPx: integer("height_px").notNull(),
+    gridPx: doublePrecision("grid_px").notNull(),
+    offsetX: doublePrecision("offset_x").notNull().default(0),
+    offsetY: doublePrecision("offset_y").notNull().default(0),
+    gridVisible: boolean("grid_visible").notNull().default(true),
+    createdAt: createdAt(),
+  },
+  (t) => [index("scenes_campaign_idx").on(t.campaignId)],
+);
+
+export const tokenKind = pgEnum("token_kind", ["monster", "npc", "character", "object"]);
+export const tokenSize = pgEnum("token_size", [
+  "tiny",
+  "small",
+  "medium",
+  "large",
+  "huge",
+  "gargantuan",
+]);
+
+/** Tokens on a map. x and y are grid cells, for the token's top-left corner. */
+export const tokens = pgTable(
+  "tokens",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    sceneId: uuid("scene_id")
+      .notNull()
+      .references(() => scenes.id, { onDelete: "cascade" }),
+    kind: tokenKind().notNull(),
+    name: text().notNull(),
+    size: tokenSize().notNull().default("medium"),
+    /** SRD slug; stat blocks live in @dnd/data, not the database. */
+    monsterId: text("monster_id"),
+    characterId: uuid("character_id").references(() => characters.id, { onDelete: "cascade" }),
+    x: integer().notNull(),
+    y: integer().notNull(),
+    hidden: boolean().notNull().default(false),
+    hpCurrent: integer("hp_current"),
+    hpMax: integer("hp_max"),
+    /** For NPCs and objects; monsters and characters have theirs elsewhere. */
+    ac: integer(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index("tokens_scene_idx").on(t.sceneId),
+    // One token per character on a map; other kinds have no character and don't collide.
+    uniqueIndex("tokens_scene_character_idx").on(t.sceneId, t.characterId),
+  ],
+);
+
+/** The fight in progress; one per campaign. It's deleted when it ends. */
+export const encounters = pgTable("encounters", {
+  id: uuid().primaryKey().defaultRandom(),
+  campaignId: uuid("campaign_id")
+    .notNull()
+    .unique()
+    .references(() => campaigns.id, { onDelete: "cascade" }),
+  sceneId: uuid("scene_id")
+    .notNull()
+    .references(() => scenes.id, { onDelete: "cascade" }),
+  round: integer().notNull().default(1),
+  /** Who is acting. Not a foreign key: this row and its combatants refer to each other. */
+  currentCombatantId: uuid("current_combatant_id"),
+  createdAt: createdAt(),
+});
+
+export const combatants = pgTable(
+  "combatants",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    encounterId: uuid("encounter_id")
+      .notNull()
+      .references(() => encounters.id, { onDelete: "cascade" }),
+    /** Name and HP are read from the token, so changes there show here too. */
+    tokenId: uuid("token_id")
+      .notNull()
+      .references(() => tokens.id, { onDelete: "cascade" }),
+    initiative: integer().notNull(),
+    reactionUsed: boolean("reaction_used").notNull().default(false),
+  },
+  (t) => [
+    uniqueIndex("combatants_encounter_token_idx").on(t.encounterId, t.tokenId),
+    index("combatants_token_idx").on(t.tokenId),
+  ],
+);
+
+/** Someone left an enemy's reach, and it hasn't answered yet. Cleared when the turn moves on. */
+export const reactionPrompts = pgTable(
+  "reaction_prompts",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    encounterId: uuid("encounter_id")
+      .notNull()
+      .references(() => encounters.id, { onDelete: "cascade" }),
+    reactorTokenId: uuid("reactor_token_id")
+      .notNull()
+      .references(() => tokens.id, { onDelete: "cascade" }),
+    targetTokenId: uuid("target_token_id")
+      .notNull()
+      .references(() => tokens.id, { onDelete: "cascade" }),
+  },
+  (t) => [uniqueIndex("reaction_prompts_unique_idx").on(t.encounterId, t.reactorTokenId)],
+);
+
+/** A hit whose damage hasn't been rolled. Kept on the server so damage can't follow a miss. */
+export const pendingAttacks = pgTable("pending_attacks", {
+  id: uuid().primaryKey().defaultRandom(),
+  attackerTokenId: uuid("attacker_token_id")
+    .notNull()
+    .references(() => tokens.id, { onDelete: "cascade" }),
+  targetTokenId: uuid("target_token_id")
+    .notNull()
+    .references(() => tokens.id, { onDelete: "cascade" }),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  name: text().notNull(),
+  critical: boolean().notNull(),
+  secret: boolean().notNull(),
+  damage: jsonb().notNull(),
+  createdAt: createdAt(),
+});
+
 // ── Chat & dice log ──────────────────────────────────────────────────────────────
 
 export const messageKind = pgEnum("message_kind", ["text", "roll", "system"]);
@@ -104,6 +334,8 @@ export const chatMessages = pgTable(
     rolls: integer().array(),
     total: integer(),
     label: text(),
+    /** A DM's roll that players don't see. */
+    secret: boolean().notNull().default(false),
     createdAt: createdAt(),
   },
   (t) => [

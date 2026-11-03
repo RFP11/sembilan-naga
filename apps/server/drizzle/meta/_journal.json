@@ -15,6 +15,62 @@
       "when": 1793384927637,
       "tag": "0001_characters",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793673893471,
+      "tag": "0002_promo_registrations",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793677463899,
+      "tag": "0003_co_dm_invites",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793680770632,
+      "tag": "0004_campaign_notes",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793682207927,
+      "tag": "0005_scenes",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793688364979,
+      "tag": "0006_tokens",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793692150612,
+      "tag": "0007_encounters",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1793693045522,
+      "tag": "0008_secret_rolls",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1793693860303,
+      "tag": "0009_combat",
+      "breakpoints": true
     }
   ]
 }

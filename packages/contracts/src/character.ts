@@ -168,7 +168,8 @@ export type BuildIssue = z.infer<typeof buildIssue>;
 
 /** HP changes are applied on the server with the damage rules (temp HP, death saves). */
 export const hpChangeRequest = z.object({
-  type: z.enum(["damage", "heal", "temp"]),
+  /** "set" is a correction by hand: it makes HP exactly this amount. */
+  type: z.enum(["damage", "heal", "temp", "set"]),
   amount: z.number().int().min(0).max(10_000),
   /** Damage at 0 HP from a Critical Hit counts as two Death Save failures. */
   critical: z.boolean().default(false),
@@ -188,6 +189,37 @@ export const statePatchRequest = z.object({
   concentratingOn: z.string().nullable().optional(),
 });
 export type StatePatchRequest = z.infer<typeof statePatchRequest>;
+
+/** A spell a character has: chosen for a class, or granted, such as by its species. */
+export const characterSpell = z.object({
+  spellId: z.string().nullable(),
+  source: z.string(),
+  prepared: z.boolean(),
+  alwaysPrepared: z.boolean(),
+});
+export type CharacterSpell = z.infer<typeof characterSpell>;
+
+/** The full choice for one class, replacing what it had. Limits are checked on the server. */
+export const setClassSpellsRequest = z.object({ spellIds: z.array(slug).max(100) });
+export type SetClassSpellsRequest = z.infer<typeof setClassSpellsRequest>;
+
+export const castSpellRequest = z.object({
+  spellId: slug,
+  /** Casting it higher than it needs; without this, the lowest slot that works. */
+  slotLevel: z.number().int().min(1).max(9).optional(),
+});
+export type CastSpellRequest = z.infer<typeof castSpellRequest>;
+
+export const castResult = z.object({
+  /** Null for a cantrip. */
+  slotLevel: z.number().int().nullable(),
+  pact: z.boolean(),
+  /** The spell now being concentrated on, when this one needs it. */
+  concentrating: z.string().nullable(),
+  /** The spell this one replaced: only one can be concentrated on at a time. */
+  endedConcentration: z.string().nullable(),
+});
+export type CastResult = z.infer<typeof castResult>;
 
 /** Hit Point Dice to spend, by die size: { "10": 2 } spends two d10s. */
 export const shortRestRequest = z.object({

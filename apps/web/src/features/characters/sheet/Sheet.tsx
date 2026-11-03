@@ -9,6 +9,7 @@ import { DiceLog } from "../../vtt/DiceLog";
 import type { CharacterWithIssues } from "../api";
 import { ABILITY_SHORT, classSummary, signed, speciesName } from "../labels";
 import { useSheetActions } from "./actions";
+import { CharacterSpells } from "./CharacterSpells";
 import { HpPanel } from "./HpPanel";
 import { Inventory } from "./Inventory";
 
@@ -263,6 +264,11 @@ export function Sheet({
               </p>
             </section>
           )}
+
+          <section className="panel">
+            <h3>Spells</h3>
+            <CharacterSpells character={character} derived={d} />
+          </section>
 
           <section className="panel">
             <h3>Status</h3>

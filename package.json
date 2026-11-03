@@ -20,7 +20,8 @@
     "db:setup": "pnpm --filter @dnd/server db:setup",
     "db:reset": "pnpm --filter @dnd/server db:reset",
     "db:generate": "pnpm --filter @dnd/server db:generate",
-    "db:studio": "pnpm --filter @dnd/server db:studio"
+    "db:studio": "pnpm --filter @dnd/server db:studio",
+    "promo:upload-map": "pnpm --filter @dnd/server promo:upload-map"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

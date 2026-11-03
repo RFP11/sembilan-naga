@@ -18,7 +18,7 @@ export function HpPanel({ character, maxHp, hitDice, actions }: Props) {
   const [message, setMessage] = useState<string | null>(null);
   const n = Math.max(0, Math.floor(Number(amount)) || 0);
 
-  const change = (type: "damage" | "heal" | "temp") =>
+  const change = (type: "damage" | "heal" | "temp" | "set") =>
     actions.hp.mutate(
       { type, amount: n, critical: type === "damage" && critical },
       {
@@ -71,6 +71,13 @@ export function HpPanel({ character, maxHp, hitDice, actions }: Props) {
         <button disabled={!n || pending} onClick={() => change("temp")}>
           Temp HP
         </button>
+        <button
+          disabled={amount === "" || pending}
+          title="Correct HP by hand: makes it exactly this amount"
+          onClick={() => change("set")}
+        >
+          Set HP
+        </button>
       </div>
       {state.hpCurrent === 0 && (
         <label className="chip">
@@ -93,6 +100,11 @@ export function HpPanel({ character, maxHp, hitDice, actions }: Props) {
           </p>
           {state.deathSaves.fail >= 3 ? (
             <p className="error">Dead.</p>
+          ) : state.deathSaves.success >= 3 ? (
+            <p>
+              <strong>Stable.</strong> No more death saves. Regains 1 HP after 1d4 hours, or when
+              healed.
+            </p>
           ) : (
             <button
               disabled={pending}

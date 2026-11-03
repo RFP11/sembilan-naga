@@ -36,11 +36,18 @@ export type DevLoginRequest = z.infer<typeof devLoginRequest>;
 export const memberRole = z.enum(["gm", "player", "spectator"]);
 export type MemberRole = z.infer<typeof memberRole>;
 
+/** World era shown on the public campaign page; the DM chooses it. */
+export const mapEra = z.enum(["emas", "pertanda", "senja"]);
+export type MapEra = z.infer<typeof mapEra>;
+
 /** campaigns.settings; every field has a default so old rows stay valid. */
 export const campaignSettings = z.object({
   allowMulticlass: z.boolean().default(true),
   /** Players may create homebrew visible to the whole campaign. */
   playersCanShareHomebrew: z.boolean().default(false),
+  mapEra: mapEra.default("emas"),
+  /** New sign-ups through the public campaign page; the DM opens and closes them. */
+  registrationOpen: z.boolean().default(true),
 });
 export type CampaignSettings = z.infer<typeof campaignSettings>;
 

@@ -26,6 +26,12 @@ export const SEED = {
     name: "Dev Campaign",
     inviteCode: "DEVCAMP",
   },
+  /** Set PROMO_CAMPAIGN_ID to this id in development; see README. */
+  promoCampaign: {
+    id: "00000000-0000-4000-8000-000000000102",
+    name: "Serpih Langit",
+    inviteCode: "SERPIH",
+  },
 } as const;
 
 export async function seed(orm: Orm): Promise<void> {
@@ -50,6 +56,28 @@ export async function seed(orm: Orm): Promise<void> {
       .onConflictDoUpdate({
         target: campaigns.id,
         set: { name: SEED.campaign.name, inviteCode: SEED.campaign.inviteCode },
+      });
+
+    // Older than Dev Campaign so that one stays first in the GM's newest-first list. Its
+    // settings aren't touched on conflict, so re-seeding keeps the era chosen on the DM page.
+    await tx
+      .insert(campaigns)
+      .values({
+        ...SEED.promoCampaign,
+        description: "Campaign promoted on the public page.",
+        ownerId: SEED.gm.id,
+        createdAt: new Date("2020-01-01T00:00:00Z"),
+      })
+      .onConflictDoUpdate({
+        target: campaigns.id,
+        set: { name: SEED.promoCampaign.name, inviteCode: SEED.promoCampaign.inviteCode },
+      });
+    await tx
+      .insert(campaignMembers)
+      .values({ campaignId: SEED.promoCampaign.id, userId: SEED.gm.id, role: "gm" })
+      .onConflictDoUpdate({
+        target: [campaignMembers.campaignId, campaignMembers.userId],
+        set: { role: "gm" },
       });
 
     const members = [

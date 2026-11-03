@@ -4,6 +4,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../lib/api";
 import { socket } from "../../lib/socket";
 
+const QUICK_DICE = ["d4", "d6", "d8", "d10", "d12", "d20", "d100"];
+
 export function DiceLog({ campaignId }: { campaignId: string }) {
   const qc = useQueryClient();
   const log = useQuery({
@@ -26,30 +28,67 @@ export function DiceLog({ campaignId }: { campaignId: string }) {
     };
   }, [campaignId, qc]);
 
-  const roll = async (e: FormEvent) => {
-    e.preventDefault();
-    const res = await socket.emitWithAck("dice:roll", { campaignId, expression });
+  const roll = async (toRoll: string) => {
+    const res = await socket.emitWithAck("dice:roll", { campaignId, expression: toRoll });
     setError(res.ok ? null : res.error);
+  };
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    void roll(expression);
   };
 
   return (
-    <div>
-      <form onSubmit={roll} style={{ display: "flex", gap: "0.5rem" }}>
-        <input value={expression} onChange={(e) => setExpression(e.target.value)} size={10} />
-        <button type="submit">Roll</button>
-      </form>
-      {error && <p className="error">{error}</p>}
-      <ul className="log">
-        {log.data?.map((r) => (
-          <li key={r.id}>
-            <strong>{r.total}</strong>{" "}
-            <span className="muted">
-              {r.by}: {r.label ? `${r.label} · ` : ""}
-              {r.expression} [{r.rolls.join(", ")}]
-            </span>
-          </li>
-        ))}
-      </ul>
+    <div className="parchment dice-tray">
+      <div className="parchment-body">
+        <h2>Dadu</h2>
+        <div className="dice-quick" role="group" aria-label="Lempar satu dadu">
+          {QUICK_DICE.map((die) => (
+            <button
+              key={die}
+              type="button"
+              className="die"
+              aria-label={`Lempar 1${die}`}
+              onClick={() => void roll(`1${die}`)}
+            >
+              {die}
+            </button>
+          ))}
+        </div>
+        <form className="dice-form" onSubmit={onSubmit}>
+          <input
+            value={expression}
+            onChange={(e) => setExpression(e.target.value)}
+            aria-label="Rumus dadu, misalnya 2d6+3"
+            size={10}
+          />
+          <button type="submit" className="btn btn-red btn-small">
+            Lempar
+          </button>
+        </form>
+        {error && (
+          <p className="form-error" role="alert">
+            {error}
+          </p>
+        )}
+        <ul className="log" aria-label="Riwayat lemparan">
+          {log.data?.map((r) => (
+            <li key={r.id}>
+              <span className="hex roll-total">{r.total}</span>
+              <span className="roll-detail">
+                <b>
+                  {r.by}
+                  {r.secret && <span className="roll-secret-tag"> rahasia</span>}
+                </b>
+                <span className="ink-soft">
+                  {r.label ? `${r.label} · ` : ""}
+                  {r.expression} [{r.rolls.join(", ")}]
+                </span>
+              </span>
+            </li>
+          ))}
+          {log.data?.length === 0 && <li className="ink-soft">Belum ada lemparan.</li>}
+        </ul>
+      </div>
     </div>
   );
 }

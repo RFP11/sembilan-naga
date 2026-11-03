@@ -8,15 +8,22 @@ import { characterRoutes } from "./characters/routes";
 import type { Config } from "./config";
 import type { Db } from "./db";
 import { registerSocket } from "./plugins/socket";
+import { attackRoutes } from "./scenes/attacks";
+import { encounterRoutes } from "./scenes/encounter";
+import { sceneRoutes } from "./scenes/routes";
+import { tokenRoutes } from "./scenes/tokens";
+import { promoRoutes, type PromoConfig } from "./promo/routes";
 import { compendiumRoutes } from "./routes/compendium";
 import { healthRoutes } from "./routes/health";
+import type { Storage } from "./storage";
 
 export interface AppDeps {
-  config: AuthConfig & Pick<Config, "WEB_DIST">;
+  config: AuthConfig & PromoConfig & Pick<Config, "WEB_DIST">;
   db: Db;
+  storage: Storage | null;
 }
 
-export async function buildApp({ config, db }: AppDeps) {
+export async function buildApp({ config, db, storage }: AppDeps) {
   const app = Fastify({ logger: config.NODE_ENV !== "test" });
 
   await registerAuth(app, config, db);
@@ -26,6 +33,11 @@ export async function buildApp({ config, db }: AppDeps) {
   await app.register(campaignRoutes, { prefix: "/api", db });
   await app.register(characterRoutes, { prefix: "/api", db });
   await app.register(playRoutes, { prefix: "/api", db, io });
+  await app.register(promoRoutes, { prefix: "/api/promo", db, config, storage });
+  await app.register(sceneRoutes, { prefix: "/api", db, io, storage });
+  await app.register(tokenRoutes, { prefix: "/api", db, io });
+  await app.register(encounterRoutes, { prefix: "/api", db, io });
+  await app.register(attackRoutes, { prefix: "/api", db, io });
 
   // Production: serve the React build from the same origin, with SPA fallback.
   if (config.WEB_DIST) {

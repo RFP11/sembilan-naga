@@ -1,4 +1,4 @@
-import { campaignRoom, type User } from "@dnd/contracts";
+import { campaignGmRoom, campaignRoom, type User } from "@dnd/contracts";
 import type { Orm } from "../db";
 import { chatMessages } from "../db/schema";
 import type { IO } from "../plugins/socket";
@@ -15,6 +15,7 @@ export async function recordRoll(
     label?: string;
     rolls: number[];
     total: number;
+    secret?: boolean;
   },
 ) {
   const [row] = await orm
@@ -27,9 +28,11 @@ export async function recordRoll(
       label: roll.label,
       rolls: roll.rolls,
       total: roll.total,
+      secret: roll.secret ?? false,
     })
     .returning();
   const result = toRollResult(row!, roll.user.displayName);
-  io.to(campaignRoom(roll.campaignId)).emit("dice:rolled", result);
+  const room = result.secret ? campaignGmRoom(roll.campaignId) : campaignRoom(roll.campaignId);
+  io.to(room).emit("dice:rolled", result);
   return result;
 }

@@ -1,0 +1,1469 @@
+/* The tabletop in the campaign's look. .tavern sits on top of .promo (promo.css), so it shares
+   its wood, parchment and buttons. The older screens read the --fg/--muted/--line/--accent
+   tokens, so setting those per surface restyles them: cream on wood, ink on parchment. */
+
+.tavern {
+  --bg: #33231a;
+  --fg: var(--cream);
+  --muted: var(--cream-soft);
+  --line: #6b4a30;
+  --accent: var(--gold);
+  font-size: 16px;
+}
+.tavern .parchment,
+.tavern .panel,
+.tavern .builder > aside {
+  --bg: #fbf4e2;
+  --fg: var(--ink);
+  --muted: var(--ink-soft);
+  --line: #b49a72;
+  --accent: var(--red);
+  color: var(--ink);
+}
+.tavern .wrap {
+  max-width: 1500px;
+}
+.tavern-main {
+  padding-block: 20px 48px;
+}
+.tavern .spacer {
+  flex: 1;
+}
+
+/* Header */
+.tavern .plank-inner {
+  justify-content: flex-start;
+}
+.tavern .tab-bar {
+  gap: 4px;
+}
+.tavern .tab-bar button {
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 17px;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+  background: var(--wood-dark);
+  border: 0;
+  border-radius: 5px;
+  padding: 6px 14px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+}
+.tavern .tab-bar button[aria-current="true"] {
+  color: #2e2206;
+  background: var(--gold);
+  box-shadow: 0 3px 0 var(--gold-dark);
+}
+.tavern .invite-code,
+.tavern .tavern-user {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--cream-soft);
+}
+.tavern .invite-code b {
+  color: var(--cream);
+  letter-spacing: 0.06em;
+}
+
+/* Table: board and dice */
+.tavern .table-layout {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(280px, 340px);
+  gap: 22px;
+  align-items: start;
+  justify-content: start;
+}
+.tavern .table-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px;
+  color: var(--cream-soft);
+}
+.tavern .status-dot {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.tavern .status-dot.on {
+  background: #6fcf97;
+  box-shadow: 0 0 6px #6fcf97;
+}
+.tavern .board {
+  border: 0;
+  border-radius: 3px;
+}
+.tavern .board canvas {
+  display: block;
+  max-width: 100%;
+  height: auto !important;
+}
+.tavern .dice-tray h2 {
+  font-size: 28px;
+  margin: 0;
+}
+.tavern .dice-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.tavern .die {
+  width: 52px;
+  height: 46px;
+  padding: 0;
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 15px;
+  color: var(--cream);
+  background: var(--wood);
+  border: 0;
+  cursor: pointer;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  transition: background 0.12s;
+}
+.tavern .die:hover {
+  background: var(--red);
+}
+/* The hexagon's clip would cut the outline off, so focus changes the fill instead. */
+.tavern .die:focus-visible {
+  outline: none;
+  color: #2e2206;
+  background: var(--gold);
+}
+.tavern .dice-form {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.tavern .dice-form input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  padding: 7px 10px;
+  color: var(--ink);
+  background: #fbf4e2;
+  border: 2px solid var(--wood-light);
+  border-radius: 5px;
+}
+.tavern .log {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  max-height: 460px;
+  overflow-y: auto;
+}
+.tavern .log li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(90, 60, 30, 0.25);
+}
+.tavern .roll-total {
+  flex: none;
+  color: #2e2206;
+  background: var(--gold);
+  font-size: 17px;
+}
+.tavern .roll-detail {
+  display: grid;
+  font-size: 15px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Older screens (characters, builder, sheet, compendium) */
+.tavern-main h1 {
+  font-size: 34px;
+}
+.tavern-main h2 {
+  font-size: 26px;
+  margin-top: 8px;
+}
+.tavern-main h3 {
+  font-size: 20px;
+}
+.tavern-main button:not(.btn, .die) {
+  color: var(--cream);
+  background: var(--wood);
+  border: 0;
+  border-radius: 5px;
+  box-shadow: 0 2px 0 var(--wood-dark);
+}
+.tavern-main button:not(.btn, .die):hover:not(:disabled) {
+  background: var(--wood-light);
+}
+.tavern-main button[aria-current="true"]:not(.btn, .die),
+.tavern-main button[aria-pressed="true"]:not(.btn, .die) {
+  color: #2e2206;
+  background: var(--gold);
+  box-shadow: 0 2px 0 var(--gold-dark);
+}
+.tavern-main button.primary:not(.btn, .die) {
+  color: #fff;
+  background: var(--red);
+  box-shadow: 0 3px 0 var(--red-dark);
+}
+.tavern-main button.link:not(.btn, .die) {
+  color: var(--accent);
+  background: none;
+  box-shadow: none;
+}
+.tavern-main input:not([type="checkbox"], [type="radio"], .dice-form input),
+.tavern-main select,
+.tavern-main textarea {
+  color: var(--ink);
+  background: #fbf4e2;
+  border: 2px solid var(--wood-light);
+  border-radius: 5px;
+}
+.tavern-main .card {
+  border: 0;
+}
+.tavern-main fieldset {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+.tavern-main legend {
+  padding-inline: 0.35rem;
+}
+.tavern-main dt {
+  color: var(--muted);
+}
+.tavern .panel,
+.tavern .builder > aside {
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(255, 255, 255, 0.4), transparent 55%),
+    linear-gradient(135deg, var(--paper), var(--paper-2));
+  border: 0;
+  border-radius: 6px;
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+}
+.tavern .hp-bar span {
+  background: var(--red);
+}
+
+/* Campaign picker */
+.camp-picker .camp-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.camp-picker .camp-card {
+  width: 100%;
+  min-height: 92px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  text-align: left;
+  color: var(--cream);
+  background:
+    repeating-linear-gradient(180deg, transparent 0 44px, rgba(0, 0, 0, 0.2) 44px 46px),
+    linear-gradient(180deg, var(--wood-light), var(--wood));
+  border: 0;
+  border-radius: 6px;
+  box-shadow:
+    inset 0 0 0 2px var(--wood-dark),
+    0 6px 0 var(--wood-dark);
+  cursor: pointer;
+  transition: transform 0.08s;
+}
+.camp-picker .camp-card:hover {
+  transform: translateY(-2px);
+}
+.camp-picker .camp-name {
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 24px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+.camp-picker .status-tag {
+  flex: none;
+  margin: 0;
+}
+.camp-picker .camp-forms {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 30px;
+  max-width: 820px;
+}
+.camp-picker .camp-forms h2 {
+  font-size: 26px;
+  margin: 0 0 12px;
+}
+.camp-picker .camp-forms label {
+  display: grid;
+  gap: 4px;
+  font-weight: 700;
+}
+.camp-picker .camp-forms input {
+  width: 100%;
+  font: inherit;
+  font-weight: 400;
+  padding: 9px 11px;
+  color: var(--ink);
+  background: #fbf4e2;
+  border: 2px solid var(--wood-light);
+  border-radius: 5px;
+}
+.camp-picker .camp-forms .btn {
+  margin-top: 14px;
+}
+
+@media (max-width: 1000px) {
+  .tavern .table-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 680px) {
+  .camp-picker .camp-forms {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tavern .invite-code {
+    display: none;
+  }
+}
+
+/* The dice log inside the character sheet already sits on a panel: no second sheet of paper. */
+.tavern .panel .dice-tray {
+  filter: none;
+}
+.tavern .panel .dice-tray::before {
+  display: none;
+}
+.tavern .panel .dice-tray .parchment-body {
+  padding: 0;
+}
+.tavern .panel .dice-tray h2 {
+  display: none;
+}
+
+/* Compendium entries as wooden plaques */
+.tavern-main article:not(.parchment) {
+  padding: 14px 18px;
+  background: linear-gradient(180deg, var(--wood), var(--wood-dark));
+  border-radius: 6px;
+  box-shadow: 0 5px 8px rgba(0, 0, 0, 0.35);
+}
+.tavern-main article:not(.parchment) h3 {
+  margin-top: 0;
+  color: var(--gold);
+}
+.tavern-main article:not(.parchment) p:last-child {
+  margin-bottom: 0;
+}
+
+/* Board with a map */
+.tavern .table-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+}
+.tavern .table-main {
+  min-width: 0;
+}
+.tavern .board-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 10px;
+}
+.tavern .board-name {
+  font-weight: 700;
+}
+.tavern .board-name .muted {
+  font-weight: 400;
+}
+.tavern .board {
+  overflow: auto;
+  max-height: 78vh;
+}
+.tavern .board canvas {
+  display: block;
+  width: var(--board-width, 100%);
+  max-width: none;
+  height: auto !important;
+}
+.tavern-main .calib-zoom {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.tavern-main .calib-zoom button {
+  padding: 3px 10px;
+  font-size: 14px;
+}
+
+/* The DM's maps */
+.tavern .map-panel {
+  margin-top: 18px;
+}
+.tavern .map-panel-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.tavern .map-panel-head h2 {
+  margin: 0;
+}
+.tavern .map-upload {
+  position: relative;
+  cursor: pointer;
+}
+.tavern .map-upload.busy {
+  opacity: 0.65;
+  cursor: default;
+}
+/* The input stays in the page and covers its label, so keyboards and screen readers reach it. */
+.tavern .map-upload input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: inherit;
+}
+.tavern .map-upload:focus-within {
+  outline: 3px solid var(--gold);
+  outline-offset: 3px;
+}
+.tavern .map-error {
+  margin: 8px 0;
+  color: #ffc2a6;
+  font-weight: 700;
+}
+.tavern .map-empty {
+  margin: 10px 0 0;
+}
+.tavern .map-list {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+}
+.tavern .map-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  padding: 10px 14px;
+  background: linear-gradient(180deg, var(--wood), var(--wood-dark));
+  border-radius: 6px;
+}
+.tavern .map-list li.live {
+  box-shadow: inset 0 0 0 2px var(--gold);
+}
+.tavern .map-info {
+  display: grid;
+  flex: 1 1 180px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.tavern .map-list .status-tag {
+  margin: 0;
+}
+.tavern .map-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Setting a map's scale */
+.tavern .calibrator {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 22px;
+  align-items: start;
+}
+.tavern .calib-stage-col {
+  min-width: 0;
+}
+.tavern .calib-stage-col .calib-zoom {
+  margin-bottom: 10px;
+}
+.tavern .calib-scroll {
+  overflow: auto;
+  max-height: 80vh;
+}
+.tavern .calib-stage {
+  position: relative;
+  line-height: 0;
+}
+.tavern .calib-stage img {
+  display: block;
+  width: 100%;
+  max-width: none;
+  user-select: none;
+}
+.tavern .calib-stage svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+  touch-action: none;
+}
+.tavern .calib-stage text {
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  pointer-events: none;
+}
+.tavern .calib-controls h2 {
+  margin: 0;
+  font-size: 28px;
+}
+.tavern .calib-stepper,
+.tavern .calib-columns {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.tavern .calib-stepper input,
+.tavern .calib-columns input {
+  flex: 1;
+  min-width: 0;
+}
+.tavern .calib-stepper button {
+  flex: none;
+  padding: 4px 7px;
+  font-size: 14px;
+}
+.tavern .calib-columns {
+  gap: 8px;
+}
+.tavern .calib-columns .btn {
+  flex: none;
+}
+.tavern .calib-offsets {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.tavern .reg-form .calib-check {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.tavern .calib-summary {
+  margin: 16px 0 0;
+  padding: 8px 12px;
+  background: rgba(120, 80, 30, 0.14);
+  border-radius: 5px;
+}
+@media (max-width: 1000px) {
+  .tavern .calibrator {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* After the two-column board rule above, so that narrow screens still stack. */
+@media (max-width: 1000px) {
+  .tavern .table-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.tavern .reg-form .calib-check input {
+  width: auto;
+  flex: none;
+}
+
+/* Tokens */
+.tavern .table-side {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+  min-width: 0;
+}
+.tavern .token-hint {
+  margin-top: 16px;
+}
+.tavern .token-panel {
+  margin-top: 18px;
+}
+.tavern .token-panel h2 {
+  margin: 0 0 10px;
+}
+.tavern .token-tabs {
+  margin-bottom: 12px;
+}
+.tavern .token-tabs button {
+  padding: 6px 14px;
+  font-size: 15px;
+}
+.tavern .token-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  align-items: end;
+  margin-bottom: 12px;
+}
+.tavern .token-options label,
+.tavern .token-search,
+.tavern .token-custom label {
+  display: grid;
+  gap: 4px;
+  font-weight: 700;
+  font-size: 15px;
+}
+.tavern .token-options input[type="number"] {
+  width: 84px;
+  padding: 5px 8px;
+}
+.tavern .token-options .token-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+.tavern .token-search input,
+.tavern .token-custom input,
+.tavern .token-custom select {
+  width: 100%;
+  padding: 7px 10px;
+  font: inherit;
+  font-weight: 400;
+}
+.tavern .token-results {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.tavern-main .token-results button {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  gap: 1px;
+  padding: 8px 10px;
+  text-align: left;
+}
+.tavern .token-results span {
+  font-size: 14px;
+  color: var(--cream-soft);
+  overflow-wrap: anywhere;
+}
+.tavern .token-custom {
+  display: grid;
+  grid-template-columns: minmax(160px, 2fr) minmax(150px, 1.4fr) minmax(90px, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+.tavern .token-details h2 {
+  margin: 0;
+  font-size: 26px;
+}
+.tavern .token-kind {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+.tavern .token-details .reg-form {
+  margin-top: 0;
+  gap: 12px;
+}
+.tavern .token-details select {
+  width: 100%;
+  padding: 7px 10px;
+  font: inherit;
+  font-weight: 400;
+}
+.tavern .token-hp {
+  display: grid;
+  gap: 6px;
+}
+.tavern .token-hp .calib-stepper button {
+  flex: 1;
+}
+@media (max-width: 760px) {
+  .tavern .token-custom {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Stat block of the selected token */
+.tavern .stat-panel .parchment-body {
+  max-height: 68vh;
+  overflow-y: auto;
+  padding: 22px 22px 24px;
+}
+.tavern .stat-block h2 {
+  margin: 0;
+  font-size: 26px;
+}
+.tavern .stat-sub {
+  margin: 2px 0 12px;
+  font-size: 15px;
+}
+.tavern .stat-numbers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px 12px;
+  margin: 0 0 12px;
+}
+.tavern .stat-numbers dt,
+.tavern .stat-facts dt {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+.tavern .stat-numbers dd {
+  margin: 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.tavern .stat-numbers dd .ink-soft {
+  font-weight: 400;
+  font-size: 14px;
+}
+.tavern .stat-abilities {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.tavern .stat-abilities th,
+.tavern .stat-abilities td {
+  padding: 3px 2px;
+  border-bottom: 1px solid rgba(90, 60, 30, 0.25);
+}
+.tavern .stat-abilities tbody th {
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-align: left;
+}
+.tavern .stat-facts {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 0;
+  font-size: 15px;
+}
+.tavern .stat-facts dd {
+  margin: 0;
+}
+.tavern .stat-section {
+  margin-top: 14px;
+  font-size: 15px;
+}
+.tavern .stat-section > summary {
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 18px;
+  color: var(--red-dark);
+  padding-bottom: 3px;
+  border-bottom: 2px solid rgba(126, 42, 29, 0.45);
+  cursor: pointer;
+}
+.tavern .stat-section p {
+  margin: 6px 0;
+}
+.tavern .stat-entry {
+  margin-top: 8px;
+}
+.tavern .stat-entry p {
+  margin: 2px 0 0;
+}
+.tavern .stat-entry .prose p {
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+.tavern .stat-skills {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 2px 10px;
+  margin: 6px 0 0;
+  padding: 0;
+  color: var(--ink-soft);
+}
+.tavern .stat-skills .proficient {
+  font-weight: 700;
+  color: var(--ink);
+}
+.tavern .stat-feature {
+  margin-top: 6px;
+}
+.tavern .stat-feature > summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.tavern .stat-feature > summary .ink-soft {
+  font-weight: 400;
+  font-size: 14px;
+}
+
+/* Keep what's used during play near the top. */
+.tavern .stat-numbers {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.tavern .stat-more {
+  font-size: 15px;
+}
+.tavern .stat-more > summary {
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  border-bottom: 0;
+}
+.tavern .token-details .parchment-body {
+  padding: 20px 22px 22px;
+}
+.tavern .token-details h2 {
+  margin: 0 0 10px;
+}
+.tavern .token-details .hero-actions {
+  margin-top: 10px;
+}
+.tavern .token-edit > summary {
+  font-weight: 700;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.tavern .token-edit .reg-form {
+  margin-top: 10px;
+}
+.tavern .token-edit .btn {
+  justify-self: start;
+}
+
+/* A player's sheet beside the map */
+.tavern .player-sheet .parchment-body {
+  max-height: 74vh;
+}
+.tavern .sheet-picker {
+  margin-bottom: 12px;
+}
+.tavern .stat-items {
+  list-style: none;
+  display: grid;
+  gap: 3px;
+  margin: 6px 0 0;
+  padding: 0;
+}
+.tavern .stat-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(90, 60, 30, 0.2);
+  overflow-wrap: anywhere;
+}
+.tavern .stat-items li > .ink-soft {
+  flex: none;
+  font-size: 14px;
+}
+.tavern .stat-coins {
+  font-weight: 700;
+}
+.tavern .stat-hint {
+  font-size: 14px;
+}
+
+/* Turn order down the left of the table */
+.tavern .table-layout.has-rail {
+  grid-template-columns: 210px minmax(0, 1fr) minmax(270px, 320px);
+}
+.tavern .turn-rail {
+  min-width: 0;
+}
+.tavern .turn-rail h2 {
+  margin: 0 0 10px;
+  font-size: 24px;
+}
+.tavern .turn-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.tavern .turn-end {
+  width: 100%;
+  margin-bottom: 12px;
+}
+.tavern .turn-cards {
+  list-style: none;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+.tavern .turn-divider {
+  margin: 4px 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--cream-soft);
+  border-bottom: 1px dashed var(--cream-soft);
+}
+.tavern .turn-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  min-height: 58px;
+  color: var(--ink);
+  background: linear-gradient(135deg, var(--paper), var(--paper-2));
+  border-left: 7px solid var(--wood);
+  border-radius: 5px;
+  box-shadow: 0 4px 7px rgba(0, 0, 0, 0.4);
+}
+.tavern .turn-card.kind-monster {
+  border-left-color: var(--red);
+}
+.tavern .turn-card.kind-npc {
+  border-left-color: var(--gold-dark);
+}
+.tavern .turn-card.kind-character {
+  border-left-color: var(--teal);
+}
+.tavern .turn-card.kind-object {
+  border-left-color: #6b6256;
+}
+.tavern .turn-card.current {
+  outline: 3px solid var(--gold);
+  outline-offset: 1px;
+  margin-top: 9px;
+}
+.tavern .turn-card.selected:not(.current) {
+  outline: 2px solid var(--wood-light);
+}
+.tavern .turn-card.hidden-token {
+  opacity: 0.7;
+}
+.tavern .turn-card.down .turn-name {
+  text-decoration: line-through;
+  color: var(--ink-soft);
+}
+.tavern .turn-flag {
+  position: absolute;
+  top: -10px;
+  left: 8px;
+  padding: 0 8px;
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 12px;
+  color: #2e2206;
+  background: var(--gold);
+  border-radius: 3px;
+}
+.tavern-main .turn-main,
+.tavern .turn-main {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 8px 8px;
+  color: var(--ink);
+  text-align: left;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  cursor: pointer;
+}
+.tavern .turn-main:hover .turn-name {
+  text-decoration: underline;
+}
+.tavern .turn-name {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+.tavern .turn-note {
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+.tavern .turn-hp {
+  display: block;
+  height: 5px;
+  background: rgba(60, 40, 20, 0.3);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.tavern .turn-hp span {
+  display: block;
+  height: 100%;
+}
+.tavern .turn-hp .good {
+  background: #2f9e62;
+}
+.tavern .turn-hp .warn {
+  background: var(--gold-dark);
+}
+.tavern .turn-hp .bad {
+  background: var(--red);
+}
+.tavern .turn-init {
+  flex: none;
+  align-self: center;
+  width: 42px;
+  margin-right: 6px;
+  padding: 4px 0;
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 17px;
+  text-align: center;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(90, 60, 30, 0.35);
+  border-radius: 4px;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.tavern .turn-init::-webkit-outer-spin-button,
+.tavern .turn-init::-webkit-inner-spin-button {
+  appearance: none;
+  margin: 0;
+}
+.tavern .turn-remove {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--ink-soft);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  opacity: 0;
+}
+.tavern .turn-card:hover .turn-remove,
+.tavern .turn-remove:focus-visible {
+  opacity: 1;
+}
+.tavern .turn-tools {
+  display: grid;
+  gap: 8px;
+  margin-top: 14px;
+}
+.tavern .turn-pick ul {
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  max-height: 340px;
+  margin: 0 0 10px;
+  padding: 0;
+  overflow-y: auto;
+}
+.tavern .turn-pick label {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+.tavern .turn-pick .btn {
+  width: 100%;
+  margin-bottom: 6px;
+}
+@media (max-width: 1250px) {
+  .tavern .table-layout.has-rail {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+  .tavern .table-layout.has-rail > .table-side {
+    grid-column: 2;
+  }
+}
+/* On a narrow screen the cards run across the top instead. */
+@media (max-width: 760px) {
+  .tavern .table-layout.has-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .tavern .table-layout.has-rail > .table-side {
+    grid-column: auto;
+  }
+  .tavern .turn-cards {
+    display: flex;
+    overflow-x: auto;
+    padding: 12px 4px 8px;
+  }
+  .tavern .turn-cards > li {
+    flex: 0 0 170px;
+  }
+  .tavern .turn-divider {
+    display: none;
+  }
+  .tavern .turn-card.current {
+    margin-top: 0;
+  }
+  /* Hover isn't there to reveal it. */
+  .tavern .turn-remove {
+    opacity: 1;
+  }
+}
+
+/* More specific than the older screens' button look, so cards stay parchment. */
+.tavern-main .turn-card button.turn-main:not(.btn, .die),
+.tavern-main .turn-card button.turn-main:not(.btn, .die):hover:not(:disabled) {
+  color: var(--ink);
+  background: none;
+  box-shadow: none;
+}
+.tavern-main .turn-card button.turn-remove:not(.btn, .die),
+.tavern-main .turn-card button.turn-remove:not(.btn, .die):hover:not(:disabled) {
+  color: var(--ink-soft);
+  background: none;
+  box-shadow: none;
+}
+
+/* Rolling from a stat block */
+.tavern-main .roll-btn {
+  padding: 2px 8px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.tavern-main .stat-abilities .roll-btn {
+  width: 100%;
+  padding: 1px 0;
+  min-width: 2rem;
+}
+.tavern-main .roll-btn:hover:not(:disabled) {
+  background: var(--red);
+}
+.tavern .roll-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+}
+.tavern .roll-save {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+/* Stays at the top of the scrolling panel, so a result is seen wherever the button was. */
+.tavern .roll-sticky {
+  position: sticky;
+  top: -22px;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  margin: -6px -6px 8px;
+  padding: 6px;
+  background: var(--paper);
+  border-radius: 5px;
+}
+.tavern .roll-secret {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+.tavern .roll-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+}
+.tavern .roll-result .ink-soft {
+  font-weight: 400;
+}
+.tavern .roll-secret-tag {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--red-dark);
+}
+
+/* Attacking */
+.tavern .attack-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  color: #2e2206;
+  background: var(--gold);
+  border-radius: 6px;
+}
+.tavern-main .roll-btn.roll-attack:not(.btn, .die) {
+  color: #fff;
+  background: var(--red);
+  box-shadow: 0 2px 0 var(--red-dark);
+}
+.tavern .attack-panel {
+  --accent: var(--red);
+}
+.tavern .attack-who {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+.tavern .attack-verdict {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tavern .attack-verdict > span:last-child {
+  display: grid;
+}
+.tavern .attack-verdict b {
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 22px;
+}
+.tavern .attack-verdict.hit b {
+  color: var(--red-dark);
+}
+.tavern .attack-verdict.miss b {
+  color: var(--ink-soft);
+}
+.tavern .attack-verdict.miss .roll-total {
+  color: var(--cream);
+  background: var(--wood);
+}
+.tavern .attack-math {
+  font-size: 14px;
+}
+.tavern .attack-damage {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.tavern .attack-damage .calib-check {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 15px;
+}
+.tavern .attack-crit,
+.tavern .attack-warn {
+  margin: 0;
+  font-weight: 700;
+  color: var(--red-dark);
+}
+.tavern .attack-extra {
+  display: grid;
+  gap: 3px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.tavern .attack-extra input {
+  padding: 5px 8px;
+  font: inherit;
+  font-weight: 400;
+}
+.tavern .attack-applied {
+  margin-bottom: 12px;
+}
+.tavern .attack-total {
+  margin: 0 0 4px;
+}
+.tavern .attack-applied ul {
+  margin: 0 0 6px;
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+/* In the turn rail */
+.tavern .turn-reactions {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.tavern .turn-reaction {
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  color: #2e2206;
+  background: var(--gold);
+  border-radius: 5px;
+  font-size: 14px;
+}
+.tavern .turn-reaction p {
+  margin: 0;
+}
+.tavern .turn-reminders {
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: var(--paper-2);
+  border-radius: 5px;
+  font-size: 14px;
+}
+.tavern .turn-reminders > summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.tavern .turn-reminders .roll-result {
+  margin: 6px 0;
+}
+.tavern .turn-reminder {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid rgba(90, 60, 30, 0.3);
+  overflow-wrap: anywhere;
+}
+.tavern .turn-reminder p {
+  margin: 2px 0 4px;
+}
+.tavern .turn-reminder summary {
+  font-weight: 700;
+  cursor: pointer;
+}
+.tavern .reminder-deathSave b {
+  color: var(--red-dark);
+}
+
+/* Spells */
+.tavern .spell-tag {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red-dark);
+}
+.tavern .spell-meta {
+  margin: 2px 0;
+  font-size: 13px;
+}
+.tavern .spell-level {
+  margin-top: 8px;
+}
+.tavern .spell-search {
+  width: 100%;
+  margin-top: 6px;
+  padding: 5px 8px;
+  font: inherit;
+}
+.tavern .stat-facts-title {
+  margin-bottom: 0;
+  font-weight: 700;
+}
+
+/* A character's spells */
+.tavern .spell-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin: 6px 0;
+  font-variant-numeric: tabular-nums;
+}
+.tavern .spell-slots .empty {
+  color: var(--ink-soft);
+  text-decoration: line-through;
+}
+.tavern .spell-concentrating {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin: 6px 0;
+  padding: 5px 8px;
+  background: rgba(233, 178, 46, 0.3);
+  border-radius: 4px;
+}
+.tavern .spell-cast-note {
+  margin: 6px 0;
+  padding: 5px 8px;
+  background: rgba(31, 122, 125, 0.16);
+  border-radius: 4px;
+}
+.tavern .spell-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 3px;
+}
+.tavern .spell-row .stat-feature {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
+  overflow-wrap: anywhere;
+}
+.tavern .spell-row > input[type="checkbox"] {
+  flex: none;
+  margin-top: 5px;
+}
+.tavern .spell-actions {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.tavern-main .spell-actions select {
+  padding: 0 2px;
+  font-size: 13px;
+}
+.tavern .spell-choose {
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+}
+.tavern .spell-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  margin: 6px 0;
+}
+.tavern .spell-counts .full {
+  font-weight: 700;
+  color: var(--red-dark);
+}
+.tavern .spell-options {
+  max-height: 46vh;
+  margin-top: 6px;
+  overflow-y: auto;
+}
+
+/* HP by hand, and death saves */
+.tavern .hp-controls,
+.tavern .token-hp-set {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 6px 0 10px;
+}
+.tavern .token-hp-set {
+  margin: 0;
+}
+.tavern .hp-controls input,
+.tavern .token-hp-set input {
+  width: 76px;
+  padding: 3px 6px;
+  font: inherit;
+  font-weight: 400;
+}
+.tavern .death-saves {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0;
+  padding: 8px 10px;
+  background: rgba(181, 65, 47, 0.14);
+  border-radius: 5px;
+}
+.tavern .death-saves p {
+  margin: 0;
+}
+.tavern .death-dead b {
+  color: var(--red-dark);
+}
+.tavern .death-stable b {
+  color: var(--teal-dark);
+}
+.tavern .death-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
