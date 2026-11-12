@@ -1,7 +1,7 @@
 // Database schema (Drizzle). Change it here, then `pnpm db:generate` to write a migration.
 // Tables arrive with the phase that uses them; see docs/PLAN.md for the full design.
 
-import type { FogCell } from "@dnd/contracts";
+import type { DiceColor, FogCell } from "@dnd/contracts";
 import { sql } from "drizzle-orm";
 import {
   boolean,
@@ -35,6 +35,8 @@ export const users = pgTable(
     email: text().notNull(),
     displayName: text("display_name").notNull(),
     avatarUrl: text("avatar_url"),
+    /** Colour of the 3D dice this user throws (see DICE_COLORS). */
+    diceColor: text("dice_color").$type<DiceColor>().notNull().default("gold"),
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex("users_email_idx").on(t.email)],

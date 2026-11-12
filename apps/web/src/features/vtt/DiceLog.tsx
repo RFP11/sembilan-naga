@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, type FormEvent } from "react";
 import { api } from "../../lib/api";
 import { socket } from "../../lib/socket";
+import { DiceSettings } from "../dice/DiceSettings";
 
 const QUICK_DICE = ["d4", "d6", "d8", "d10", "d12", "d20", "d100"];
 
@@ -88,6 +89,7 @@ export function DiceLog({ campaignId }: { campaignId: string }) {
           ))}
           {log.data?.length === 0 && <li className="ink-soft">Belum ada lemparan.</li>}
         </ul>
+        <DiceSettings />
       </div>
     </div>
   );

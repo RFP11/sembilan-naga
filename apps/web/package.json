@@ -16,15 +16,18 @@
     "@dnd/data": "workspace:*",
     "@dnd/rules": "workspace:*",
     "@tanstack/react-query": "^5.90.2",
+    "cannon-es": "^0.20.0",
     "pixi.js": "^8.13.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "socket.io-client": "^4.8.1",
+    "three": "^0.187.0",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.187.0",
     "@vitejs/plugin-react": "^5.0.4",
     "typescript": "^5.9.3",
     "vite": "^7.1.9",

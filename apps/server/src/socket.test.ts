@@ -4,7 +4,7 @@ import type { AddressInfo } from "node:net";
 import { io as connect, type Socket } from "socket.io-client";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { SEED, SEED_CHARACTERS } from "./db/seed";
-import { campaigns, chatMessages, scenes, tokens } from "./db/schema";
+import { campaigns, chatMessages, scenes, tokens, users } from "./db/schema";
 import { createTestApp, loginAs } from "./test/setup";
 
 type Client = Socket<ServerToClientEvents, ClientToServerEvents>;
@@ -205,12 +205,21 @@ describe("socket", () => {
         userId: SEED.player1.id,
         modifier: 1,
         label: "test",
+        color: "gold",
       });
       expect(result.rolls).toHaveLength(2);
       expect(result.total).toBe(result.rolls[0]! + result.rolls[1]! + 1);
 
       const [row] = await db.orm.select().from(chatMessages).where(eq(chatMessages.id, result.id));
       expect(row).toMatchObject({ kind: "roll", expression: "2d6+1", total: result.total });
+    });
+
+    it("throws dice in the roller's colour, even one picked after connecting", async () => {
+      await db.orm.update(users).set({ diceColor: "tiedye" }).where(eq(users.id, SEED.player1.id));
+      const rolled = new Promise<DiceRollResult>((resolve) => b.once("dice:rolled", resolve));
+      await a.emitWithAck("dice:roll", { campaignId, expression: "1d20" });
+      expect((await rolled).color).toBe("tiedye");
+      await db.orm.update(users).set({ diceColor: "gold" }).where(eq(users.id, SEED.player1.id));
     });
 
     it("rejects bad dice", async () => {

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { diceColor } from "./dice";
 
 // Socket.IO contract. Every client -> server payload has a schema, because the
 // server must never trust the client (positions, dice, etc.).
@@ -32,6 +33,8 @@ export const diceRollResult = diceRollRequest.required({ secret: true }).extend(
   by: z.string(),
   userId: z.uuid().nullable(),
   createdAt: z.string(),
+  /** The roller's dice colour; only on live rolls, for the 3D dice. */
+  color: diceColor.optional(),
 });
 export type DiceRollResult = z.infer<typeof diceRollResult>;
 

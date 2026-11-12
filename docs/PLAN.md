@@ -13,7 +13,7 @@ Ubah lewat PR seperti kode lainnya.
 | Database        | PostgreSQL lokal (port 5432), tanpa Docker.                                                        |
 | ORM / migrasi   | Drizzle di atas driver `postgres` yang sudah ada; migrasi dengan `drizzle-kit`.                    |
 | File (peta dll) | Disimpan di disk (volume), DB hanya menyimpan metadata di tabel `assets`.                          |
-| Dadu 3D         | `@3d-dice/dice-box-threejs` (three.js + cannon-es); hasil tetap diroll di server.                  |
+| Dadu 3D         | three.js + cannon-es sendiri, model "DnD Dice Set" (CC BY 4.0); hasil tetap diroll di server.      |
 
 Perbedaan 2024 vs 2014 yang memengaruhi kode: _species_ (bukan _race_), background memberi
 ASI (+2/+1 atau +1/+1/+1, maks 20) dan satu Origin feat, Weapon Mastery, Exhaustion 6 level
@@ -411,7 +411,8 @@ stat block saat token dipilih. ✅ Fog of war, alat ukur, ping:
 
 Status (PR #2): ✅ encounter dengan initiative dan kartu giliran, serangan ke AC lalu damage
 langsung ke HP target (critical, resistance, concentration save), secret roll DM, pengingat
-opportunity attack. ⏳ Belum: encounter builder dengan XP budget, dadu 3D, homebrew monster.
+opportunity attack. ✅ Dadu 3D (PR #6). ⏳ Belum: encounter builder dengan XP budget, homebrew
+monster.
 
 - Encounter builder dengan XP Budget per Character (Low / Moderate / High).
 - Initiative tracker (monster memakai nilai Initiative di stat block), giliran, ronde.
@@ -428,36 +429,41 @@ opportunity attack. ⏳ Belum: encounter builder dengan XP budget, dadu 3D, home
   token dan kondisinya.
 - Bisa dipakai di encounter builder (XP masuk XP budget) dan dijadikan token.
 
-#### Dadu 3D
+#### Dadu 3D ✅
 
-Library: [`@3d-dice/dice-box-threejs`](https://github.com/3d-dice/dice-box-threejs)
-(three.js + cannon-es). Dipilih karena mendukung **hasil yang ditentukan**
-(`roll("2d20@17,4")`), sehingga server tetap jadi sumber hasil dan animasi hanya tampilan.
+Tanpa library dadu: `dice-box-threejs` tidak dirawat sejak 2022 dan membuat geometrinya
+sendiri. Kita memakai three.js + cannon-es langsung dengan model
+["DnD Dice Set"](https://sketchfab.com/3d-models/dnd-dice-set-51a01c6f714944ea95d9a2d24eb24928)
+karya Logan S. (CC BY 4.0; atribusi di `apps/web/public/dice/LICENSE.md` dan di panel Dadu).
 
 Alur:
 
-1. Client kirim `dice:roll` (ekspresi + label), seperti sekarang.
-2. Server roll dengan `packages/rules`, simpan ke `chat_messages`, broadcast `dice:rolled`
-   berisi hasil **per kelompok dadu** (jenis dadu + nilai tiap dadu).
-3. Setiap client menyusun notasi `@` dari hasil server dan melempar dadu 3D; semua tab
-   melihat dadu mendarat di angka yang sama.
-4. Dice log menampilkan total setelah animasi selesai (atau langsung bila animasi dimatikan).
+1. Client kirim `dice:roll`; server roll dengan `packages/rules`, simpan, broadcast
+   `dice:rolled` (ditambah `color`: warna dadu si pelempar).
+2. Setiap client mensimulasikan lemparan sampai selesai (cannon-es, bentuk polihedron ideal
+   dari normal tiap sisi), lalu memutarnya ulang. Mesh yang digambar diputar dengan rotasi
+   simetri dadu sehingga sisi yang mendarat di atas menampilkan angka dari server; jalur
+   fisikanya tidak berubah. d4 dibaca dari sudut atas.
+3. Tabel sisi → angka per model ada di `apps/web/src/features/dice/faces.ts` (dikalibrasi
+   dari render tiap sisi, diverifikasi di browser untuk semua jenis dadu).
 
-Pekerjaan yang dibutuhkan:
+Detail:
 
-- **Rules**: parser dadu saat ini hanya mendukung satu kelompok (`2d6+3`). Perluas ke
-  beberapa kelompok (`1d8+2d6+3`), advantage/disadvantage (`2d20kh1` / `2d20kl1`),
-  dan `d100` (ditampilkan sebagai d100 + d10 di 3D). Tetap murni & ber-test.
-- **Contracts**: `diceRollResult` diubah dari `rolls: number[]` menjadi daftar kelompok
-  `{ sides, rolls, kept }`, ditambah flag `hidden` untuk roll GM.
-- **Web**: canvas three.js terpisah di atas board PixiJS (`pointer-events: none`),
-  di-load secara lazy agar tidak memperberat halaman lain; antrean bila banyak roll sekaligus.
-- **Privasi**: roll tersembunyi GM hanya dianimasikan di layar GM; player menerima
-  "GM melempar dadu" tanpa angka.
-- **Pengaturan per user** (disimpan lokal): animasi on/off, warna/tema dadu, suara.
-- **Spike dulu**: uji satu hari bahwa notasi `@` stabil (dadu benar-benar mendarat di nilai
-  yang diminta) untuk d4–d20 dan d100 sebelum dipakai penuh. Bila gagal, fallback ke dice log
-  2D tanpa mengubah alur server.
+- Canvas three.js transparan di atas papan (`pointer-events: none`), di-load lazy: three.js
+  dan model baru diunduh saat dadu pertama dilempar (atau saat senggang).
+- Warna dadu (Emas, Merah, Perak, Pelangi) disimpan per user di server (`users.dice_color`,
+  `PATCH /api/auth/me`), jadi semua orang melihat warna dadu si pelempar.
+- Animasi dan suara on/off disimpan lokal per perangkat; default animasi mati bila sistem
+  meminta _reduced motion_. Suara dibuat di browser dengan Web Audio (tanpa file audio).
+- Roll rahasia DM tidak pernah sampai ke player, jadi hanya beranimasi di layar DM.
+- d100 dilempar sebagai dua d10 (puluhan + satuan, 10 dibaca 0). d2/d3 hanya di log.
+  Paling banyak 12 dadu dianimasikan per lemparan.
+
+Belum:
+
+- Parser dadu masih satu kelompok (`2d6+3`). Perluas ke beberapa kelompok (`1d8+2d6+3`) dan
+  advantage/disadvantage (`2d20kh1`).
+- Dice log langsung menampilkan hasil, tidak menunggu dadu mendarat.
 
 ### Fase 5 – Lanjutan
 

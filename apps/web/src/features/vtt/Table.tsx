@@ -5,6 +5,7 @@ import type { ComponentProps } from "react";
 import { useEncounter, useScenes, useTokens, useUpdateFog } from "./api";
 import { AttackBar, AttackFlowProvider, AttackPanel, useAttackFlow } from "./attackFlow";
 import { Board, type BoardTool } from "./Board";
+import { DiceOverlay } from "../dice/DiceOverlay";
 import { BoardTools } from "./BoardTools";
 import { DiceLog } from "./DiceLog";
 import { MapCalibrator } from "./MapCalibrator";
@@ -113,7 +114,9 @@ export function Table({ campaignId }: { campaignId: string }) {
             onSelect={setSelectedId}
             onMove={moveToken}
             onFog={(change) => active && updateFog.mutate({ sceneId: active.id, change })}
-          />
+          >
+            <DiceOverlay campaignId={campaignId} />
+          </AimingBoard>
           {isDm &&
             (active ? (
               <TokenPanel campaignId={campaignId} sceneId={active.id} tokens={tokens} />

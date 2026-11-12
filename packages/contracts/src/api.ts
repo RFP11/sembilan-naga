@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { diceColor } from "./dice";
 
 // REST contract. The server validates with these schemas; the web imports the types.
 
@@ -15,6 +16,7 @@ export const user = z.object({
   email: z.string(),
   displayName: z.string(),
   avatarUrl: z.string().nullable(),
+  diceColor,
 });
 export type User = z.infer<typeof user>;
 

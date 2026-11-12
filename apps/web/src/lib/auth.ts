@@ -1,4 +1,4 @@
-import type { AuthProvidersResponse, MeResponse } from "@dnd/contracts";
+import type { AuthProvidersResponse, MeResponse, UpdatePreferencesRequest } from "@dnd/contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "./api";
 import { socket } from "./socket";
@@ -30,5 +30,15 @@ export function useLogout() {
       socket.disconnect();
       qc.resetQueries();
     },
+  });
+}
+
+/** Personal settings others see too, like the colour of your dice. */
+export function useUpdatePreferences() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (change: UpdatePreferencesRequest) =>
+      api<MeResponse>("/auth/me", { method: "PATCH", body: change }),
+    onSuccess: (me) => qc.setQueryData(["me"], me),
   });
 }

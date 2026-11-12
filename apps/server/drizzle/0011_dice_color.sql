@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "dice_color" text DEFAULT 'gold' NOT NULL;

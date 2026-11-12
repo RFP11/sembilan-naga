@@ -4,6 +4,7 @@ import {
   type AuthProvidersResponse,
   type MeResponse,
   type User,
+  updatePreferencesRequest,
 } from "@dnd/contracts";
 import fastifyCookie from "@fastify/cookie";
 import { decodeIdToken, generateCodeVerifier, generateState, Google } from "arctic";
@@ -81,6 +82,14 @@ export async function registerAuth(app: FastifyInstance, config: AuthConfig, db:
   await app.register(
     async (auth) => {
       auth.get("/me", async (req): Promise<MeResponse> => ({ user: req.user }));
+
+      // Personal settings that other people see too, like the colour of your dice.
+      auth.patch("/me", { preHandler: requireUser }, async (req, reply): Promise<MeResponse> => {
+        const parsed = updatePreferencesRequest.safeParse(req.body);
+        if (!parsed.success) return reply.code(400).send({ error: "invalid payload" });
+        await db.orm.update(users).set(parsed.data).where(eq(users.id, req.user!.id));
+        return { user: { ...req.user!, ...parsed.data } };
+      });
 
       auth.get("/providers", async (): Promise<AuthProvidersResponse> => {
         const devUsers = devLogin

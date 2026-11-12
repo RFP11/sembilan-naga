@@ -47,6 +47,22 @@ describe("auth", () => {
     expect(after.json()).toEqual({ user: null });
   });
 
+  it("saves the colour of a player's dice", async () => {
+    const cookie = await loginAs(app, SEED.player2.id);
+    const set = (diceColor: string) =>
+      app.inject({
+        method: "PATCH",
+        url: "/api/auth/me",
+        headers: { cookie },
+        payload: { diceColor },
+      });
+    expect((await set("purple")).statusCode).toBe(400);
+    expect((await set("silver")).json()).toMatchObject({ user: { diceColor: "silver" } });
+    const me = await app.inject({ method: "GET", url: "/api/auth/me", headers: { cookie } });
+    expect(me.json()).toMatchObject({ user: { diceColor: "silver" } });
+    await set("gold");
+  });
+
   it("rejects dev login for unknown users", async () => {
     const res = await app.inject({
       method: "POST",
