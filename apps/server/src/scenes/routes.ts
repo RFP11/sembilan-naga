@@ -1,9 +1,12 @@
 import {
+  applyFog,
   campaignRoom,
   MAX_MAP_BYTES,
   MAX_MAP_SIDE,
   MIN_GRID_PX,
+  sceneGridSize,
   setActiveSceneRequest,
+  updateFogRequest,
   updateSceneRequest,
   type Scene,
   type ScenesResponse,
@@ -44,6 +47,8 @@ const toScene = (row: SceneRow): Scene => ({
   offsetX: row.offsetX,
   offsetY: row.offsetY,
   gridVisible: row.gridVisible,
+  fogEnabled: row.fogEnabled,
+  fogRevealed: row.fogRevealed,
   createdAt: row.createdAt.toISOString(),
 });
 
@@ -163,6 +168,38 @@ export const sceneRoutes: FastifyPluginAsync<{
       .where(eq(scenes.id, existing.id))
       .returning();
     if ((await activeSceneId(m.campaignId)) === existing.id) announce(m.campaignId);
+    return toScene(row!);
+  });
+
+  /**
+   * Fog of war: turn it on or off, reveal or hide a rectangle of squares, or all of them.
+   * Players then fetch the map and tokens again; tokens in the dark aren't sent to them.
+   */
+  app.patch("/campaigns/:id/scenes/:sceneId/fog", async (req, reply) => {
+    const m = await gm(req, reply);
+    if (!m) return reply;
+    const params = sceneParams.safeParse(req.params);
+    if (!params.success) return reply.code(404).send({ error: "not found" });
+    const parsed = updateFogRequest.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "perubahan kabut tidak valid" });
+    const existing = await loadScene(m.campaignId, params.data.sceneId);
+    if (!existing) return reply.code(404).send({ error: "not found" });
+
+    const change = parsed.data;
+    const { cols, rows } = sceneGridSize(existing);
+    const [row] = await db.orm
+      .update(scenes)
+      .set(
+        "enabled" in change
+          ? { fogEnabled: change.enabled }
+          : { fogRevealed: applyFog(existing.fogRevealed, change, cols, rows) },
+      )
+      .where(eq(scenes.id, existing.id))
+      .returning();
+    if ((await activeSceneId(m.campaignId)) === existing.id) {
+      announce(m.campaignId);
+      io.to(campaignRoom(m.campaignId)).emit("tokens:changed", { campaignId: m.campaignId });
+    }
     return toScene(row!);
   });
 

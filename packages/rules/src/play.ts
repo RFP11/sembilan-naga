@@ -46,3 +46,12 @@ export function encounterXpBudget(
     return sum + budget;
   }, 0);
 }
+
+/**
+ * Distance between two grid squares in feet. On a grid every square is 5 feet and entering a
+ * diagonally adjacent square costs the same as an orthogonal one (SRD 5.2.1, "Playing on a
+ * Grid"), so the distance is the larger of the two axis distances.
+ */
+export function gridDistanceFeet(a: { x: number; y: number }, b: { x: number; y: number }): number {
+  return Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) * 5;
+}

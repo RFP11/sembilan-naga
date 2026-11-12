@@ -1,6 +1,7 @@
 // Database schema (Drizzle). Change it here, then `pnpm db:generate` to write a migration.
 // Tables arrive with the phase that uses them; see docs/PLAN.md for the full design.
 
+import type { FogCell } from "@dnd/contracts";
 import { sql } from "drizzle-orm";
 import {
   boolean,
@@ -198,6 +199,10 @@ export const scenes = pgTable(
     offsetX: doublePrecision("offset_x").notNull().default(0),
     offsetY: doublePrecision("offset_y").notNull().default(0),
     gridVisible: boolean("grid_visible").notNull().default(true),
+    /** Fog of war: players see only the revealed squares and the tokens on them. */
+    fogEnabled: boolean("fog_enabled").notNull().default(false),
+    /** Revealed squares as [x, y] grid cells (see `applyFog` in @dnd/contracts). */
+    fogRevealed: jsonb("fog_revealed").$type<FogCell[]>().notNull().default([]),
     createdAt: createdAt(),
   },
   (t) => [index("scenes_campaign_idx").on(t.campaignId)],

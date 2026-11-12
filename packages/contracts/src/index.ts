@@ -6,3 +6,4 @@ export * from "./scene";
 export * from "./token";
 export * from "./encounter";
 export * from "./attack";
+export * from "./fog";

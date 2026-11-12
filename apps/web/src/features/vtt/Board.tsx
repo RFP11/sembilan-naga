@@ -1,8 +1,21 @@
-import { sceneGridSize, TOKEN_CELLS, type Scene, type Token } from "@dnd/contracts";
+import {
+  revealedSet,
+  sceneGridSize,
+  TOKEN_CELLS,
+  type BoardPinged,
+  type CellRect,
+  type Scene,
+  type Token,
+} from "@dnd/contracts";
+import { gridDistanceFeet } from "@dnd/rules";
 import { Application, Circle, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 import type { FederatedPointerEvent } from "pixi.js";
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { socket } from "../../lib/socket";
 import { sceneImageUrl } from "./api";
+
+/** What a press on the board does: move tokens, measure, ping, or (DM) reveal / hide fog. */
+export type BoardTool = "select" | "measure" | "ping" | "reveal" | "hide";
 
 /** One grid square on the board: the space of a Medium token. A map is scaled to fit this. */
 const CELL = 48;
@@ -64,6 +77,8 @@ function initials(name: string) {
 }
 
 const NAME_LABEL = "name";
+/** Overlay drawings for the current measure / fog drag. */
+const SWEEP = "sweep";
 
 /** Everything a token's look depends on: it's redrawn only when this changes. */
 const lookOf = (t: Token, selected: boolean, acting: boolean) =>
@@ -148,8 +163,11 @@ export function Board({
   selectedId,
   actingId,
   targeting,
+  isDm,
+  tool,
   onSelect,
   onMove,
+  onFog,
 }: {
   campaignId: string;
   scene: Scene | null;
@@ -158,8 +176,12 @@ export function Board({
   actingId: string | null;
   /** Clicking a token picks it as a target, so nothing should start dragging. */
   targeting: boolean;
+  /** The DM sees through the fog (dimmed); players see only revealed squares. */
+  isDm: boolean;
+  tool: BoardTool;
   onSelect: (id: string | null) => void;
   onMove: (id: string, x: number, y: number) => void;
+  onFog: (change: { reveal: CellRect } | { hide: CellRect }) => void;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState<Zoom>("fit");
@@ -168,14 +190,23 @@ export function Board({
   const [boardVersion, setBoardVersion] = useState(0);
 
   const layerRef = useRef<Container | null>(null);
+  const fogRef = useRef<Graphics | null>(null);
+  const overlayRef = useRef<Container | null>(null);
+  const appRef = useRef<Application | null>(null);
+  // A measure or fog rectangle being dragged, in grid cells.
+  const sweepRef = useRef<{ from: { x: number; y: number }; to: { x: number; y: number } } | null>(
+    null,
+  );
   const drawnRef = useRef(new Map<string, Drawn>());
   // `half` keeps a big token centred under the pointer.
   const draggingRef = useRef<{ id: string; view: Container; half: number } | null>(null);
   // The pointer handlers live as long as the board; these keep them on current values.
   const tokensRef = useRef(tokens);
   tokensRef.current = tokens;
-  const handlersRef = useRef({ onSelect, onMove });
-  handlersRef.current = { onSelect, onMove };
+  const handlersRef = useRef({ onSelect, onMove, onFog });
+  handlersRef.current = { onSelect, onMove, onFog };
+  const toolRef = useRef(tool);
+  toolRef.current = tool;
   const targetingRef = useRef(targeting);
   targetingRef.current = targeting;
   const selectedRef = useRef(selectedId);
@@ -235,10 +266,79 @@ export function Board({
       board.addChild(layer);
       layerRef.current = layer;
 
+      // Above the tokens: the fog, then measuring lines, fog rectangles and pings.
+      const fog = new Graphics();
+      board.addChild(fog);
+      fogRef.current = fog;
+      const overlay = new Container();
+      board.addChild(overlay);
+      overlayRef.current = overlay;
+      appRef.current = app;
+
+      /** The grid square under the pointer, kept on the map. */
+      const cellAt = (e: FederatedPointerEvent) => ({
+        x: Math.max(0, Math.min(cols - 1, Math.floor((e.global.x - originX) / CELL))),
+        y: Math.max(0, Math.min(rows - 1, Math.floor((e.global.y - originY) / CELL))),
+      });
+      const drawSweep = () => {
+        for (const child of overlay.removeChildren()) if (child.label === SWEEP) child.destroy();
+        const sweep = sweepRef.current;
+        if (!sweep) return;
+        const { from, to } = sweep;
+        const g = new Graphics();
+        g.label = SWEEP;
+        if (toolRef.current === "measure") {
+          const centre = (c: { x: number; y: number }) =>
+            [c.x * CELL + CELL / 2, c.y * CELL + CELL / 2] as const;
+          g.moveTo(...centre(from))
+            .lineTo(...centre(to))
+            .stroke({ width: 4, color: 0xe9b22e })
+            .circle(...centre(from), 5)
+            .fill(0xe9b22e)
+            .circle(...centre(to), 5)
+            .fill(0xe9b22e);
+          const feet = gridDistanceFeet(from, to);
+          const label = new Text({
+            text: `${feet} ft · ${feet / 5} kotak`,
+            style: {
+              fontFamily: "Alegreya Sans, sans-serif",
+              fontSize: 14,
+              fontWeight: "700",
+              fill: 0xffffff,
+              stroke: { color: 0x1c130c, width: 4 },
+            },
+          });
+          label.label = SWEEP;
+          label.anchor.set(0.5, 1.2);
+          label.position.set(...centre(to));
+          overlay.addChild(g, label);
+        } else {
+          const x = Math.min(from.x, to.x) * CELL;
+          const y = Math.min(from.y, to.y) * CELL;
+          const w = (Math.abs(from.x - to.x) + 1) * CELL;
+          const h = (Math.abs(from.y - to.y) + 1) * CELL;
+          const color = toolRef.current === "reveal" ? 0x6fcf97 : 0xe4483b;
+          g.rect(x, y, w, h).fill({ color, alpha: 0.25 }).stroke({ width: 2, color });
+          overlay.addChild(g);
+        }
+      };
+
       app.stage.eventMode = "static";
       app.stage.hitArea = app.screen;
       app.stage.on("pointerdown", (e: FederatedPointerEvent) => {
-        if (e.target === app.stage) handlersRef.current.onSelect(null);
+        const t = toolRef.current;
+        if (t === "select") {
+          if (e.target === app.stage) handlersRef.current.onSelect(null);
+          return;
+        }
+        const cell = cellAt(e);
+        if (t === "ping") {
+          const local = { x: (e.global.x - originX) / CELL, y: (e.global.y - originY) / CELL };
+          if (local.x >= 0 && local.y >= 0) socket.emit("board:ping", { campaignId, ...local });
+          return;
+        }
+        sweepRef.current = { from: cell, to: cell };
+        drawSweep();
       });
       app.stage.on("pointermove", (e: FederatedPointerEvent) => {
         const dragging = draggingRef.current;
@@ -246,8 +346,22 @@ export function Board({
           e.global.x - originX - dragging.half,
           e.global.y - originY - dragging.half,
         );
+        if (sweepRef.current) {
+          sweepRef.current.to = cellAt(e);
+          drawSweep();
+        }
       });
       const drop = () => {
+        const sweep = sweepRef.current;
+        if (sweep) {
+          sweepRef.current = null;
+          const rect = { x1: sweep.from.x, y1: sweep.from.y, x2: sweep.to.x, y2: sweep.to.y };
+          if (toolRef.current === "reveal") handlersRef.current.onFog({ reveal: rect });
+          if (toolRef.current === "hide") handlersRef.current.onFog({ hide: rect });
+          // A measurement stays on the board until the next one; fog rectangles go at once.
+          if (toolRef.current !== "measure") drawSweep();
+          return;
+        }
         const dragging = draggingRef.current;
         draggingRef.current = null;
         if (!dragging) return;
@@ -270,6 +384,10 @@ export function Board({
     return () => {
       disposed = true;
       layerRef.current = null;
+      fogRef.current = null;
+      overlayRef.current = null;
+      appRef.current = null;
+      sweepRef.current = null;
       draggingRef.current = null;
       drawn.clear();
       if (app.renderer) app.destroy(true, { children: true, texture: true });
@@ -322,6 +440,89 @@ export function Board({
       if (draggingRef.current?.id !== t.id) entry.view.position.set(t.x * CELL, t.y * CELL);
     }
   }, [tokens, selectedId, actingId, boardVersion]);
+
+  // Tokens only take clicks with the select tool; other tools work on the squares under them.
+  useEffect(() => {
+    const layer = layerRef.current;
+    if (layer) layer.eventMode = tool === "select" ? "passive" : "none";
+    const overlay = overlayRef.current;
+    if (overlay) for (const child of overlay.removeChildren()) child.destroy();
+    sweepRef.current = null;
+  }, [tool, boardVersion]);
+
+  // Fog: black for players over every square not revealed; the DM sees through a dark veil.
+  const fogEnabled = scene?.fogEnabled ?? false;
+  const fogKey = scene ? scene.fogRevealed.map(([x, y]) => `${x},${y}`).join(";") : "";
+  useEffect(() => {
+    const fog = fogRef.current;
+    if (!fog) return;
+    fog.clear();
+    if (!fogEnabled || !scene) return;
+    const revealed = revealedSet(scene.fogRevealed);
+    // One rectangle per run of dark squares in a row keeps the drawing small.
+    for (let y = 0; y < rows; y++) {
+      let start = -1;
+      for (let x = 0; x <= cols; x++) {
+        const dark = x < cols && !revealed.has(`${x},${y}`);
+        if (dark && start < 0) start = x;
+        if (!dark && start >= 0) {
+          fog.rect(start * CELL, y * CELL, (x - start) * CELL, CELL);
+          start = -1;
+        }
+      }
+    }
+    fog.fill({ color: 0x0d0906, alpha: isDm ? 0.55 : 1 });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `fogKey` stands for the revealed squares
+  }, [fogEnabled, fogKey, isDm, cols, rows, boardVersion]);
+
+  // Pings from anyone at the table: three rings that grow and fade where they pointed.
+  useEffect(() => {
+    const onPing = (p: BoardPinged) => {
+      const app = appRef.current;
+      const overlay = overlayRef.current;
+      if (p.campaignId !== campaignId || !app || !overlay) return;
+      const ring = new Graphics();
+      const name = new Text({
+        text: p.by,
+        style: {
+          fontFamily: "Alegreya Sans, sans-serif",
+          fontSize: 13,
+          fontWeight: "700",
+          fill: 0xffffff,
+          stroke: { color: 0x1c130c, width: 3 },
+        },
+      });
+      name.anchor.set(0.5, 2.2);
+      const at = { x: p.x * CELL, y: p.y * CELL };
+      name.position.set(at.x, at.y);
+      overlay.addChild(ring, name);
+      const duration = 1800;
+      let elapsed = 0;
+      const tick = () => {
+        elapsed += app.ticker.deltaMS;
+        const t = elapsed / duration;
+        ring.clear();
+        for (let i = 0; i < 3; i++) {
+          const phase = (t * 3 - i * 0.35) % 1;
+          if (phase < 0) continue;
+          ring
+            .circle(at.x, at.y, 6 + phase * CELL)
+            .stroke({ width: 3, color: 0xe9b22e, alpha: 1 - phase });
+        }
+        name.alpha = 1 - t;
+        if (t >= 1) {
+          app.ticker.remove(tick);
+          ring.destroy();
+          name.destroy();
+        }
+      };
+      app.ticker.add(tick);
+    };
+    socket.on("board:pinged", onPing);
+    return () => {
+      socket.off("board:pinged", onPing);
+    };
+  }, [campaignId]);
 
   const canvasWidth = zoom === "fit" ? "100%" : `${layout.width * zoom}px`;
 

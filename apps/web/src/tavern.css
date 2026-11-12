@@ -1467,3 +1467,18 @@
   flex-wrap: wrap;
   gap: 6px;
 }
+
+/* Board tools: select / measure / ping, and the DM's fog of war */
+.tavern .board-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+}
+.tavern .fog-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 6px;
+  font-size: 14px;
+}

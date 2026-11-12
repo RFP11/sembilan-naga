@@ -1,4 +1,5 @@
 import {
+  boardPing,
   campaignJoin,
   campaignGmRoom,
   campaignRoom,
@@ -75,8 +76,14 @@ export function registerSocket(app: FastifyInstance, db: Db): IO {
       try {
         const moved = await moveToken(db.orm, user.id, parsed.data);
         if (!moved) return;
-        const room = moved.hidden ? campaignGmRoom(campaignId) : campaignRoom(campaignId);
+        // Players never learn where a hidden token goes, or a token that ends up in the fog.
+        const secret = moved.hidden || moved.foggedAfter;
+        const room = secret ? campaignGmRoom(campaignId) : campaignRoom(campaignId);
         socket.to(room).emit("token:moved", { campaignId, tokenId, x: moved.x, y: moved.y });
+        // Walking into or out of the fog changes who may see it: players fetch tokens again.
+        if (!moved.hidden && moved.foggedBefore !== moved.foggedAfter) {
+          io.to(campaignRoom(campaignId)).emit("tokens:changed", { campaignId });
+        }
         const prompted = await noteOpportunities(db.orm, tokenId, moved.from, moved);
         if (prompted) {
           io.to(campaignRoom(campaignId)).emit("encounter:changed", { campaignId });
@@ -84,6 +91,21 @@ export function registerSocket(app: FastifyInstance, db: Db): IO {
       } catch (err) {
         app.log.error({ err }, "token move failed");
       }
+    });
+
+    // Pings: at most one every 400 ms per connection, so nobody can flood the table.
+    let lastPing = 0;
+    socket.on("board:ping", (payload) => {
+      const parsed = boardPing.safeParse(payload);
+      if (!parsed.success || !canAct(parsed.data.campaignId)) return;
+      const now = Date.now();
+      if (now - lastPing < 400) return;
+      lastPing = now;
+      io.to(campaignRoom(parsed.data.campaignId)).emit("board:pinged", {
+        ...parsed.data,
+        by: user.displayName,
+        userId: user.id,
+      });
     });
 
     // Dice are rolled on the server so players can't fake results, and logged.

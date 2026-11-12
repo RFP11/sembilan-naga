@@ -384,7 +384,22 @@ Per jenis:
 
 Status (PR #2, `feat/serpih-langit-promo`): ✅ upload peta battle + skala grid, token tersimpan
 (monster SRD, NPC, karakter, objek), token tersembunyi dan HP monster tidak dikirim ke player,
-stat block saat token dipilih. ⏳ Belum: fog of war, alat ukur jarak, ping.
+stat block saat token dipilih. ✅ Fog of war, alat ukur, ping:
+
+- Fog per peta (`fog_enabled`, `fog_revealed` = sel `[x, y]` yang dibuka, migrasi `0010_fog`):
+  DM menyalakan/mematikan, membuka atau menutup area dengan menyeret kotak, atau semuanya
+  (`PATCH /api/campaigns/:id/scenes/:sceneId/fog`). Player melihat hitam pekat di luar area
+  terbuka, DM melihat peta di balik selubung gelap.
+- Kerahasiaan di server, bukan cuma tampilan: token monster/NPC/objek yang seluruh kotaknya
+  di dalam kabut tidak dikirim ke player (token karakter party selalu terlihat); gerakan yang
+  berakhir di kabut hanya dikirim ke DM; keluar/masuk kabut membuat player mengambil ulang
+  token. Gambar peta tetap dikirim utuh (seperti VTT lain), jadi kabut tidak menyembunyikan
+  isi file gambarnya.
+- Alat ukur: seret dari kotak ke kotak; jarak memakai aturan grid SRD (diagonal = 1 kotak =
+  5 ft), `gridDistanceFeet` di `packages/rules`.
+- Ping: klik peta, semua orang di meja melihat lingkaran beranimasi dengan nama pengirim;
+  dibatasi satu per 400 ms per koneksi.
+- Belum: kombatan di urutan inisiatif tidak ikut disembunyikan oleh kabut.
 
 - Scene, upload peta, atur grid.
 - Token tersimpan di DB. Izin: GM bebas, player hanya token yang dia kontrol.
