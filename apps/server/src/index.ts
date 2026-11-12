@@ -1,6 +1,7 @@
 import { buildApp } from "./app";
 import { config } from "./config";
 import { createDb, runMigrations } from "./db";
+import { createStorage } from "./storage";
 
 if (!config.DATABASE_URL) {
   console.error(
@@ -11,7 +12,9 @@ if (!config.DATABASE_URL) {
 
 const db = createDb(config.DATABASE_URL);
 await runMigrations(db, config.MIGRATIONS_DIR);
-const app = await buildApp({ config, db });
+const storage = createStorage(config);
+if (!storage) console.warn("S3_* is not set: registrations are closed and the map has no images.");
+const app = await buildApp({ config, db, storage });
 
 const shutdown = async () => {
   await app.close();

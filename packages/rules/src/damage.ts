@@ -17,6 +17,10 @@ export interface DamageResult extends HitPointState {
  * damage is at least their HP maximum; damage taken at 0 HP adds a Death Save failure (two
  * on a Critical Hit) or kills if it equals the maximum. Three failures also mean death.
  */
+/** At 0 HP with three successes: no more death saves, until damage or healing changes that. */
+export const isStable = (hp: Pick<HitPointState, "current" | "deathSaves">) =>
+  hp.current === 0 && hp.deathSaves.success >= 3;
+
 export function applyDamage(
   hp: HitPointState,
   amount: number,
@@ -29,11 +33,13 @@ export function applyDamage(
 
   if (hp.current === 0) {
     if (rest === 0) return { ...hp, temp, dead: false };
-    const fail = Math.min(3, hp.deathSaves.fail + (critical ? 2 : 1));
+    // Becoming Stable reset the failures, so this starts a fresh count.
+    const fail = Math.min(3, (isStable(hp) ? 0 : hp.deathSaves.fail) + (critical ? 2 : 1));
     return {
       ...hp,
       temp,
-      deathSaves: { ...hp.deathSaves, fail },
+      // Damage ends being Stable: the saves start over, with this failure on them.
+      deathSaves: { success: isStable(hp) ? 0 : hp.deathSaves.success, fail },
       dead: rest >= hp.max || fail >= 3,
     };
   }
@@ -59,9 +65,20 @@ export function grantTempHp(hp: HitPointState, amount: number): HitPointState {
   return { ...hp, temp: Math.max(hp.temp, amount) };
 }
 
+/** A correction by hand: within 0 to the maximum, and back above 0 clears the death saves. */
+export function setHitPoints(hp: HitPointState, amount: number): HitPointState {
+  const current = Math.max(0, Math.min(hp.max, amount));
+  return {
+    ...hp,
+    current,
+    deathSaves: current > 0 ? { success: 0, fail: 0 } : hp.deathSaves,
+  };
+}
+
 /**
  * A Death Saving Throw: 10+ succeeds, 1 counts as two failures, 20 regains 1 HP (and resets
- * the saves). Three successes make the character Stable (saves reset, still at 0 HP).
+ * the saves). Three successes make the character Stable: still at 0 HP, failures reset, and the
+ * successes stay on the sheet because they're what says so.
  */
 export function deathSave(
   hp: HitPointState,
@@ -71,6 +88,6 @@ export function deathSave(
   const success = hp.deathSaves.success + (d20 >= 10 ? 1 : 0);
   const fail = Math.min(3, hp.deathSaves.fail + (d20 === 1 ? 2 : d20 < 10 ? 1 : 0));
   if (success >= 3)
-    return { ...hp, deathSaves: { success: 0, fail: 0 }, stable: true, dead: false };
+    return { ...hp, deathSaves: { success: 3, fail: 0 }, stable: true, dead: false };
   return { ...hp, deathSaves: { success, fail }, stable: false, dead: fail >= 3 };
 }

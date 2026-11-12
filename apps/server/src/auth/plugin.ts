@@ -26,7 +26,15 @@ export type AuthConfig = Pick<
   "NODE_ENV" | "PUBLIC_URL" | "GOOGLE_CLIENT_ID" | "GOOGLE_CLIENT_SECRET" | "DEV_LOGIN"
 >;
 
-const OAUTH_COOKIES = { state: "oauth_state", verifier: "oauth_verifier" } as const;
+const OAUTH_COOKIES = {
+  state: "oauth_state",
+  verifier: "oauth_verifier",
+  returnTo: "oauth_return",
+} as const;
+
+/** Pages a login may return to. A fixed list, so the redirect can't be pointed elsewhere. */
+const RETURN_PATHS = new Set(["/daftar", "/dm", "/dm/catatan", "/undang-dm", "/app"]);
+const DEFAULT_RETURN = "/app";
 
 /** 401s unless someone is logged in. Use as a route preHandler. */
 export async function requireUser(req: FastifyRequest, reply: FastifyReply) {
@@ -118,7 +126,13 @@ export async function registerAuth(app: FastifyInstance, config: AuthConfig, db:
           maxAge: 600,
         } as const;
 
-        auth.get("/google", async (_req, reply) => {
+        auth.get<{ Querystring: { returnTo?: string } }>("/google", async (req, reply) => {
+          const { returnTo } = req.query;
+          reply.setCookie(
+            OAUTH_COOKIES.returnTo,
+            returnTo && RETURN_PATHS.has(returnTo) ? returnTo : DEFAULT_RETURN,
+            cookieOpts,
+          );
           const state = generateState();
           const verifier = generateCodeVerifier();
           const url = google.createAuthorizationURL(state, verifier, [
@@ -134,14 +148,21 @@ export async function registerAuth(app: FastifyInstance, config: AuthConfig, db:
         auth.get<{ Querystring: { code?: string; state?: string } }>(
           "/google/callback",
           async (req, reply) => {
+            const cookieReturn = req.cookies[OAUTH_COOKIES.returnTo];
+            const returnTo =
+              cookieReturn && RETURN_PATHS.has(cookieReturn) ? cookieReturn : DEFAULT_RETURN;
             const home = (error?: string) =>
               reply.redirect(
-                new URL(error ? `/?login_error=${error}` : "/", config.PUBLIC_URL).toString(),
+                new URL(
+                  error ? `${returnTo}?login_error=${error}` : returnTo,
+                  config.PUBLIC_URL,
+                ).toString(),
               );
             const { code, state } = req.query;
             const verifier = req.cookies[OAUTH_COOKIES.verifier];
             reply.clearCookie(OAUTH_COOKIES.state, { path: "/api/auth" });
             reply.clearCookie(OAUTH_COOKIES.verifier, { path: "/api/auth" });
+            reply.clearCookie(OAUTH_COOKIES.returnTo, { path: "/api/auth" });
             if (!code || !state || !verifier || state !== req.cookies[OAUTH_COOKIES.state])
               return home("state");
 

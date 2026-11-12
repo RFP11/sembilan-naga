@@ -5,3 +5,6 @@ dist/
 *.log
 .DS_Store
 .cache/
+# Map images live in MinIO, so later eras can't be seen by reading the repository.
+apps/server/promo-assets/
+.env.production

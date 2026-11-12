@@ -13,7 +13,7 @@ import { z } from "zod";
 import { requireUser } from "../auth/plugin";
 import { memberRole } from "../campaigns/membership";
 import type { Db } from "../db";
-import { characters } from "../db/schema";
+import { characters, characterSpells, tokens } from "../db/schema";
 import { buildColumns, loadCharacter, replaceLevels, summaries } from "./repo";
 import { finalizeCharacter } from "./service";
 
@@ -61,6 +61,21 @@ export const characterRoutes: FastifyPluginAsync<{ db: Db }> = async (app, { db 
       .where(eq(characters.ownerId, req.user!.id))
       .orderBy(desc(characters.updatedAt));
     return summaries(db.orm, rows);
+  });
+
+  /** Spells the character was granted, such as a species' cantrips. */
+  app.get("/characters/:id/spells", async (req, reply) => {
+    const c = await visible(req.user!, req.params, reply);
+    if (!c) return;
+    return db.orm
+      .select({
+        spellId: characterSpells.spellId,
+        source: characterSpells.source,
+        prepared: characterSpells.prepared,
+        alwaysPrepared: characterSpells.alwaysPrepared,
+      })
+      .from(characterSpells)
+      .where(eq(characterSpells.characterId, c.id));
   });
 
   /** Ready characters in a campaign, for every member. */
@@ -131,6 +146,9 @@ export const characterRoutes: FastifyPluginAsync<{ db: Db }> = async (app, { db 
         })
         .where(eq(characters.id, c.id));
       if (patch?.levels) await replaceLevels(tx, c.id, next);
+      // Its tokens belong to the campaign it's leaving.
+      if (campaignId !== undefined && campaignId !== c.campaignId)
+        await tx.delete(tokens).where(eq(tokens.characterId, c.id));
     });
     const updated = (await loadCharacter(db.orm, c.id))!;
     return { ...updated, issues: updated.status === "draft" ? validateBuild(updated.build) : [] };

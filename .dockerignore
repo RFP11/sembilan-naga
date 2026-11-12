@@ -1,5 +1,6 @@
 **/node_modules
 **/dist
 **/.turbo
+apps/server/promo-assets
 .git
 .env

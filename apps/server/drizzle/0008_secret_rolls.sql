@@ -1,0 +1,1 @@
+ALTER TABLE "chat_messages" ADD COLUMN "secret" boolean DEFAULT false NOT NULL;

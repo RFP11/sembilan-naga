@@ -6,19 +6,27 @@ const LOGIN_ERRORS: Record<string, string> = {
   email: "Your Google account needs a verified email address.",
 };
 
-export function Login() {
+export function Login({
+  title = "DnD App",
+  googleLabel = "Sign in with Google",
+}: {
+  title?: string;
+  googleLabel?: string;
+}) {
   const providers = useProviders();
   const devLogin = useDevLogin();
   const error = new URLSearchParams(window.location.search).get("login_error");
+  // Come back to this page after Google.
+  const returnTo = encodeURIComponent(window.location.pathname);
 
   return (
     <div className="centered">
-      <h1>DnD App</h1>
+      <h1>{title}</h1>
       {error && <p className="error">{LOGIN_ERRORS[error] ?? "Login failed."}</p>}
       {providers.isPending && <p className="muted">Loading…</p>}
       {providers.data?.google && (
-        <a className="button" href="/api/auth/google">
-          Sign in with Google
+        <a className="button" href={`/api/auth/google?returnTo=${returnTo}`}>
+          {googleLabel}
         </a>
       )}
       {providers.data && !providers.data.google && !providers.data.devUsers && (

@@ -1,5 +1,6 @@
 import {
   campaignJoin,
+  campaignGmRoom,
   campaignRoom,
   diceRollRequest,
   tokenMove,
@@ -15,6 +16,8 @@ import { SESSION_COOKIE, validateSession } from "../auth/session";
 import { memberRole } from "../campaigns/membership";
 import { recordRoll } from "../campaigns/rolls";
 import type { Db } from "../db";
+import { noteOpportunities } from "../scenes/encounter";
+import { moveToken } from "../scenes/tokens";
 
 interface SocketData {
   user: User;
@@ -61,20 +64,33 @@ export function registerSocket(app: FastifyInstance, db: Db): IO {
       if (!role) return ack({ ok: false, error: "not a member of this campaign" });
       roles.set(parsed.data.campaignId, role);
       await socket.join(campaignRoom(parsed.data.campaignId));
+      if (role === "gm") await socket.join(campaignGmRoom(parsed.data.campaignId));
       ack({ ok: true });
     });
 
-    socket.on("token:move", (payload) => {
+    socket.on("token:move", async (payload) => {
       const parsed = tokenMove.safeParse(payload);
       if (!parsed.success || !canAct(parsed.data.campaignId)) return;
-      socket.to(campaignRoom(parsed.data.campaignId)).emit("token:moved", parsed.data);
+      const { campaignId, tokenId } = parsed.data;
+      try {
+        const moved = await moveToken(db.orm, user.id, parsed.data);
+        if (!moved) return;
+        const room = moved.hidden ? campaignGmRoom(campaignId) : campaignRoom(campaignId);
+        socket.to(room).emit("token:moved", { campaignId, tokenId, x: moved.x, y: moved.y });
+        const prompted = await noteOpportunities(db.orm, tokenId, moved.from, moved);
+        if (prompted) {
+          io.to(campaignRoom(campaignId)).emit("encounter:changed", { campaignId });
+        }
+      } catch (err) {
+        app.log.error({ err }, "token move failed");
+      }
     });
 
     // Dice are rolled on the server so players can't fake results, and logged.
     socket.on("dice:roll", async (payload, ack) => {
       const parsed = diceRollRequest.safeParse(payload);
       if (!parsed.success) return ack({ ok: false, error: "invalid payload" });
-      const { campaignId, expression, label } = parsed.data;
+      const { campaignId, expression, label, secret } = parsed.data;
       if (!canAct(campaignId)) return ack({ ok: false, error: "join the campaign first" });
       let roll;
       try {
@@ -89,6 +105,7 @@ export function registerSocket(app: FastifyInstance, db: Db): IO {
         label,
         rolls: roll.rolls,
         total: roll.total,
+        secret: secret && roles.get(campaignId) === "gm",
       });
       ack({ ok: true });
     });

@@ -110,13 +110,20 @@ export const campaignRoutes: FastifyPluginAsync<{ db: Db }> = async (app, { db }
   app.get("/campaigns/:id/rolls", async (req, reply) => {
     const params = idParams.safeParse(req.params);
     if (!params.success) return reply.code(404).send({ error: "not found" });
-    if (!(await memberRole(db.orm, params.data.id, req.user!.id)))
-      return reply.code(404).send({ error: "not found" });
+    const role = await memberRole(db.orm, params.data.id, req.user!.id);
+    if (!role) return reply.code(404).send({ error: "not found" });
     const rows = await db.orm
       .select({ message: chatMessages, by: users.displayName })
       .from(chatMessages)
       .leftJoin(users, eq(chatMessages.userId, users.id))
-      .where(and(eq(chatMessages.campaignId, params.data.id), eq(chatMessages.kind, "roll")))
+      .where(
+        and(
+          eq(chatMessages.campaignId, params.data.id),
+          eq(chatMessages.kind, "roll"),
+          // Secret rolls are the DM's.
+          ...(role === "gm" ? [] : [eq(chatMessages.secret, false)]),
+        ),
+      )
       .orderBy(desc(chatMessages.createdAt))
       .limit(50);
     return rows.map(({ message: m, by }): DiceRollResult => toRollResult(m, by));
@@ -138,6 +145,7 @@ export function toRollResult(
     total: m.total!,
     by: by ?? "unknown",
     userId: m.userId,
+    secret: m.secret,
     createdAt: m.createdAt.toISOString(),
   };
 }

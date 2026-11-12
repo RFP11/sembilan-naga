@@ -7,6 +7,15 @@ export async function api<T>(path: string, init?: { method?: string; body?: unkn
     headers: init?.body === undefined ? undefined : { "content-type": "application/json" },
     body: init?.body === undefined ? undefined : JSON.stringify(init.body),
   });
+  return parse<T>(res);
+}
+
+/** Multipart upload; the browser sets the content type and boundary itself. */
+export async function apiForm<T>(path: string, form: FormData): Promise<T> {
+  return parse<T>(await fetch(`/api${path}`, { method: "POST", body: form }));
+}
+
+async function parse<T>(res: Response): Promise<T> {
   const data = res.headers.get("content-type")?.includes("json") ? await res.json() : undefined;
   if (!res.ok) throw new Error(data?.error ?? `HTTP ${res.status}`);
   return data as T;

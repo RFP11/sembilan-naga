@@ -59,6 +59,53 @@ describe("hit points", () => {
     ).toBe(404);
   });
 
+  it("sets HP by hand, within the limits, for the owner and the DM", async () => {
+    const p1 = await loginAs(app, SEED.player1.id);
+    const set = async (amount: number, who = p1) =>
+      call<Sheet>(who, "POST", `/characters/${brunhild}/hp`, { type: "set", amount });
+
+    expect((await set(5)).body.state.hpCurrent).toBe(5);
+    expect((await set(999)).body.state.hpCurrent).toBe(13);
+    const dm = await loginAs(app, SEED.gm.id);
+    expect((await set(7, dm)).body.state.hpCurrent).toBe(7);
+    const stranger = await loginAs(app, SEED.player2.id);
+    expect((await set(1, stranger)).status).toBe(404);
+    await set(0);
+  });
+
+  it("stops at three successes: stable at 0 HP, and it stays that way", async () => {
+    const p1 = await loginAs(app, SEED.player1.id);
+    const path = `/characters/${brunhild}/death-save`;
+    const hpPath = `/characters/${brunhild}/hp`;
+    const save = () => call<Sheet & { stable: boolean; roll: number }>(p1, "POST", path);
+    const restart = async () => {
+      await call(p1, "POST", hpPath, { type: "set", amount: 5 });
+      await call(p1, "POST", hpPath, { type: "set", amount: 0 });
+    };
+    await restart();
+
+    let last = await save();
+    for (let i = 0; i < 300 && !last.body.stable; i++) {
+      // A 20 brings them back and three failures end it: start over.
+      if (last.body.state.hpCurrent > 0 || last.body.state.deathSaves.fail >= 3) await restart();
+      last = await save();
+    }
+    expect(last.body.stable).toBe(true);
+    expect(last.body.state.hpCurrent).toBe(0);
+    expect(last.body.state.deathSaves.success).toBe(3);
+
+    // The character sheet remembers, and there's nothing more to roll.
+    const sheet = await call<Sheet>(p1, "GET", `/characters/${brunhild}`);
+    expect(sheet.body.state.deathSaves.success).toBe(3);
+    expect((await save()).status).toBe(409);
+
+    // Damage starts the saves over.
+    const hurt = await call<Sheet>(p1, "POST", hpPath, { type: "damage", amount: 1 });
+    expect(hurt.body.state.deathSaves).toMatchObject({ success: 0 });
+    expect((await save()).status).toBe(200);
+    await restart();
+  });
+
   it("rolls death saves on the server at 0 HP and logs them", async () => {
     const p1 = await loginAs(app, SEED.player1.id);
     const save = await call<Sheet & { roll: number }>(
