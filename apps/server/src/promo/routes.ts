@@ -18,22 +18,26 @@ import {
   type Registration,
 } from "@dnd/contracts";
 import multipart from "@fastify/multipart";
+import { validateBuild } from "@dnd/character";
 import { and, asc, desc, eq, gt, isNull, ne, sql } from "drizzle-orm";
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { z } from "zod";
 import { memberRole } from "../campaigns/membership";
+import { buildColumns, replaceLevels } from "../characters/repo";
 import type { Config } from "../config";
 import type { Db } from "../db";
 import {
   campaignMembers,
   campaignRegistrations,
   campaigns,
+  characters,
   coDmInvites,
   users,
 } from "../db/schema";
 import { MAP_FILE, mapKey, sheetKey, type Storage } from "../storage";
 import { registerNoteRoutes } from "./notes";
+import { buildFromSheet, readSheetFields, streamToBuffer } from "./sheet";
 import { canStartOn, worldForEra } from "./world";
 
 export type PromoConfig = Pick<Config, "PROMO_CAMPAIGN_ID" | "PUBLIC_URL">;
@@ -80,6 +84,7 @@ function toRegistration(row: RegistrationRow): Registration {
     startIsland: row.startIsland,
     sheetName: row.sheetName,
     sheetBytes: row.sheetBytes,
+    characterId: row.characterId ?? null,
     status: row.status,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -170,6 +175,59 @@ export const promoRoutes: FastifyPluginAsync<{
       req.log.error({ err, key }, "storage read failed");
       reply.code(503).send(STORAGE_DOWN);
       return undefined;
+    }
+  };
+
+  const STEP_ORDER = ["class", "origin", "abilities", "alignment", "details"] as const;
+
+  /**
+   * Turns the sheet a player uploaded into a draft in the campaign. Best-effort: a sheet that
+   * can't be read still gives an empty draft, and a failure here never rejects the sign-up.
+   */
+  const importCharacter = async (
+    registration: RegistrationRow,
+    campaign: CampaignRow,
+  ): Promise<string | null> => {
+    if (!storage) return null;
+    const [existing] = await db.orm
+      .select({ id: characters.id })
+      .from(characters)
+      .where(
+        and(eq(characters.ownerId, registration.userId), eq(characters.campaignId, campaign.id)),
+      )
+      .limit(1);
+    if (existing) return null;
+
+    let fields: Record<string, string> = {};
+    if (registration.sheetMime === "application/pdf") {
+      try {
+        const file = await storage.get(sheetKey(registration.sheetKey));
+        if (file) fields = await readSheetFields(await streamToBuffer(file));
+      } catch (err) {
+        app.log.warn({ err, registrationId: registration.id }, "could not read character sheet");
+      }
+    }
+
+    const build = buildFromSheet(fields, registration.characterName);
+    const firstIssue = validateBuild(build)[0];
+    const builderStep = firstIssue ? STEP_ORDER.indexOf(firstIssue.step) : STEP_ORDER.length;
+    try {
+      return await db.orm.transaction(async (tx) => {
+        const [row] = await tx
+          .insert(characters)
+          .values({
+            ownerId: registration.userId,
+            campaignId: campaign.id,
+            ...buildColumns(build),
+            builderStep,
+          })
+          .returning({ id: characters.id });
+        await replaceLevels(tx, row!.id, build);
+        return row!.id;
+      });
+    } catch (err) {
+      app.log.warn({ err, registrationId: registration.id }, "could not create character");
+      return null;
     }
   };
 
@@ -597,6 +655,46 @@ export const promoRoutes: FastifyPluginAsync<{
       return updated;
     });
     if (!row) return reply.code(404).send({ error: "not found" });
-    return toRegistration(row);
+
+    if (parsed.data.status === "rejected") {
+      // The character stays the player's; it just leaves the campaign until they're accepted
+      // again. Deleting it would throw away anything they'd already edited.
+      if (row.characterId)
+        await db.orm
+          .update(characters)
+          .set({ campaignId: null, updatedAt: new Date() })
+          .where(
+            and(
+              eq(characters.id, row.characterId),
+              eq(characters.ownerId, row.userId),
+              eq(characters.campaignId, campaign.id),
+            ),
+          );
+      return toRegistration(row);
+    }
+
+    if (row.characterId) {
+      // Accepted again after a rejection: put the imported character back in the campaign.
+      await db.orm
+        .update(characters)
+        .set({ campaignId: campaign.id, updatedAt: new Date() })
+        .where(
+          and(
+            eq(characters.id, row.characterId),
+            eq(characters.ownerId, row.userId),
+            isNull(characters.campaignId),
+          ),
+        );
+      return toRegistration(row);
+    }
+
+    const created = await importCharacter(row, campaign);
+    if (!created) return toRegistration(row);
+    const [linked] = await db.orm
+      .update(campaignRegistrations)
+      .set({ characterId: created })
+      .where(eq(campaignRegistrations.id, row.id))
+      .returning();
+    return toRegistration(linked ?? row);
   });
 };

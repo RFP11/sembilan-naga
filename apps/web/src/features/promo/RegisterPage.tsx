@@ -123,9 +123,17 @@ function RegisterForm({
           </div>
         </dl>
         {registration.status === "accepted" ? (
-          <Link href="/app" className="btn btn-red">
-            Buka meja
-          </Link>
+          <>
+            {registration.characterId && (
+              <p className="ink-soft">
+                Karakter awalnya sudah dibuat otomatis dari character sheet-mu — buka meja,
+                lengkapi, lalu finalize.
+              </p>
+            )}
+            <Link href="/app" className="btn btn-red">
+              Buka meja
+            </Link>
+          </>
         ) : (
           promo.registrationOpen && (
             <button type="button" className="btn btn-plain" onClick={() => setEditing(true)}>
