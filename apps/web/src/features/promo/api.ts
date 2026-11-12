@@ -6,6 +6,7 @@ import type {
   MyRegistrationResponse,
   NotesResponse,
   PromoResponse,
+  PublicCampaignsResponse,
   Registration,
   ReviewRegistrationRequest,
   UpdateNoteRequest,
@@ -15,6 +16,14 @@ import { api, apiForm } from "../../lib/api";
 
 export function usePromo() {
   return useQuery({ queryKey: ["promo"], queryFn: () => api<PromoResponse>("/promo") });
+}
+
+/** Campaigns their DMs chose to show on the homepage. Public, no login needed. */
+export function usePublicCampaigns() {
+  return useQuery({
+    queryKey: ["public-campaigns"],
+    queryFn: () => api<PublicCampaignsResponse>("/promo/campaigns"),
+  });
 }
 
 export function useMyRegistration(enabled: boolean) {

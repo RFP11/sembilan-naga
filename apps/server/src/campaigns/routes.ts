@@ -2,6 +2,7 @@ import {
   campaignSettings,
   createCampaignRequest,
   joinCampaignRequest,
+  updateCampaignRequest,
   type Campaign,
   type CampaignDetail,
   type DiceRollResult,
@@ -83,6 +84,34 @@ export const campaignRoutes: FastifyPluginAsync<{ db: Db }> = async (app, { db }
       .onConflictDoNothing();
     const role = (await memberRole(db.orm, row.id, req.user!.id))!;
     return toCampaign(row, role);
+  });
+
+  /** A GM edits the campaign blurb and how it appears on the public homepage. */
+  app.patch("/campaigns/:id", async (req, reply) => {
+    const params = idParams.safeParse(req.params);
+    if (!params.success) return reply.code(404).send({ error: "not found" });
+    const parsed = updateCampaignRequest.safeParse(req.body);
+    if (!parsed.success)
+      return reply.code(400).send({ error: "invalid payload", details: parsed.error.issues });
+    const role = await memberRole(db.orm, params.data.id, req.user!.id);
+    if (!role) return reply.code(404).send({ error: "not found" });
+    if (role !== "gm") return reply.code(403).send({ error: "only a GM can change this campaign" });
+
+    const [row] = await db.orm.select().from(campaigns).where(eq(campaigns.id, params.data.id));
+    if (!row) return reply.code(404).send({ error: "not found" });
+    const settings = campaignSettings.parse(row.settings);
+    if (parsed.data.promoted !== undefined) settings.promoted = parsed.data.promoted;
+    if (parsed.data.promoTagline !== undefined) settings.promoTagline = parsed.data.promoTagline;
+
+    const [updated] = await db.orm
+      .update(campaigns)
+      .set({
+        ...(parsed.data.description !== undefined && { description: parsed.data.description }),
+        settings,
+      })
+      .where(eq(campaigns.id, params.data.id))
+      .returning();
+    return toCampaign(updated!, "gm");
   });
 
   app.get("/campaigns/:id", async (req, reply) => {

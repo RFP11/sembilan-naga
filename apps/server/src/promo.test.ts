@@ -5,9 +5,10 @@ import type {
   InviteCoDmResponse,
   NotesResponse,
   PromoResponse,
+  PublicCampaignsResponse,
   Registration,
 } from "@dnd/contracts";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -659,5 +660,121 @@ describe("importing the uploaded sheet", () => {
       name: "Tanpa Sheet",
       speciesId: null,
     });
+  });
+});
+
+describe("homepage campaign promotion", () => {
+  const patch = (cookie: string, id: string, body: object) =>
+    app.inject({
+      method: "PATCH",
+      url: `/api/campaigns/${id}`,
+      headers: { cookie },
+      payload: body,
+    });
+  const publicList = async () =>
+    (
+      await app.inject({ method: "GET", url: "/api/promo/campaigns" })
+    ).json<PublicCampaignsResponse>();
+
+  it("lists only promoted campaigns, with their DM but never the invite code", async () => {
+    const gm = await loginAs(app, SEED.gm.id);
+    const before = await publicList();
+    expect(before.campaigns.map((c) => c.name)).toEqual(["Serpih Langit"]);
+    expect(before.campaigns[0]).toMatchObject({
+      dmName: SEED.gm.displayName,
+      pageUrl: "/serpih-langit",
+      registrationOpen: true,
+    });
+    expect(JSON.stringify(before)).not.toContain(SEED.promoCampaign.inviteCode);
+    expect(JSON.stringify(before)).not.toContain(SEED.campaign.inviteCode);
+
+    const saved = await patch(gm, SEED.campaign.id, {
+      promoted: true,
+      promoTagline: "  Ujian di bawah tanah  ",
+      description: "  Kampanye contoh  ",
+    });
+    expect(saved.statusCode).toBe(200);
+    expect(saved.json<Campaign>()).toMatchObject({
+      description: "Kampanye contoh",
+      settings: { promoted: true, promoTagline: "Ujian di bawah tanah" },
+    });
+
+    const after = await publicList();
+    expect(after.campaigns.map((c) => c.name)).toEqual(["Dev Campaign", "Serpih Langit"]);
+    const members = await db.orm
+      .select()
+      .from(campaignMembers)
+      .where(
+        and(eq(campaignMembers.campaignId, SEED.campaign.id), eq(campaignMembers.role, "player")),
+      );
+    expect(after.campaigns[0]).toMatchObject({
+      tagline: "Ujian di bawah tanah",
+      description: "Kampanye contoh",
+      dmName: SEED.gm.displayName,
+      playerCount: members.length,
+      pageUrl: null,
+      registrationOpen: false,
+    });
+
+    await patch(gm, SEED.campaign.id, { promoted: false });
+    expect((await publicList()).campaigns.map((c) => c.name)).toEqual(["Serpih Langit"]);
+  });
+
+  it("only lets a GM change a campaign, and keeps the other settings", async () => {
+    const gm = await loginAs(app, SEED.gm.id);
+    const player = await loginAs(app, SEED.player1.id);
+
+    expect((await patch(player, SEED.campaign.id, { promoted: true })).statusCode).toBe(403);
+    expect((await patch(player, SEED.campaign.id, { promoTagline: "x" })).statusCode).toBe(403);
+
+    // The promo DM page and this endpoint write the same settings object.
+    await app.inject({
+      method: "PUT",
+      url: "/api/promo/dm/era",
+      headers: { cookie: gm },
+      payload: { era: "senja" },
+    });
+    expect(
+      (await patch(gm, SEED.promoCampaign.id, { promoTagline: "Pulau di atas kabut" })).statusCode,
+    ).toBe(200);
+    const campaigns = (
+      await app.inject({ method: "GET", url: "/api/campaigns", headers: { cookie: gm } })
+    ).json<Campaign[]>();
+    expect(campaigns.find((c) => c.id === SEED.promoCampaign.id)?.settings).toMatchObject({
+      mapEra: "senja",
+      promoted: true,
+      promoTagline: "Pulau di atas kabut",
+    });
+
+    expect((await patch(gm, SEED.promoCampaign.id, { promoTagline: "" })).statusCode).toBe(200);
+    await app.inject({
+      method: "PUT",
+      url: "/api/promo/dm/era",
+      headers: { cookie: gm },
+      payload: { era: "emas" },
+    });
+  });
+
+  it("reports closed registration for the promo campaign", async () => {
+    const gm = await loginAs(app, SEED.gm.id);
+    const setOpen = (open: boolean) =>
+      app.inject({
+        method: "PUT",
+        url: "/api/promo/dm/registration",
+        headers: { cookie: gm },
+        payload: { open },
+      });
+
+    const list = async () => {
+      const { campaigns } = await publicList();
+      const campaign = campaigns.find((c) => c.pageUrl === "/serpih-langit");
+      expect(campaign).toBeDefined();
+      return campaign!;
+    };
+
+    await setOpen(false);
+    expect((await list()).registrationOpen).toBe(false);
+    await setOpen(true);
+    expect((await list()).registrationOpen).toBe(true);
   });
 });

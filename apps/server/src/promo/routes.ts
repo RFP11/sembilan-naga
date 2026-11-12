@@ -15,11 +15,13 @@ import {
   type MapEra,
   type MyRegistrationResponse,
   type PromoResponse,
+  type PromotedCampaign,
+  type PublicCampaignsResponse,
   type Registration,
 } from "@dnd/contracts";
 import multipart from "@fastify/multipart";
 import { validateBuild } from "@dnd/character";
-import { and, asc, desc, eq, gt, isNull, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNull, ne, sql } from "drizzle-orm";
 import type { FastifyPluginAsync, FastifyReply, FastifyRequest } from "fastify";
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { z } from "zod";
@@ -232,6 +234,55 @@ export const promoRoutes: FastifyPluginAsync<{
   };
 
   // ── Public ───────────────────────────────────────────────────────────────────────
+
+  /** Campaigns their DMs chose to promote, for the homepage. Invite codes stay private. */
+  app.get("/campaigns", async (): Promise<PublicCampaignsResponse> => {
+    const rows = await db.orm
+      .select({
+        id: campaigns.id,
+        name: campaigns.name,
+        description: campaigns.description,
+        settings: campaigns.settings,
+        dmName: users.displayName,
+      })
+      .from(campaigns)
+      .innerJoin(users, eq(campaigns.ownerId, users.id))
+      .where(sql`${campaigns.settings}->>'promoted' = 'true'`)
+      .orderBy(desc(campaigns.createdAt));
+    if (!rows.length) return { campaigns: [] };
+
+    const counts = await db.orm
+      .select({ campaignId: campaignMembers.campaignId, players: sql<number>`count(*)::int` })
+      .from(campaignMembers)
+      .where(
+        and(
+          inArray(
+            campaignMembers.campaignId,
+            rows.map((row) => row.id),
+          ),
+          eq(campaignMembers.role, "player"),
+        ),
+      )
+      .groupBy(campaignMembers.campaignId);
+    const players = new Map(counts.map((count) => [count.campaignId, count.players]));
+
+    return {
+      campaigns: rows.map((row): PromotedCampaign => {
+        const settings = campaignSettings.parse(row.settings);
+        const isPromoCampaign = row.id === config.PROMO_CAMPAIGN_ID;
+        return {
+          id: row.id,
+          name: row.name,
+          tagline: settings.promoTagline,
+          description: row.description,
+          dmName: row.dmName,
+          playerCount: players.get(row.id) ?? 0,
+          pageUrl: isPromoCampaign ? "/serpih-langit" : null,
+          registrationOpen: isPromoCampaign && Boolean(storage) && settings.registrationOpen,
+        };
+      }),
+    };
+  });
 
   app.get("/", async (req): Promise<PromoResponse> => {
     const campaign = await loadCampaign();

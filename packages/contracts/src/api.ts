@@ -50,6 +50,10 @@ export const campaignSettings = z.object({
   mapEra: mapEra.default("emas"),
   /** New sign-ups through the public campaign page; the DM opens and closes them. */
   registrationOpen: z.boolean().default(true),
+  /** Shown on the public homepage when a DM turns promotion on. */
+  promoted: z.boolean().default(false),
+  /** One-line hook above the campaign name on the homepage. */
+  promoTagline: z.string().trim().max(140).default(""),
 });
 export type CampaignSettings = z.infer<typeof campaignSettings>;
 
@@ -92,6 +96,14 @@ export const joinCampaignRequest = z.object({
     .regex(/^[A-Z0-9]{4,12}$/),
 });
 export type JoinCampaignRequest = z.input<typeof joinCampaignRequest>;
+
+/** What a GM may change about their campaign: its blurb and how it appears on the homepage. */
+export const updateCampaignRequest = z.object({
+  description: z.string().trim().max(2000).optional(),
+  promoted: z.boolean().optional(),
+  promoTagline: z.string().trim().max(140).optional(),
+});
+export type UpdateCampaignRequest = z.input<typeof updateCampaignRequest>;
 
 export const apiError = z.object({ error: z.string() });
 export type ApiError = z.infer<typeof apiError>;

@@ -1,14 +1,14 @@
 import { useDevLogin, useProviders } from "../../lib/auth";
 
 const LOGIN_ERRORS: Record<string, string> = {
-  state: "Login expired or was interrupted. Try again.",
-  google: "Google login failed. Try again.",
-  email: "Your Google account needs a verified email address.",
+  state: "Login kedaluwarsa atau terputus. Coba lagi.",
+  google: "Login Google gagal. Coba lagi.",
+  email: "Akun Google-mu perlu alamat email yang terverifikasi.",
 };
 
 export function Login({
-  title = "DnD App",
-  googleLabel = "Sign in with Google",
+  title = "Meja D&D",
+  googleLabel = "Masuk dengan Google",
 }: {
   title?: string;
   googleLabel?: string;
@@ -22,8 +22,8 @@ export function Login({
   return (
     <div className="centered">
       <h1>{title}</h1>
-      {error && <p className="error">{LOGIN_ERRORS[error] ?? "Login failed."}</p>}
-      {providers.isPending && <p className="muted">Loading…</p>}
+      {error && <p className="error">{LOGIN_ERRORS[error] ?? "Login gagal."}</p>}
+      {providers.isPending && <p className="muted">Memuat…</p>}
       {providers.data?.google && (
         <a className="button" href={`/api/auth/google?returnTo=${returnTo}`}>
           {googleLabel}
@@ -31,19 +31,19 @@ export function Login({
       )}
       {providers.data && !providers.data.google && !providers.data.devUsers && (
         <p className="muted">
-          No login method is configured. See README (Google login / DEV_LOGIN).
+          Belum ada cara login yang dikonfigurasi. Lihat README (login Google / DEV_LOGIN).
         </p>
       )}
       {providers.data?.devUsers && (
         <section className="stack menu">
-          <h2 className="muted">Dev login</h2>
+          <h2 className="muted">Login dev</h2>
           {providers.data.devUsers.map((u) => (
             <button key={u.id} onClick={() => devLogin.mutate(u.id)} disabled={devLogin.isPending}>
               {u.displayName} <span className="muted">{u.email}</span>
             </button>
           ))}
           {providers.data.devUsers.length === 0 && (
-            <p className="muted">No seed users; run `pnpm db:seed`.</p>
+            <p className="muted">Belum ada user seed; jalankan `pnpm db:seed`.</p>
           )}
           {devLogin.error && <p className="error">{devLogin.error.message}</p>}
         </section>

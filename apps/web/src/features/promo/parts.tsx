@@ -18,16 +18,37 @@ export function TornFilter() {
   );
 }
 
-/** Page frame: wood header, footer with the required SRD attribution. */
-export function PromoShell({ title, children }: { title: string; children: ReactNode }) {
-  const me = useMe();
-  const logout = useLogout();
-  const promo = usePromo();
-  const user = me.data?.user;
-
+function useTitle(title: string) {
   useEffect(() => {
     document.title = title;
   }, [title]);
+}
+
+/** The SRD attribution that has to appear on every public page. */
+export function SiteFooter({ note }: { note?: string }) {
+  return (
+    <footer className="wrap promo-footer">
+      {note && <p>{note}</p>}
+      <p>
+        This work includes material from the System Reference Document 5.2.1 ("SRD 5.2.1") by
+        Wizards of the Coast LLC, available at{" "}
+        <a href="https://www.dndbeyond.com/srd">https://www.dndbeyond.com/srd</a>. The SRD 5.2.1 is
+        licensed under the Creative Commons Attribution 4.0 International License, available at{" "}
+        <a href="https://creativecommons.org/licenses/by/4.0/legalcode">
+          https://creativecommons.org/licenses/by/4.0/legalcode
+        </a>
+        .
+      </p>
+    </footer>
+  );
+}
+
+/** The site's own frame: for pages that aren't about one campaign. */
+export function SiteShell({ title, children }: { title: string; children: ReactNode }) {
+  useTitle(title);
+  const me = useMe();
+  const logout = useLogout();
+  const user = me.data?.user;
 
   return (
     <div className="promo">
@@ -35,9 +56,43 @@ export function PromoShell({ title, children }: { title: string; children: React
       <header className="plank-bar">
         <div className="wrap plank-inner">
           <Link href="/" className="brand">
+            Meja D&amp;D
+          </Link>
+          <nav aria-label="Utama">
+            <Link href="/">Beranda</Link>
+            <Link href="/app">{user ? "Buka meja" : "Masuk"}</Link>
+            {user && (
+              <button type="button" className="link-button" onClick={() => logout.mutate()}>
+                Keluar
+              </button>
+            )}
+          </nav>
+        </div>
+      </header>
+      <main>{children}</main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+/** Page frame for the Serpih Langit campaign pages: wood header, SRD footer. */
+export function PromoShell({ title, children }: { title: string; children: ReactNode }) {
+  useTitle(title);
+  const me = useMe();
+  const logout = useLogout();
+  const promo = usePromo();
+  const user = me.data?.user;
+
+  return (
+    <div className="promo">
+      <TornFilter />
+      <header className="plank-bar">
+        <div className="wrap plank-inner">
+          <Link href="/serpih-langit" className="brand">
             Serpih Langit
           </Link>
           <nav aria-label="Utama">
+            <Link href="/">Beranda</Link>
             <Link href="/daftar">Daftar</Link>
             {promo.data?.viewerIsGm && <Link href="/dm">Halaman DM</Link>}
             {promo.data?.viewerIsGm && <Link href="/dm/catatan">Catatan</Link>}
@@ -51,19 +106,7 @@ export function PromoShell({ title, children }: { title: string; children: React
         </div>
       </header>
       <main>{children}</main>
-      <footer className="wrap promo-footer">
-        <p>Serpih Langit adalah dunia homebrew yang kompatibel dengan 5e.</p>
-        <p>
-          This work includes material from the System Reference Document 5.2.1 ("SRD 5.2.1") by
-          Wizards of the Coast LLC, available at{" "}
-          <a href="https://www.dndbeyond.com/srd">https://www.dndbeyond.com/srd</a>. The SRD 5.2.1
-          is licensed under the Creative Commons Attribution 4.0 International License, available at{" "}
-          <a href="https://creativecommons.org/licenses/by/4.0/legalcode">
-            https://creativecommons.org/licenses/by/4.0/legalcode
-          </a>
-          .
-        </p>
-      </footer>
+      <SiteFooter note="Serpih Langit adalah dunia homebrew yang kompatibel dengan 5e." />
     </div>
   );
 }

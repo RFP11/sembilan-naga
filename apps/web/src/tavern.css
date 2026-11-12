@@ -323,6 +323,54 @@
   margin-top: 14px;
 }
 
+.camp-picker .camp-item {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+.camp-picker .camp-promo summary {
+  padding: 6px 4px;
+  font-size: 14px;
+  color: var(--cream);
+  cursor: pointer;
+}
+.camp-picker .camp-promo-form {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  color: var(--ink);
+  background: #fbf4e2;
+  border: 2px solid var(--wood-light);
+  border-radius: 6px;
+}
+.camp-picker .camp-promo-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.camp-picker .camp-promo-form input:not([type="checkbox"]),
+.camp-picker .camp-promo-form textarea {
+  width: 100%;
+  font: inherit;
+  font-weight: 400;
+  padding: 9px 11px;
+  color: var(--ink);
+  background: #fffdf6;
+  border: 2px solid var(--wood-light);
+  border-radius: 5px;
+  resize: vertical;
+}
+.camp-picker .camp-promo-form .camp-promo-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.camp-picker .camp-promo-form .btn {
+  justify-self: start;
+  margin-top: 0;
+}
+
 @media (max-width: 1000px) {
   .tavern .table-layout {
     grid-template-columns: minmax(0, 1fr);
