@@ -7,10 +7,13 @@ import type {
   PromoResponse,
   Registration,
 } from "@dnd/contracts";
-import { eq } from "drizzle-orm";
-import { afterAll, describe, expect, it } from "vitest";
+import { eq, inArray } from "drizzle-orm";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import { buildApp } from "./app";
-import { campaignMembers, campaignRegistrations, coDmInvites } from "./db/schema";
+import { campaignMembers, campaignRegistrations, characters, coDmInvites } from "./db/schema";
 import { SEED } from "./db/seed";
 import { createTestApp, loginAs, TEST_CONFIG } from "./test/setup";
 
@@ -568,5 +571,93 @@ describe("campaign notes", () => {
 
     const res = await app.inject({ method: "GET", url: "/api/promo" });
     expect(res.body).not.toContain("Puing");
+  });
+});
+
+describe("importing the uploaded sheet", () => {
+  const FIXTURE = path.join(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "promo/__fixtures__/rafle-sheet.pdf",
+  );
+
+  const review = (cookie: string, id: string, status: string) =>
+    app.inject({
+      method: "PATCH",
+      url: `/api/promo/dm/registrations/${id}`,
+      headers: { cookie },
+      payload: { status },
+    });
+
+  beforeEach(async () => {
+    await db.orm.delete(campaignRegistrations);
+    await db.orm
+      .delete(characters)
+      .where(inArray(characters.ownerId, [SEED.player1.id, SEED.player2.id]));
+    for (const key of storedSheets()) objects.delete(key);
+  });
+
+  it("makes a prefilled draft when the DM accepts a D&D Beyond sheet", async () => {
+    const player = await loginAs(app, SEED.player2.id);
+    const gm = await loginAs(app, SEED.gm.id);
+    const created = (await register(player, FIELDS, await readFile(FIXTURE))).json<Registration>();
+    const accepted = (await review(gm, created.id, "accepted")).json<Registration>();
+    expect(accepted.characterId).toBeTruthy();
+
+    const [draft] = await db.orm
+      .select()
+      .from(characters)
+      .where(eq(characters.ownerId, SEED.player2.id));
+    expect(draft).toMatchObject({
+      id: accepted.characterId,
+      campaignId: SEED.promoCampaign.id,
+      status: "draft",
+      name: "Raffle Snapper",
+      speciesId: "human",
+      backgroundId: "criminal",
+      alignment: "cg",
+    });
+
+    // Accepting again doesn't make a second one.
+    await review(gm, created.id, "accepted");
+    expect(
+      (await db.orm.select().from(characters).where(eq(characters.ownerId, SEED.player2.id)))
+        .length,
+    ).toBe(1);
+
+    // Rejecting only takes it out of the campaign; it stays the player's.
+    await review(gm, created.id, "rejected");
+    expect(
+      (await db.orm.select().from(characters).where(eq(characters.id, draft!.id)))[0]!.campaignId,
+    ).toBeNull();
+
+    // Accepting again puts the same character back.
+    await review(gm, created.id, "accepted");
+    expect(
+      (await db.orm.select().from(characters).where(eq(characters.id, draft!.id)))[0]!.campaignId,
+    ).toBe(SEED.promoCampaign.id);
+  });
+
+  it("makes an empty draft for a sheet it can't read", async () => {
+    const player = await loginAs(app, SEED.player1.id);
+    const gm = await loginAs(app, SEED.gm.id);
+    const png = Buffer.concat([
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      Buffer.alloc(16),
+    ]);
+    const created = (
+      await register(player, { ...FIELDS, characterName: "Tanpa Sheet" }, png)
+    ).json<Registration>();
+    const accepted = (await review(gm, created.id, "accepted")).json<Registration>();
+
+    const [draft] = await db.orm
+      .select()
+      .from(characters)
+      .where(eq(characters.id, accepted.characterId!));
+    expect(draft).toMatchObject({
+      campaignId: SEED.promoCampaign.id,
+      status: "draft",
+      name: "Tanpa Sheet",
+      speciesId: null,
+    });
   });
 });

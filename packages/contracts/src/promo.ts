@@ -71,6 +71,8 @@ export const registration = z.object({
   startIsland: z.string(),
   sheetName: z.string(),
   sheetBytes: z.number(),
+  /** The draft character made from the sheet when the DM accepted this registration. */
+  characterId: z.uuid().nullable(),
   status: registrationStatus,
   createdAt: z.string(),
   updatedAt: z.string(),

@@ -122,6 +122,10 @@ export const campaignRegistrations = pgTable(
     sheetName: text("sheet_name").notNull(),
     sheetMime: text("sheet_mime").notNull(),
     sheetBytes: integer("sheet_bytes").notNull(),
+    /** The draft character auto-created from this sheet when the DM accepted it. */
+    characterId: uuid("character_id").references((): AnyPgColumn => characters.id, {
+      onDelete: "set null",
+    }),
     status: registrationStatus().notNull().default("pending"),
     createdAt: createdAt(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
