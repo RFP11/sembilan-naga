@@ -3,7 +3,7 @@
   "tasks": {
     "build": { "dependsOn": ["^build"], "outputs": ["dist/**"] },
     "typecheck": {},
-    "test": {},
+    "test": { "passThroughEnv": ["DATABASE_URL"] },
     "dev": { "cache": false, "persistent": true }
   }
 }
