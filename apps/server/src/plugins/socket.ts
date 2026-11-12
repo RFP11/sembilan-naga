@@ -11,12 +11,14 @@ import {
   type User,
 } from "@dnd/contracts";
 import { rollDice } from "@dnd/rules";
+import { eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { Server } from "socket.io";
 import { SESSION_COOKIE, validateSession } from "../auth/session";
 import { memberRole } from "../campaigns/membership";
 import { recordRoll } from "../campaigns/rolls";
 import type { Db } from "../db";
+import { users } from "../db/schema";
 import { noteOpportunities } from "../scenes/encounter";
 import { moveToken } from "../scenes/tokens";
 
@@ -120,9 +122,14 @@ export function registerSocket(app: FastifyInstance, db: Db): IO {
       } catch (err) {
         return ack({ ok: false, error: (err as Error).message });
       }
+      // The dice colour may have changed since this socket connected.
+      const [fresh] = await db.orm
+        .select({ diceColor: users.diceColor })
+        .from(users)
+        .where(eq(users.id, user.id));
       await recordRoll(db.orm, io, {
         campaignId,
-        user,
+        user: { ...user, diceColor: fresh?.diceColor ?? user.diceColor },
         expression,
         label,
         rolls: roll.rolls,

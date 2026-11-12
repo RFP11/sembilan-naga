@@ -256,3 +256,7 @@ langsung, lalu jalankan ulang `srd:build`.
 Konten SRD berasal dari System Reference Document 5.2 oleh Wizards of the Coast LLC,
 dengan lisensi [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/legalcode).
 Jangan memasukkan konten non-SRD (buku berbayar) ke repo ini.
+
+Model dadu 3D: ["DnD Dice Set"](https://sketchfab.com/3d-models/dnd-dice-set-51a01c6f714944ea95d9a2d24eb24928)
+oleh Logan S., [CC-BY-4.0](https://creativecommons.org/licenses/by/4.0/). Yang dipakai ada di
+`apps/web/public/dice/` (lihat `LICENSE.md` di sana); atribusinya juga tampil di panel Dadu.

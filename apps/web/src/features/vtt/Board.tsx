@@ -10,7 +10,7 @@ import {
 import { gridDistanceFeet } from "@dnd/rules";
 import { Application, Circle, Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 import type { FederatedPointerEvent } from "pixi.js";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { socket } from "../../lib/socket";
 import { sceneImageUrl } from "./api";
 
@@ -168,6 +168,7 @@ export function Board({
   onSelect,
   onMove,
   onFog,
+  children,
 }: {
   campaignId: string;
   scene: Scene | null;
@@ -182,6 +183,8 @@ export function Board({
   onSelect: (id: string | null) => void;
   onMove: (id: string, x: number, y: number) => void;
   onFog: (change: { reveal: CellRect } | { hide: CellRect }) => void;
+  /** Laid over the visible part of the board, like the 3D dice. */
+  children?: ReactNode;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState<Zoom>("fit");
@@ -551,12 +554,13 @@ export function Board({
           Gambar peta gagal dimuat. Coba muat ulang halaman.
         </p>
       )}
-      <div className="wood-frame">
+      <div className="wood-frame board-stage">
         <div
           ref={hostRef}
           className="board"
           style={{ "--board-width": canvasWidth } as CSSProperties}
         />
+        {children}
       </div>
     </div>
   );

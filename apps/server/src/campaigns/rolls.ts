@@ -31,7 +31,7 @@ export async function recordRoll(
       secret: roll.secret ?? false,
     })
     .returning();
-  const result = toRollResult(row!, roll.user.displayName);
+  const result = { ...toRollResult(row!, roll.user.displayName), color: roll.user.diceColor };
   const room = result.secret ? campaignGmRoom(roll.campaignId) : campaignRoom(roll.campaignId);
   io.to(room).emit("dice:rolled", result);
   return result;

@@ -42,6 +42,7 @@ export async function validateSession(
         email: users.email,
         displayName: users.displayName,
         avatarUrl: users.avatarUrl,
+        diceColor: users.diceColor,
       },
     })
     .from(sessions)

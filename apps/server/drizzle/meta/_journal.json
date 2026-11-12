@@ -78,6 +78,13 @@
       "when": 1794499474492,
       "tag": "0010_fog",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1794501586184,
+      "tag": "0011_dice_color",
+      "breakpoints": true
     }
   ]
 }

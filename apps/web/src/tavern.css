@@ -1482,3 +1482,124 @@
   padding: 0 6px;
   font-size: 14px;
 }
+
+/* ── 3D dice ───────────────────────────────────────────────────────────────── */
+.tavern .board-stage {
+  position: relative;
+}
+/* Covers the visible board; the dice never catch a click meant for the map. */
+.tavern .dice-overlay {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.tavern .dice-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.tavern .dice-landed {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tavern .dice-landed li {
+  padding: 4px 12px;
+  border-radius: 999px;
+  color: var(--cream);
+  background: rgb(30 20 12 / 0.82);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.tavern .dice-landed b {
+  margin-left: 4px;
+  font-family: "Lilita One", "Trebuchet MS", sans-serif;
+  font-size: 18px;
+  color: var(--gold);
+}
+.tavern .dice-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+.tavern .dice-colors {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.tavern .dice-colors legend {
+  float: left;
+  margin-right: 4px;
+  padding: 0;
+}
+.tavern .dice-swatch {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+.tavern .dice-swatch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.tavern .dice-swatch:has(input:checked) {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px var(--gold);
+}
+.tavern .dice-swatch:has(input:focus-visible) {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+.tavern .swatch-gold {
+  background: radial-gradient(circle at 35% 35%, #ffd84a 0 22%, #151209 24%);
+}
+.tavern .swatch-red {
+  background: #d4161d;
+}
+.tavern .swatch-silver {
+  background: linear-gradient(135deg, #f2f2f2, #8d8d8d);
+}
+.tavern .swatch-tiedye {
+  background: conic-gradient(#d33, #e9c400, #2a2, #26c, #a3c, #d33);
+}
+.tavern .dice-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.tavern .dice-credit {
+  flex-basis: 100%;
+  margin: 0;
+  font-size: 12px;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

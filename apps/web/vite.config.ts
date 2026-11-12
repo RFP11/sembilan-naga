@@ -6,7 +6,15 @@ export default defineConfig({
   plugins: [react()],
   // Pre-bundle deps that only lazy-loaded code imports, so Vite doesn't reload the page the
   // first time someone opens those screens in dev.
-  optimizeDeps: { include: ["zod"] },
+  optimizeDeps: {
+    include: [
+      "zod",
+      "three",
+      "cannon-es",
+      "three/addons/loaders/FBXLoader.js",
+      "three/addons/environments/RoomEnvironment.js",
+    ],
+  },
   server: {
     port: 5173,
     // Listen on every interface so the app opens from other devices on the LAN / tailnet
