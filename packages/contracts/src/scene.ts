@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { fogCell } from "./fog";
 
 // Battle maps. A map is an image plus its grid: how many image pixels one grid square spans and
 // where the first line falls. One square is what a Medium token occupies.
@@ -19,6 +20,9 @@ export const scene = z.object({
   offsetY: z.number(),
   /** Off for maps that already have a grid drawn in. */
   gridVisible: z.boolean(),
+  /** Fog of war: when on, only `fogRevealed` squares can be seen by players. */
+  fogEnabled: z.boolean(),
+  fogRevealed: z.array(fogCell),
   createdAt: z.string(),
 });
 export type Scene = z.infer<typeof scene>;

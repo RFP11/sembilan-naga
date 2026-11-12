@@ -4,7 +4,7 @@ import { armorClass } from "./armor";
 import { fixedHitPoints, hitDicePool, maxHitPoints } from "./hp";
 import { levelForXp, xpForLevel } from "./levels";
 import { multiclassProblems } from "./multiclass";
-import { encounterXpBudget, exhaustionEffects, passiveScore } from "./play";
+import { encounterXpBudget, exhaustionEffects, gridDistanceFeet, passiveScore } from "./play";
 import {
   applyAbilityBonuses,
   isStandardArray,
@@ -193,5 +193,14 @@ describe("play", () => {
     expect(exhaustionEffects(6).dead).toBe(true);
     expect(encounterXpBudget([3, 3, 3, 3], "moderate")).toBe(900);
     expect(encounterXpBudget([1, 5], "high")).toBe(1200);
+  });
+});
+
+describe("gridDistanceFeet", () => {
+  it("counts diagonal squares like straight ones (SRD: Playing on a Grid)", () => {
+    expect(gridDistanceFeet({ x: 0, y: 0 }, { x: 6, y: 0 })).toBe(30);
+    expect(gridDistanceFeet({ x: 0, y: 0 }, { x: 4, y: 4 })).toBe(20);
+    expect(gridDistanceFeet({ x: 2, y: 5 }, { x: 0, y: 1 })).toBe(20);
+    expect(gridDistanceFeet({ x: 3, y: 3 }, { x: 3, y: 3 })).toBe(0);
   });
 });

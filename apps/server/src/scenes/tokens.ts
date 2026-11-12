@@ -1,4 +1,6 @@
 import {
+  isFogged,
+  revealedSet,
   campaignRoom,
   createTokenRequest,
   sceneGridSize,
@@ -114,7 +116,17 @@ export async function moveToken(orm: Orm, userId: string, move: TokenMove) {
 
   const { x, y } = clampToMap(row.scene, row.token.size, move.x, move.y);
   await orm.update(tokens).set({ x, y }).where(eq(tokens.id, row.token.id));
-  return { x, y, hidden: row.token.hidden, from: { x: row.token.x, y: row.token.y } };
+  // Whether players could see it before and after the move; party tokens are never fogged.
+  const fogged = (at: { x: number; y: number }) =>
+    row.token.kind !== "character" && isFogged(row.scene, { ...at, size: row.token.size });
+  return {
+    x,
+    y,
+    hidden: row.token.hidden,
+    from: { x: row.token.x, y: row.token.y },
+    foggedBefore: fogged(row.token),
+    foggedAfter: fogged({ x, y }),
+  };
 }
 
 export const tokenRoutes: FastifyPluginAsync<{ db: Db; io: IO }> = async (app, { db, io }) => {
@@ -164,7 +176,11 @@ export const tokenRoutes: FastifyPluginAsync<{ db: Db; io: IO }> = async (app, {
       .leftJoin(characters, eq(tokens.characterId, characters.id))
       .where(and(eq(tokens.sceneId, scene.id), ...(isGm ? [] : [eq(tokens.hidden, false)])))
       .orderBy(asc(tokens.createdAt), asc(tokens.name));
-    return rows.map((r) => toToken(r.token, r.ownerId, req.user!.id, isGm));
+    // Players don't get tokens standing in the fog (the party's own tokens always show).
+    const revealed = revealedSet(scene.fogRevealed);
+    return rows
+      .filter((r) => isGm || r.token.kind === "character" || !isFogged(scene, r.token, revealed))
+      .map((r) => toToken(r.token, r.ownerId, req.user!.id, isGm));
   });
 
   app.post("/campaigns/:id/scenes/:sceneId/tokens", async (req, reply) => {

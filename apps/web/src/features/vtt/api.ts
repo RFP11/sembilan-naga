@@ -5,6 +5,7 @@ import type {
   ScenesResponse,
   Token,
   TokenMove,
+  UpdateFogRequest,
   UpdateSceneRequest,
   UpdateTokenRequest,
 } from "@dnd/contracts";
@@ -56,6 +57,18 @@ export function useUploadScene(campaignId: string) {
 export function useUpdateScene(campaignId: string) {
   return useSceneMutation(campaignId, ({ id, ...body }: { id: string } & UpdateSceneRequest) =>
     api<Scene>(`/campaigns/${campaignId}/scenes/${id}`, { method: "PATCH", body }),
+  );
+}
+
+/** Fog of war on a map: on/off, reveal or hide a rectangle, or everything (DM only). */
+export function useUpdateFog(campaignId: string) {
+  return useSceneMutation(
+    campaignId,
+    ({ sceneId, change }: { sceneId: string; change: UpdateFogRequest }) =>
+      api<Scene>(`/campaigns/${campaignId}/scenes/${sceneId}/fog`, {
+        method: "PATCH",
+        body: change,
+      }),
   );
 }
 

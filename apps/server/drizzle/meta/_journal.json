@@ -71,6 +71,13 @@
       "when": 1793693860303,
       "tag": "0009_combat",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1794499474492,
+      "tag": "0010_fog",
+      "breakpoints": true
     }
   ]
 }

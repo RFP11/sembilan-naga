@@ -2,9 +2,10 @@ import { useState } from "react";
 import { useCampaign } from "../../lib/useCampaign";
 import { useCampaigns } from "../campaigns/CampaignPicker";
 import type { ComponentProps } from "react";
-import { useEncounter, useScenes, useTokens } from "./api";
+import { useEncounter, useScenes, useTokens, useUpdateFog } from "./api";
 import { AttackBar, AttackFlowProvider, AttackPanel, useAttackFlow } from "./attackFlow";
-import { Board } from "./Board";
+import { Board, type BoardTool } from "./Board";
+import { BoardTools } from "./BoardTools";
 import { DiceLog } from "./DiceLog";
 import { MapCalibrator } from "./MapCalibrator";
 import { MapPanel } from "./MapPanel";
@@ -40,6 +41,8 @@ export function Table({ campaignId }: { campaignId: string }) {
   const isDm = role === "gm";
   const [calibrating, setCalibrating] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [tool, setTool] = useState<BoardTool>("select");
+  const updateFog = useUpdateFog(campaignId);
 
   const list = scenes.data?.scenes ?? [];
   const active = list.find((s) => s.id === scenes.data?.activeSceneId) ?? null;
@@ -86,14 +89,30 @@ export function Table({ campaignId }: { campaignId: string }) {
               : "Menghubungkan…"}
           </p>
           <AttackBar />
+          <BoardTools
+            tool={tool}
+            onTool={setTool}
+            isDm={isDm}
+            scene={active}
+            fogPending={updateFog.isPending}
+            onFog={(change) => active && updateFog.mutate({ sceneId: active.id, change })}
+          />
+          {updateFog.error && (
+            <p className="map-error" role="alert">
+              {updateFog.error.message}
+            </p>
+          )}
           <AimingBoard
             campaignId={campaignId}
             scene={active}
             tokens={tokens}
             selectedId={selected?.id ?? null}
             actingId={acting}
+            isDm={isDm}
+            tool={tool}
             onSelect={setSelectedId}
             onMove={moveToken}
+            onFog={(change) => active && updateFog.mutate({ sceneId: active.id, change })}
           />
           {isDm &&
             (active ? (

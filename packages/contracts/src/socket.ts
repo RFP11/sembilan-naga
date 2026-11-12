@@ -37,10 +37,20 @@ export type DiceRollResult = z.infer<typeof diceRollResult>;
 
 export type Ack = { ok: true } | { ok: false; error: string };
 
+/** "Look here": a point on the map (in grid cells, fractions allowed) everyone sees pulse. */
+export const boardPing = z.object({
+  campaignId: z.uuid(),
+  x: z.number().min(0).max(10_000),
+  y: z.number().min(0).max(10_000),
+});
+export type BoardPing = z.infer<typeof boardPing>;
+export type BoardPinged = BoardPing & { by: string; userId: string };
+
 export interface ClientToServerEvents {
   "campaign:join": (payload: CampaignJoin, ack: (res: Ack) => void) => void;
   "token:move": (payload: TokenMove) => void;
   "dice:roll": (payload: DiceRollRequest, ack: (res: Ack) => void) => void;
+  "board:ping": (payload: BoardPing) => void;
 }
 
 /** A character's sheet changed (HP, items, rests...); clients refetch it. */
@@ -66,6 +76,7 @@ export interface ServerToClientEvents {
   "scene:changed": (payload: SceneChanged) => void;
   "tokens:changed": (payload: TokensChanged) => void;
   "encounter:changed": (payload: EncounterChanged) => void;
+  "board:pinged": (payload: BoardPinged) => void;
 }
 
 /** Socket.IO room name for a campaign. */
