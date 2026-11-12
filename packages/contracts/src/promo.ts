@@ -82,6 +82,25 @@ export type Registration = z.infer<typeof registration>;
 export const myRegistrationResponse = z.object({ registration: registration.nullable() });
 export type MyRegistrationResponse = z.infer<typeof myRegistrationResponse>;
 
+/** A campaign its DM chose to show on the public homepage (see `campaignSettings.promoted`). */
+export const promotedCampaign = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  tagline: z.string(),
+  description: z.string(),
+  /** The GM's display name. */
+  dmName: z.string(),
+  playerCount: z.number().int().min(0),
+  /** The campaign's public page, if it has one (Serpih Langit today). */
+  pageUrl: z.string().nullable(),
+  /** Open sign-ups through that page; the invite code itself is never public. */
+  registrationOpen: z.boolean(),
+});
+export type PromotedCampaign = z.infer<typeof promotedCampaign>;
+
+export const publicCampaignsResponse = z.object({ campaigns: z.array(promotedCampaign) });
+export type PublicCampaignsResponse = z.infer<typeof publicCampaignsResponse>;
+
 export const dmRegistration = registration.extend({
   accountName: z.string(),
   email: z.string(),

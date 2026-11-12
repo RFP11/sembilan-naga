@@ -67,6 +67,11 @@ export async function seed(orm: Orm): Promise<void> {
         description: "Campaign promoted on the public page.",
         ownerId: SEED.gm.id,
         createdAt: new Date("2020-01-01T00:00:00Z"),
+        // Seeded as promoted so the dev homepage isn't empty; the DM can turn it off.
+        settings: {
+          promoted: true,
+          promoTagline: "Ratusan pulau melayang di atas kabut. Pilih pulau awalmu.",
+        },
       })
       .onConflictDoUpdate({
         target: campaigns.id,

@@ -2,7 +2,7 @@ import { lazy, Suspense, useState, type ComponentType, type ReactNode } from "re
 import { Login } from "./features/auth/Login";
 import { CampaignPicker, useCampaigns } from "./features/campaigns/CampaignPicker";
 import { Compendium } from "./features/compendium/Compendium";
-import { PromoShell, TornFilter } from "./features/promo/parts";
+import { SiteShell, TornFilter } from "./features/promo/parts";
 import { Table } from "./features/vtt/Table";
 import { useLogout, useMe } from "./lib/auth";
 import { Link } from "./lib/router";
@@ -55,13 +55,13 @@ export function TableApp() {
 /** The way in, before a campaign is open: the same frame as the public pages. */
 function Entrance({ children }: { children: ReactNode }) {
   return (
-    <PromoShell title="Meja: Serpih Langit">
+    <SiteShell title="Meja D&D">
       <section className="wrap block narrow">
         <div className="parchment">
           <div className="parchment-body">{children}</div>
         </div>
       </section>
-    </PromoShell>
+    </SiteShell>
   );
 }
 
@@ -79,13 +79,13 @@ function LoggedIn({ displayName }: { displayName: string }) {
   const campaign = campaigns.data?.find((c) => c.id === campaignId);
   if (!campaign) {
     return (
-      <PromoShell title="Campaign: Serpih Langit">
+      <SiteShell title="Meja D&D: pilih campaign">
         {campaigns.isPending ? (
           <p className="wrap block on-wood">Memuat…</p>
         ) : (
           <CampaignPicker onPick={pick} />
         )}
-      </PromoShell>
+      </SiteShell>
     );
   }
 
