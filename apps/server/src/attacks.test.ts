@@ -206,7 +206,8 @@ describe("an attack", () => {
     expect(r.damage[0]).toMatchObject({ dice: "2d6+3", type: "slashing" });
 
     const back = await attackUntil(() => true, gm, scimitar(goblin.id, hero.id));
-    expect(back.targetAc).toBe(16);
+    // Chain Mail 16, +1 from the Defense fighting style.
+    expect(back.targetAc).toBe(17);
   });
 
   it("can't be made by or against the wrong token", async () => {

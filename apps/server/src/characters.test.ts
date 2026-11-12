@@ -1,4 +1,4 @@
-import { choiceKey } from "@dnd/character";
+import { choiceKey, classChoiceKey } from "@dnd/character";
 import type { BuildIssue, Character, CharacterBuildInput, CharacterSummary } from "@dnd/contracts";
 import { afterAll, describe, expect, it } from "vitest";
 import { SEED, SEED_CHARACTERS } from "./db/seed";
@@ -34,7 +34,10 @@ const complete: CharacterBuildInput = {
   baseScores: { str: 15, dex: 13, con: 14, int: 8, wis: 10, cha: 10 },
   backgroundBonus: { str: 1, dex: 1, con: 1 },
   levels: [{ classId: "barbarian" }],
-  choices: { [choiceKey.classSkills("barbarian")]: ["animal-handling", "survival"] },
+  choices: {
+    [choiceKey.classSkills("barbarian")]: ["animal-handling", "survival"],
+    [classChoiceKey.weaponMastery("barbarian")]: ["greataxe", "handaxe"],
+  },
   equipment: { class: "a", background: "b" },
   languages: ["orc", "giant"],
 };

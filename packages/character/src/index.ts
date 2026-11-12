@@ -3,3 +3,4 @@ export * from "./validate";
 export * from "./equipment";
 export * from "./sheet";
 export * from "./spells";
+export * from "./classChoices";

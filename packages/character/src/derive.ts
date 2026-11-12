@@ -26,6 +26,7 @@ import {
   type UnarmoredDefense,
   type WornArmor,
 } from "@dnd/rules";
+import { classChoices, featAbilityIncrease, featById } from "./classChoices";
 
 /** Spellcasting ability per class (from each class's Spellcasting / Pact Magic feature). */
 export const SPELLCASTING_ABILITY: Readonly<Record<string, AbilityId>> = {
@@ -73,11 +74,43 @@ export function speciesGrants(build: Pick<CharacterBuild, "speciesId" | "choices
   return [...b.grants, ...chosen];
 }
 
-/** Final ability scores, or undefined until base scores are set. Throws past 20 (see validate). */
+/**
+ * Final ability scores, or undefined until base scores are set: base + background bonus, then
+ * the abilities raised by feats taken with Ability Score Improvements (to 20) and Epic Boons
+ * (to 30). Throws past those limits (validate reports it).
+ */
 export function finalScores(
-  build: Pick<CharacterBuild, "baseScores" | "backgroundBonus">,
+  build: Pick<CharacterBuild, "baseScores" | "backgroundBonus" | "levels" | "choices">,
 ): AbilityScores | undefined {
-  return build.baseScores && applyAbilityBonuses(build.baseScores, [build.backgroundBonus]);
+  if (!build.baseScores) return undefined;
+  let scores = applyAbilityBonuses(build.baseScores, [build.backgroundBonus]);
+  for (const c of classChoices(build)) {
+    if (c.kind !== "feat") continue;
+    const feat = featById(one(build.choices[c.key]));
+    const increase = feat && featAbilityIncrease(feat);
+    if (!increase) continue;
+    const bonus: Partial<Record<AbilityId, number>> = {};
+    for (const a of many(build.choices[c.abilitiesKey]).slice(0, increase.points)) {
+      if (increase.from.includes(a as AbilityId))
+        bonus[a as AbilityId] = (bonus[a as AbilityId] ?? 0) + 1;
+    }
+    scores = applyAbilityBonuses(scores, [bonus], increase.max);
+  }
+  return scores;
+}
+
+/** Feats the character has: background's, Human Versatile's, Fighting Styles and level feats. */
+export function characterFeats(
+  build: Pick<CharacterBuild, "backgroundId" | "levels" | "choices">,
+): string[] {
+  const background = backgrounds.find((b) => b.id === build.backgroundId);
+  return [
+    ...(background ? [background.feat] : []),
+    ...many(build.choices[choiceKey.species("feat")]),
+    ...classChoices(build).flatMap((c) =>
+      c.kind === "feat" || c.kind === "fighting-style" ? many(build.choices[c.key]) : [],
+    ),
+  ];
 }
 
 export interface DerivedOptions {
@@ -121,6 +154,27 @@ export function deriveCharacter(build: CharacterBuild, opts: DerivedOptions = {}
           { extraPerLevel: hpPerLevel, extra: draconic },
         );
 
+  // ── Class choices: feats, orders, expertise, weapon masteries ──
+  const choices = classChoices(build);
+  const feats = characterFeats(build);
+  const answer = (kind: string) =>
+    choices.filter((c) => c.kind === kind).flatMap((c) => many(build.choices[c.key]));
+  const orders = choices.flatMap((c) =>
+    c.kind === "order" ? [{ classId: c.classId, order: one(build.choices[c.key]) }] : [],
+  );
+  // Protector (Cleric) and Warden (Druid) train with Martial weapons.
+  const martialFromOrder = orders.some((o) => o.order === "protector" || o.order === "warden");
+  // Thaumaturge / Magician: one extra cantrip and Wisdom on two Intelligence skills (min +1).
+  const lore = orders.find((o) => o.order === "thaumaturge" || o.order === "magician");
+  const skillBonus: Record<string, number> = lore
+    ? Object.fromEntries(
+        (lore.order === "thaumaturge" ? ["arcana", "religion"] : ["arcana", "nature"]).map((s) => [
+          s,
+          Math.max(1, mod("wis")),
+        ]),
+      )
+    : {};
+
   // ── Armor Class ──
   const unarmored: UnarmoredDefense[] = [];
   if (perClass.some((c) => c.classId === "barbarian"))
@@ -133,7 +187,8 @@ export function deriveCharacter(build: CharacterBuild, opts: DerivedOptions = {}
     armor: opts.armor,
     shield: opts.shield,
     unarmored,
-    bonus: opts.acBonus,
+    // Defense fighting style: +1 while wearing armor.
+    bonus: (opts.acBonus ?? 0) + (opts.armor && feats.includes("defense") ? 1 : 0),
   });
 
   // ── Proficiencies ──
@@ -172,20 +227,34 @@ export function deriveCharacter(build: CharacterBuild, opts: DerivedOptions = {}
   const perceptionBonus = checkBonus(
     scores?.wis ?? 10,
     Math.max(1, level),
-    skills.has("perception") ? "proficient" : "none",
+    !skills.has("perception")
+      ? "none"
+      : answer("expertise").includes("perception")
+        ? "expertise"
+        : "proficient",
   );
 
   return {
     level,
     proficiencyBonus: pb,
-    classes: perClass,
+    classes: perClass.map((c) => ({
+      ...c,
+      ...(lore?.classId === c.classId && { extraCantrips: 1 }),
+    })),
     scores,
     modifiers: scores ? Object.fromEntries(ABILITIES.map((a) => [a, mod(a)])) : undefined,
     savingThrows: [...savingThrows],
     skills: [...skills],
+    expertise: answer("expertise").filter((s) => skills.has(s)),
+    /** Flat bonuses to skill checks from features (Thaumaturge, Magician). */
+    skillBonus,
+    feats,
+    weaponMasteries: answer("weapon-mastery"),
+    martialWeapons: martialFromOrder,
     maxHp: hp,
     ac,
-    initiative: mod("dex"),
+    // Alert: add the Proficiency Bonus to Initiative.
+    initiative: mod("dex") + (feats.includes("alert") ? pb : 0),
     speed,
     size,
     darkvision,

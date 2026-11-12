@@ -15,9 +15,9 @@ export interface ClassSpellLimits {
  * own levels, as if single-classed, which is how multiclassing works for preparing spells.
  */
 export function classSpellLimits(
-  classLevels: readonly { classId: string; level: number }[],
+  classLevels: readonly { classId: string; level: number; extraCantrips?: number }[],
 ): ClassSpellLimits[] {
-  return classLevels.flatMap(({ classId, level }) => {
+  return classLevels.flatMap(({ classId, level, extraCantrips = 0 }) => {
     const cls = classes.find((c) => c.id === classId);
     const columns = cls?.table.find((row) => row.level === level)?.columns;
     if (!cls || !columns || !columns["Prepared Spells"]) return [];
@@ -28,7 +28,8 @@ export function classSpellLimits(
       {
         classId,
         className: cls.name,
-        cantrips: Number(columns["Cantrips"] ?? 0),
+        // Thaumaturge (Cleric) and Magician (Druid) know one extra cantrip.
+        cantrips: Number(columns["Cantrips"] ?? 0) + extraCantrips,
         prepared: Number(columns["Prepared Spells"]),
         maxSpellLevel: Math.max(0, ...slotLevels, Number(columns["Slot Level"] ?? 0)),
       },

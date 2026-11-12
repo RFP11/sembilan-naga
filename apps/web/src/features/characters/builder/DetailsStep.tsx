@@ -10,6 +10,7 @@ import {
   weapons,
   type ItemRef,
 } from "@dnd/data";
+import { ClassChoicesEditor, mergeChoices } from "../ClassChoicesEditor";
 import type { StepProps } from "./Builder";
 
 const ITEMS = { weapon: weapons, armor, gear, tool: tools } as const;
@@ -78,6 +79,16 @@ export function DetailsStep({ build, update }: StepProps) {
             ))}
           </div>
         </fieldset>
+      )}
+
+      {cls && (
+        <>
+          <h3>Class features</h3>
+          <ClassChoicesEditor
+            build={build}
+            onChange={(changes) => update({ choices: mergeChoices(build.choices, changes) })}
+          />
+        </>
       )}
 
       {(

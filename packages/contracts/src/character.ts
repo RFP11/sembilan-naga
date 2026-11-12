@@ -248,3 +248,15 @@ export const updateItemRequest = z.object({
   attuned: z.boolean().optional(),
 });
 export type UpdateItemRequest = z.infer<typeof updateItemRequest>;
+
+/**
+ * Gain a level: in an existing class or a new one (multiclassing prerequisites apply). Hit
+ * Points use the fixed value or a server roll. `choices` answers what the new level asks for
+ * (see classChoices in @dnd/character); answers to earlier choices can be included unchanged.
+ */
+export const levelUpRequest = z.object({
+  classId: slug,
+  hp: z.enum(["fixed", "roll"]).default("fixed"),
+  choices: z.record(z.string(), z.union([z.string(), z.array(z.string())])).default({}),
+});
+export type LevelUpRequest = z.input<typeof levelUpRequest>;

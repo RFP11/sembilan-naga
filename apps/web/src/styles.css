@@ -415,3 +415,15 @@ button.roll {
     grid-template-columns: 1fr;
   }
 }
+.features-list {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0;
+}
+.features-list dt {
+  font-size: 0.85em;
+  color: var(--muted);
+}
+.features-list dd {
+  margin: 0;
+}

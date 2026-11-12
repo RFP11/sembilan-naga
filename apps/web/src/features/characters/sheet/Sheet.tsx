@@ -11,6 +11,7 @@ import { ABILITY_SHORT, classSummary, signed, speciesName } from "../labels";
 import { useSheetActions } from "./actions";
 import { CharacterSpells } from "./CharacterSpells";
 import { HpPanel } from "./HpPanel";
+import { Features } from "./Features";
 import { Inventory } from "./Inventory";
 
 /** The character sheet for a ready character, opened inside campaign `campaignId`. */
@@ -160,7 +161,7 @@ export function Sheet({
                   <RollButton bonus={s.bonus} label={s.name} />{" "}
                   <span className={s.proficient ? "" : "muted"}>
                     {s.name} <span className="muted">({ABILITY_SHORT[s.ability]})</span>
-                    {s.proficient && " ●"}
+                    {s.expertise ? " ●●" : s.proficient && " ●"}
                   </span>
                 </li>
               ))}
@@ -185,6 +186,7 @@ export function Sheet({
                       {a.name}
                       {!a.proficient && <span className="muted"> (not proficient)</span>}
                       {a.range && <span className="muted"> · {a.range}</span>}
+                      {a.mastery && <span className="badge">{a.mastery}</span>}
                     </td>
                     <td>
                       <RollButton bonus={a.toHit} label={`${a.name} attack`} />
@@ -215,6 +217,8 @@ export function Sheet({
               </tbody>
             </table>
           </section>
+
+          <Features character={character} derived={d} actions={actions} />
 
           {(d.spellSlots.length > 0 || d.pactMagic) && (
             <section className="panel">
