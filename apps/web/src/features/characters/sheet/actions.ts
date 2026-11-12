@@ -1,6 +1,7 @@
 import type {
   AddItemRequest,
   HpChangeRequest,
+  LevelUpRequest,
   ShortRestRequest,
   StatePatchRequest,
   UpdateItemRequest,
@@ -49,6 +50,9 @@ export function useSheetActions(id: string) {
       id,
       ({ itemId, ...body }: UpdateItemRequest & { itemId: string }) =>
         api<Sheet>(`/characters/${id}/items/${itemId}`, { method: "PATCH", body }),
+    ),
+    levelUp: useSheetMutation(id, (body: LevelUpRequest) =>
+      api<Sheet & { hpGained: number; hpRoll?: number }>(`/characters/${id}/level-up`, { body }),
     ),
     removeItem: useSheetMutation(id, (itemId: string) =>
       api<Sheet>(`/characters/${id}/items/${itemId}`, { method: "DELETE" }),

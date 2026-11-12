@@ -10,6 +10,7 @@ import {
   skills,
   species,
   speciesBuilders,
+  weapons,
 } from "@dnd/data";
 import {
   isStandardArray,
@@ -18,7 +19,14 @@ import {
   validatePointBuy,
   type AbilityScores,
 } from "@dnd/rules";
-import { choiceKey, classLevels, finalScores } from "./derive";
+import {
+  classChoices,
+  featAbilityIncrease,
+  featById,
+  featPrerequisite,
+  invocationPrerequisite,
+} from "./classChoices";
+import { characterFeats, choiceKey, classLevels, deriveCharacter, finalScores } from "./derive";
 
 const many = (v: string | string[] | undefined) =>
   v === undefined ? [] : Array.isArray(v) ? v : [v];
@@ -150,5 +158,132 @@ export function validateBuild(build: CharacterBuild): BuildIssue[] {
   if (background && !build.equipment.background)
     add("details", `Choose ${background.name} starting equipment.`);
 
+  for (const m of classChoiceProblems(build)) add("details", m);
+
   return issues;
+}
+
+/**
+ * Problems with the class choices (Fighting Style, feats, Expertise, Weapon Mastery, orders,
+ * Invocations, Metamagic). Shared by the builder and level-up.
+ */
+export function classChoiceProblems(build: CharacterBuild): string[] {
+  const problems: string[] = [];
+  const derived = deriveCharacter(build);
+  const className = (id: string) => classes.find((c) => c.id === id)?.name ?? id;
+  const one = (key: string) => {
+    const v = build.choices[key];
+    return Array.isArray(v) ? v[0] : v;
+  };
+  const exactly = (key: string, count: number) => {
+    const picked = many(build.choices[key]);
+    return picked.length === count && new Set(picked).size === count ? picked : undefined;
+  };
+  const taken = characterFeats(build);
+  let scores: AbilityScores | undefined;
+  try {
+    scores = finalScores(build);
+  } catch {
+    scores = undefined; // reported by the ability scores step
+  }
+  const expertiseSoFar = new Set<string>();
+
+  for (const c of classChoices(build)) {
+    const who = `${className(c.classId)} (level ${c.characterLevel})`;
+    if (c.kind === "fighting-style") {
+      const feat = featById(one(c.key));
+      if (feat?.category !== "fighting-style") problems.push(`${who}: choose a Fighting Style.`);
+    } else if (c.kind === "feat") {
+      const feat = featById(one(c.key));
+      const label =
+        c.category === "epic-boon" ? "an Epic Boon" : "a feat or Ability Score Improvement";
+      if (!feat || feat.category !== c.category) {
+        problems.push(`${who}: choose ${label}.`);
+        continue;
+      }
+      const pre = featPrerequisite(feat);
+      if (pre.level > c.characterLevel)
+        problems.push(`${feat.name} needs character level ${pre.level}.`);
+      if (
+        scores &&
+        pre.abilities.length &&
+        !pre.abilities.some((a) => scores![a] >= pre.minScore)
+      ) {
+        problems.push(`${feat.name} needs ${pre.abilities.join(" or ")} ${pre.minScore}+.`);
+      }
+      if (!feat.repeatable && taken.filter((f) => f === feat.id).length > 1) {
+        problems.push(`${feat.name} can only be taken once.`);
+      }
+      const increase = featAbilityIncrease(feat);
+      if (increase) {
+        const picked = many(build.choices[c.abilitiesKey]);
+        const counts = picked.reduce<Record<string, number>>(
+          (m, a) => ({ ...m, [a]: (m[a] ?? 0) + 1 }),
+          {},
+        );
+        const ok =
+          picked.length === increase.points &&
+          picked.every((a) => increase.from.includes(a as never)) &&
+          Object.values(counts).every((n) => n <= 2);
+        if (!ok) {
+          problems.push(
+            increase.points === 2
+              ? `${feat.name}: raise one ability by 2 or two abilities by 1.`
+              : `${feat.name}: choose the ability to increase (${increase.from.join(", ")}).`,
+          );
+        }
+      }
+    } else if (c.kind === "expertise") {
+      const picked = exactly(c.key, c.count);
+      if (!picked || !picked.every((s) => derived.skills.includes(s) && !expertiseSoFar.has(s))) {
+        problems.push(
+          `${who}: choose Expertise in ${c.count} skill${c.count > 1 ? "s" : ""} you're proficient in.`,
+        );
+      }
+      for (const s of picked ?? []) expertiseSoFar.add(s);
+    } else if (c.kind === "weapon-mastery") {
+      const picked = exactly(c.key, c.total);
+      if (!picked || !picked.every((w) => weapons.some((x) => x.id === w))) {
+        problems.push(
+          `${className(c.classId)}: choose ${c.total} kinds of weapons for Weapon Mastery.`,
+        );
+      }
+    } else if (c.kind === "order") {
+      if (!c.options.some((o) => o.id === one(c.key))) problems.push(`${who}: choose a ${c.name}.`);
+    } else if (c.kind === "invocations" || c.kind === "metamagic") {
+      const cls = classes.find((x) => x.id === c.classId)!;
+      const list = cls.options.find(
+        (o) => o.id === (c.kind === "invocations" ? "eldritch-invocation" : "metamagic"),
+      );
+      const picked = exactly(c.key, c.total);
+      const level = classLevels(build).find((x) => x.classId === c.classId)?.level ?? 0;
+      const label = c.kind === "invocations" ? "Eldritch Invocations" : "Metamagic options";
+      if (!picked || !list) {
+        problems.push(`${className(c.classId)}: choose ${c.total} ${label}.`);
+        continue;
+      }
+      for (const id of picked) {
+        const entry = list.entries.find((e) => e.id === id);
+        if (!entry) {
+          problems.push(`${className(c.classId)}: unknown option "${id}".`);
+          continue;
+        }
+        if (c.kind === "invocations") {
+          const pre = invocationPrerequisite(entry.prerequisite);
+          if (pre.level > level) problems.push(`${entry.name} needs Warlock level ${pre.level}.`);
+          if (pre.invocation && !picked.includes(pre.invocation)) {
+            problems.push(
+              `${entry.name} needs the ${pre.invocation.replace(/-/g, " ")} invocation.`,
+            );
+          }
+        }
+      }
+    } else if (c.kind === "languages") {
+      const picked = exactly(c.key, c.count);
+      if (!picked || !picked.every((l) => languages.some((x) => x.id === l))) {
+        problems.push(`${who}: choose ${c.count} languages.`);
+      }
+    }
+  }
+  return problems;
 }

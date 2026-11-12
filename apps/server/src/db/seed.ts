@@ -1,7 +1,7 @@
 // Development data. Idempotent: fixed ids + upserts, so `pnpm db:seed` can run any time.
 // Grows with each phase (characters in Fase 2, scenes/tokens in Fase 3, ...).
 
-import { choiceKey, validateBuild } from "@dnd/character";
+import { choiceKey, classChoiceKey, validateBuild } from "@dnd/character";
 import { characterBuild, type CharacterBuildInput } from "@dnd/contracts";
 import { inArray, sql } from "drizzle-orm";
 import { buildColumns, loadCharacter, replaceLevels } from "../characters/repo";
@@ -171,7 +171,11 @@ export const SEED_CHARACTERS: SeedCharacter[] = [
       baseScores: { str: 15, dex: 14, con: 13, int: 8, wis: 10, cha: 12 },
       backgroundBonus: { str: 2, con: 1 },
       levels: [{ classId: "fighter" }],
-      choices: { [choiceKey.classSkills("fighter")]: ["perception", "survival"] },
+      choices: {
+        [choiceKey.classSkills("fighter")]: ["perception", "survival"],
+        [classChoiceKey.fightingStyle("fighter")]: "defense",
+        [classChoiceKey.weaponMastery("fighter")]: ["greatsword", "flail", "javelin"],
+      },
       equipment: { class: "a", background: "a" },
       languages: ["dwarvish", "giant"],
     },
@@ -195,6 +199,8 @@ export const SEED_CHARACTERS: SeedCharacter[] = [
         [choiceKey.species("spellcasting-ability")]: "int",
         [choiceKey.species("keen-senses")]: "perception",
         [choiceKey.classSkills("wizard")]: ["investigation", "medicine"],
+        [classChoiceKey.feat(4)]: "ability-score-improvement",
+        [classChoiceKey.featAbilities(4)]: ["int", "con"],
       },
       equipment: { class: "a", background: "a" },
       languages: ["elvish", "draconic"],
@@ -220,6 +226,9 @@ export const SEED_CHARACTERS: SeedCharacter[] = [
         [choiceKey.species("skills")]: "perception",
         [choiceKey.species("feat")]: "alert",
         [choiceKey.classSkills("cleric")]: ["history", "medicine"],
+        [classChoiceKey.order("cleric")]: "protector",
+        [classChoiceKey.feat(4)]: "ability-score-improvement",
+        [classChoiceKey.featAbilities(4)]: ["wis", "wis"],
       },
       equipment: { class: "a", background: "b" },
       languages: ["halfling", "dwarvish"],
@@ -249,6 +258,9 @@ export const SEED_CHARACTERS: SeedCharacter[] = [
         [choiceKey.species("spellcasting-ability")]: "cha",
         [choiceKey.species("size")]: "medium",
         [choiceKey.classSkills("fighter")]: ["acrobatics", "perception"],
+        [classChoiceKey.fightingStyle("fighter")]: "archery",
+        [classChoiceKey.weaponMastery("fighter")]: ["shortsword", "scimitar", "longbow"],
+        [classChoiceKey.invocations("warlock")]: ["pact-of-the-blade"],
       },
       equipment: { class: "b", background: "a" },
       languages: ["goblin", "orc"],

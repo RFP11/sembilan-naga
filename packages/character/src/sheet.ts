@@ -40,7 +40,12 @@ export function equippedDefense(items: readonly CharacterItem[]): {
  * Whether the classes' weapon proficiencies cover a weapon. Parses the SRD wording, e.g.
  * "Simple weapons and Martial weapons that have the Finesse or Light property".
  */
-export function isProficientWith(classIds: readonly string[], weapon: Weapon): boolean {
+export function isProficientWith(
+  classIds: readonly string[],
+  weapon: Weapon,
+  { martial = false }: { martial?: boolean } = {},
+): boolean {
+  if (martial) return true; // Protector / Warden: Simple and Martial weapons
   return classIds.some((id) => {
     const text = classes.find((c) => c.id === id)?.weaponProficiencies ?? "";
     if (weapon.category === "simple") return /Simple/.test(text);
@@ -64,6 +69,8 @@ export interface WeaponAttack {
   /** Two-handed damage for Versatile weapons. */
   versatileDamage?: string;
   range?: string;
+  /** The weapon's mastery property, when the character has chosen this kind of weapon. */
+  mastery?: string;
 }
 
 const withMod = (dice: string, mod: number) =>
@@ -89,7 +96,9 @@ export function weaponAttacks(
             ? "dex"
             : "str";
       const mod = mods[ability] ?? 0;
-      const proficient = isProficientWith(classIds, w);
+      const proficient = isProficientWith(classIds, w, { martial: derived.martialWeapons });
+      // Archery fighting style: +2 to attack rolls with Ranged weapons.
+      const archery = w.kind === "ranged" && derived.feats.includes("archery") ? 2 : 0;
       return [
         {
           itemId: i.id,
@@ -97,11 +106,12 @@ export function weaponAttacks(
           equipped: i.equipped,
           ability,
           proficient,
-          toHit: mod + (proficient ? derived.proficiencyBonus : 0),
+          toHit: mod + (proficient ? derived.proficiencyBonus : 0) + archery,
           damage: withMod(w.damage.dice, mod),
           damageType: w.damage.type,
           ...(w.versatileDice && { versatileDamage: withMod(w.versatileDice, mod) }),
           ...(w.range && { range: `${w.range.normal}/${w.range.long} ft` }),
+          ...(derived.weaponMasteries.includes(w.id) && { mastery: w.mastery }),
         },
       ];
     })
@@ -118,11 +128,17 @@ export function checkBonuses(derived: DerivedCharacter) {
       name: s.name,
       ability: s.ability,
       proficient: derived.skills.includes(s.id),
-      bonus: checkBonus(
-        score(s.ability),
-        level,
-        derived.skills.includes(s.id) ? "proficient" : "none",
-      ),
+      expertise: derived.expertise.includes(s.id),
+      bonus:
+        checkBonus(
+          score(s.ability),
+          level,
+          derived.expertise.includes(s.id)
+            ? "expertise"
+            : derived.skills.includes(s.id)
+              ? "proficient"
+              : "none",
+        ) + (derived.skillBonus[s.id] ?? 0),
     })),
     saves: (["str", "dex", "con", "int", "wis", "cha"] as const).map((a) => ({
       ability: a,

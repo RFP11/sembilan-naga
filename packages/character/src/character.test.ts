@@ -1,6 +1,12 @@
 import { characterBuild, type CharacterBuildInput } from "@dnd/contracts";
 import { describe, expect, it } from "vitest";
-import { choiceKey, deriveCharacter, startingInventory, validateBuild } from "./index";
+import {
+  choiceKey,
+  classChoiceKey,
+  deriveCharacter,
+  startingInventory,
+  validateBuild,
+} from "./index";
 
 const build = (input: CharacterBuildInput) => characterBuild.parse(input);
 
@@ -14,7 +20,11 @@ const fighter: CharacterBuildInput = {
   baseScores: { str: 15, dex: 14, con: 13, int: 8, wis: 10, cha: 12 },
   backgroundBonus: { str: 2, con: 1 },
   levels: [{ classId: "fighter" }],
-  choices: { [choiceKey.classSkills("fighter")]: ["perception", "survival"] },
+  choices: {
+    [choiceKey.classSkills("fighter")]: ["perception", "survival"],
+    [classChoiceKey.fightingStyle("fighter")]: "defense",
+    [classChoiceKey.weaponMastery("fighter")]: ["greatsword", "javelin", "longbow"],
+  },
   equipment: { class: "a", background: "a" },
   languages: ["dwarvish", "giant"],
 };

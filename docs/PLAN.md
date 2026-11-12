@@ -287,8 +287,8 @@ Progres:
    autosave draft, preview live dari `@dnd/character`, masalah per langkah, roll 4d6 di
    server (`POST /api/characters/:id/roll-abilities`, hasilnya tidak bisa diubah klien).
    Diuji end-to-end di Chromium headless (login → buat Elf Wizard → Finish).
-   Belum: pilihan fitur kelas (Fighting Style, Expertise, spell awal), pilihan tool
-   proficiency, roll HP saat memulai di level > 1, multiclass dari builder (lewat level-up).
+   Pilihan fitur kelas: lihat langkah 7. Belum: pilihan tool proficiency (Monk, Bard,
+   Soldier), roll HP saat memulai di level > 1.
 5. ✅ Character sheet: HP (damage lewat temp HP, heal, temp HP, massive damage), death save
    diroll server, Short Rest (hit dice diroll server, Pact Magic pulih) dan Long Rest (aturan
    2024: semua HP & hit dice pulih, Exhaustion −1), spell slot & pact slot, Exhaustion,
@@ -298,8 +298,31 @@ Progres:
    SRD atau item bebas, jumlah, equip, attune maks 3, hapus); owner dan GM campaign bisa
    mengubah; perubahan disiarkan lewat socket `character:updated` sehingga sheet yang
    terbuka ikut berubah; `version` mencegah edit yang saling menimpa.
-   Belum: level-up, daftar spell kelas & persiapan spell, efek magic item (bonus AC/attack).
+   Spell: langkah 5b. Level-up: langkah 7. Belum: efek magic item (bonus AC/attack).
+   5b. ✅ Spell kelas (PR #2): pilih cantrip & spell yang disiapkan sesuai tabel kelas
+   (per kelas saat multiclass); cast dari sheet memakai slot terendah yang cukup atau slot
+   pilihan, Pact Magic didahulukan; concentration dilacak. Batasnya mengikuti level kelas,
+   jadi naik level otomatis menambah pilihan spell.
 6. ⏳ Homebrew item/spell/feat
+7. ✅ Pilihan fitur kelas & level-up:
+   - `classChoices(build)` di `@dnd/character` membaca pilihan dari tabel kelas SRD: Fighting
+     Style, ASI/feat (level 4/8/12/16, Fighter 6/14, Rogue 10) dan Epic Boon (19), Expertise
+     (Rogue 1/6, Bard 2/9, Ranger 2 lewat Deft Explorer + 2 bahasa, Ranger 9), Weapon Mastery
+     (kolom tabel Barbarian/Fighter; 2 tetap untuk Paladin/Ranger/Rogue), Divine/Primal
+     Order, Eldritch Invocations (kolom tabel, prasyarat level & pact dicek), Metamagic (2/4/6).
+   - Efek yang dihitung: kenaikan skor dari ASI/feat (maks 20, Epic Boon maks 30), Expertise
+     (bonus skill & Passive Perception), Alert (+PB inisiatif), Defense (+1 AC saat ber-armor),
+     Archery (+2 serangan ranged), Protector/Warden (proficiency senjata Martial),
+     Thaumaturge/Magician (+1 cantrip, Wis ke Arcana/Religion atau Arcana/Nature), sifat
+     mastery tampil di serangan senjata yang dipilih.
+   - Builder: bagian "Class features" di langkah Details untuk level awal.
+   - Sheet: panel Features + Level up: pilih kelas (prasyarat multiclass dicek), HP fixed atau
+     diroll server (tercatat di dice log), subclass otomatis di level 3, pilihan level baru
+     (dan pilihan lama yang belum dijawab). `POST /api/characters/:id/level-up`; HP saat ini
+     naik sebesar kenaikan HP maksimum, XP minimal ambang level baru.
+   - Belum: efek mekanis invocation/metamagic/feat lain (tercatat sebagai teks), mengganti
+     pilihan saat Long Rest/level-up (Weapon Mastery, invocation), skill & proficiency
+     tambahan saat multiclass ("As a Multiclass Character").
 
 **Character builder** (wizard 5 langkah sesuai SRD):
 
@@ -359,6 +382,10 @@ Per jenis:
 
 ### Fase 3 – VTT
 
+Status (PR #2, `feat/serpih-langit-promo`): ✅ upload peta battle + skala grid, token tersimpan
+(monster SRD, NPC, karakter, objek), token tersembunyi dan HP monster tidak dikirim ke player,
+stat block saat token dipilih. ⏳ Belum: fog of war, alat ukur jarak, ping.
+
 - Scene, upload peta, atur grid.
 - Token tersimpan di DB. Izin: GM bebas, player hanya token yang dia kontrol.
 - Drag: client kirim preview ter-throttle (tidak disimpan), simpan saat token dilepas.
@@ -366,6 +393,10 @@ Per jenis:
 - Fog of war (GM membuka area), alat ukur jarak, ping.
 
 ### Fase 4 – Combat
+
+Status (PR #2): ✅ encounter dengan initiative dan kartu giliran, serangan ke AC lalu damage
+langsung ke HP target (critical, resistance, concentration save), secret roll DM, pengingat
+opportunity attack. ⏳ Belum: encounter builder dengan XP budget, dadu 3D, homebrew monster.
 
 - Encounter builder dengan XP Budget per Character (Low / Moderate / High).
 - Initiative tracker (monster memakai nilai Initiative di stat block), giliran, ronde.

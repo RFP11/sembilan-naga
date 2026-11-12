@@ -2,8 +2,11 @@
 // The owner and the campaign's GM may use them; dice are rolled here and logged.
 
 import {
+  classChoiceProblems,
+  classChoices,
   classSpellLimits,
   deriveCharacter,
+  finalScores,
   equippedDefense,
   slotForCasting,
   spellChoiceProblem,
@@ -12,7 +15,9 @@ import {
   addItemRequest,
   campaignRoom,
   castSpellRequest,
+  characterBuild,
   hpChangeRequest,
+  levelUpRequest,
   setClassSpellsRequest,
   shortRestRequest,
   statePatchRequest,
@@ -29,7 +34,9 @@ import {
   grantTempHp,
   hitDicePool,
   isStable,
+  multiclassProblems,
   setHitPoints,
+  xpForLevel,
   type HitPointState,
 } from "@dnd/rules";
 import { and, eq, sql } from "drizzle-orm";
@@ -40,9 +47,9 @@ import { requireUser } from "../auth/plugin";
 import { memberRole } from "../campaigns/membership";
 import { recordRoll } from "../campaigns/rolls";
 import type { Db } from "../db";
-import { characterItems, characterSpells, characterState } from "../db/schema";
+import { characterItems, characters, characterSpells, characterState } from "../db/schema";
 import type { IO } from "../plugins/socket";
-import { loadCharacter } from "./repo";
+import { buildColumns, loadCharacter, replaceLevels } from "./repo";
 
 const idParams = z.object({ id: z.uuid() });
 const itemParams = z.object({ id: z.uuid(), itemId: z.uuid() });
@@ -318,6 +325,87 @@ export const playRoutes: FastifyPluginAsync<{ db: Db; io: IO }> = async (app, { 
         exhaustion: Math.max(0, c.state.exhaustion - 1),
       },
     );
+  });
+
+  // ── Level-up ──
+
+  /**
+   * Adds a level in `classId`: checks multiclassing prerequisites, takes the fixed Hit Points or
+   * rolls the Hit Die here (and logs it), takes the SRD subclass at class level 3, and requires
+   * every choice the new level calls for. Current HP rise by however much the maximum did.
+   */
+  app.post("/characters/:id/level-up", async (req, reply) => {
+    const c = await playable(req.user!, req.params, reply);
+    if (!c) return;
+    const parsed = levelUpRequest.safeParse(req.body);
+    if (!parsed.success) return reply.code(400).send({ error: "invalid payload" });
+    const { classId, hp, choices } = parsed.data;
+    const cls = classes.find((x) => x.id === classId);
+    if (!cls) return reply.code(400).send({ error: `unknown class "${classId}"` });
+    if (c.build.levels.length >= 20) return reply.code(409).send({ error: "already level 20" });
+
+    const before = deriveCharacter(c.build, equippedDefense(c.items));
+    const current = before.classes.map((x) => x.classId);
+    if (before.scores) {
+      const problems = multiclassProblems(before.scores, current, classId);
+      if (problems.length)
+        return reply.code(422).send({ error: "can't multiclass", issues: problems });
+    }
+
+    const classLevel = (before.classes.find((x) => x.classId === classId)?.level ?? 0) + 1;
+    const hpRoll = hp === "roll" ? die(cls.hitDie) : undefined;
+    const levels = [
+      ...c.build.levels,
+      {
+        classId,
+        ...(classLevel >= 3 && { subclassId: cls.subclass.id }),
+        ...(hpRoll && { hpRoll }),
+      },
+    ];
+    // Only answers to class choices may change here; the rest of the build stays as it was.
+    const next = characterBuild.parse({ ...c.build, levels });
+    const allowed = new Set(
+      classChoices(next).flatMap((x) => (x.kind === "feat" ? [x.key, x.abilitiesKey] : [x.key])),
+    );
+    for (const [k, v] of Object.entries(choices)) if (allowed.has(k)) next.choices[k] = v;
+
+    const problems = classChoiceProblems(next);
+    try {
+      finalScores(next);
+    } catch (err) {
+      problems.push((err as Error).message);
+    }
+    if (problems.length)
+      return reply.code(422).send({ error: "the new level isn't complete", issues: problems });
+
+    const after = deriveCharacter(next, equippedDefense(c.items));
+    const gained = after.maxHp - before.maxHp;
+    await db.orm.transaction(async (tx) => {
+      await tx
+        .update(characters)
+        .set({ ...buildColumns(next), xp: Math.max(c.xp, xpForLevel(levels.length)) })
+        .where(eq(characters.id, c.id));
+      await replaceLevels(tx, c.id, next);
+      await tx
+        .update(characterState)
+        .set({
+          hpCurrent: Math.max(0, Math.min(after.maxHp, c.state.hpCurrent + gained)),
+          version: sql`${characterState.version} + 1`,
+        })
+        .where(eq(characterState.characterId, c.id));
+    });
+    if (hpRoll && c.campaignId) {
+      await recordRoll(db.orm, io, {
+        campaignId: c.campaignId,
+        user: req.user!,
+        expression: `1d${cls.hitDie}`,
+        label: `${c.build.name}: Hit Points for level ${levels.length}`,
+        rolls: [hpRoll],
+        total: hpRoll,
+      });
+    }
+    const character = await changed(c);
+    return { ...character, hpGained: gained, ...(hpRoll && { hpRoll }) };
   });
 
   // ── Inventory ──
